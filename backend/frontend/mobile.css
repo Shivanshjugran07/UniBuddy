@@ -1,5 +1,6 @@
 /* ═══════════════════════════════════════════════════════
-   UniBuddy — Mobile CSS v2.0
+   UniBuddy — Mobile CSS v3.0
+   Theme: Blue + Orange + White/Black
    Bottom Nav Bar + Full Width + No Scroll Issues
 ═══════════════════════════════════════════════════════ */
 
@@ -27,24 +28,30 @@
     align-items: center;
     justify-content: space-between;
     padding: 10px 14px;
-    background: #0c0e1a;
+    background: #000000;
     position: sticky;
     top: 0;
     z-index: 200;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(37,99,235,0.2);
     margin: -12px -12px 14px -12px;
     width: calc(100% + 24px);
   }
   .mob-topbar-logo {
     font-family: 'Outfit', sans-serif;
     font-size: 20px; font-weight: 800;
-    color: #fff; letter-spacing: -1px;
+    letter-spacing: -1px;
+    display: flex; align-items: center; gap: 1px;
   }
-  .mob-topbar-logo span { color: #6366f1; }
+  .mob-topbar-logo .logo-uni { color: #2563eb; }
+  .mob-topbar-logo .logo-buddy { color: #f97316; }
+
+  /* Fallback if spans not used */
+  .mob-topbar-logo:not(:has(span)) { color: #2563eb; }
+
   .mob-topbar-right { display: flex; align-items: center; gap: 8px; }
   .mob-user-av {
     width: 32px; height: 32px; border-radius: 50%;
-    background: linear-gradient(135deg,#6366f1,#818cf8);
+    background: linear-gradient(135deg, #2563eb, #f97316);
     display: flex; align-items: center; justify-content: center;
     font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700;
     color: #fff; overflow: hidden; cursor: pointer;
@@ -62,22 +69,26 @@
     position: fixed;
     bottom: 0; left: 0; right: 0;
     height: 60px;
-    background: #0c0e1a;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    background: #000000;
+    border-top: 2px solid rgba(37,99,235,0.3);
     z-index: 500;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.35);
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
   }
   .mob-nav-item {
     flex: 1; display: flex; flex-direction: column;
     align-items: center; justify-content: center; gap: 2px;
-    text-decoration: none; color: #4b5563;
+    text-decoration: none; color: #4b5a7a;
     font-size: 9px; font-weight: 700; font-family: 'Nunito', sans-serif;
     cursor: pointer; transition: all 0.2s;
     border-top: 2px solid transparent;
   }
   .mob-nav-icon { font-size: 19px; line-height: 1; }
-  .mob-nav-item.active { color: #6366f1; border-top-color: #6366f1; background: rgba(99,102,241,0.07); }
-  .mob-nav-item:hover { color: #fff; }
+  .mob-nav-item.active {
+    color: #2563eb;
+    border-top-color: #2563eb;
+    background: rgba(37,99,235,0.1);
+  }
+  .mob-nav-item:hover { color: #f97316; }
 
   /* ── STATS: 2 col ── */
   .stats { grid-template-columns: 1fr 1fr !important; gap: 8px !important; margin-bottom: 12px !important; }
@@ -128,15 +139,14 @@
   body { height: auto !important; overflow-y: auto !important; }
 
   /* ── MENTOR PORTAL MOBILE FIX ── */
-  .portal-body {
-    flex-direction: column !important;
-  }
+  .portal-body { flex-direction: column !important; }
   .portal-sidebar {
     width: 100% !important;
     display: flex !important;
     flex-direction: row !important;
     overflow-x: auto !important;
     padding: 8px 0 !important;
+    background: #000000 !important;
   }
   .ps-item {
     flex-shrink: 0 !important;
@@ -147,18 +157,20 @@
   }
   .ps-item.active {
     border-left: none !important;
-    border-bottom-color: var(--indigo) !important;
+    border-bottom-color: #2563eb !important;
+    color: #2563eb !important;
   }
-  .portal-content {
-    padding: 16px !important;
-  }
-  .portal-header {
-    padding: 16px !important;
-    flex-wrap: wrap !important;
-    gap: 10px !important;
-  }
+  .portal-content { padding: 16px !important; }
+  .portal-header { padding: 16px !important; flex-wrap: wrap !important; gap: 10px !important; }
   .ph-name { font-size: 16px !important; }
   .chat-wrap { height: calc(100vh - 320px) !important; }
+
+  /* ── LIGHT MODE MOBILE OVERRIDES ── */
+  body.light-mode .mob-topbar,
+  body.light-mode .mob-bottom-nav,
+  body.light-mode .portal-sidebar {
+    background: #0c1229 !important;
+  }
 }
 
 /* Desktop: hide mobile elements */
