@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Books — UniBuddy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --indigo: #6366f1; --indigo-dark: #4f46e5; --indigo-light: #eef2ff;
+      --bg: #f8fafc; --card: #fff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b; --sidebar: #0c0e1a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Nunito', sans-serif; background: var(--bg); display: flex; min-height: 100vh; }
+
+    /* SIDEBAR (same as dashboard) */
+    .sidebar { width: 240px; background: var(--sidebar); display: flex; flex-direction: column; padding: 24px 0; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; }
+    .sidebar-logo { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; color: white; letter-spacing: -1px; padding: 0 24px 28px; border-bottom: 1px solid #1e2240; }
+    .sidebar-logo span { color: var(--indigo); }
+    .nav-section { padding: 20px 12px 8px; font-size: 10px; color: #3a4060; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: #6b7280; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s; text-decoration: none; border-left: 3px solid transparent; }
+    .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+    .nav-item.active { color: var(--indigo); border-left-color: var(--indigo); background: rgba(99,102,241,0.08); }
+    .nav-item .icon { font-size: 18px; width: 22px; text-align: center; }
+    .sidebar-bottom { margin-top: auto; padding: 20px 12px; border-top: 1px solid #1e2240; }
+    .user-mini { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; overflow: hidden; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .user-name { font-size: 13px; font-weight: 700; color: white; }
+    .user-role { font-size: 11px; color: var(--muted); }
+    .btn-logout-mini { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px; margin-left: auto; }
+
+    /* MAIN */
+    .main { margin-left: 240px; flex: 1; padding: 32px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .page-title { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; color: var(--text); }
+    .btn-add { background: var(--indigo); color: white; padding: 10px 20px; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-add:hover { background: var(--indigo-dark); }
+
+    /* FILTERS */
+    .filters { display: flex; gap: 12px; margin-bottom: 22px; flex-wrap: wrap; }
+    .filter-input { padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 14px; outline: none; background: var(--card); color: var(--text); transition: 0.2s; }
+    .filter-input:focus { border-color: var(--indigo); }
+    .filter-input.search { flex: 1; min-width: 200px; }
+    select.filter-input { cursor: pointer; }
+
+    /* GRID */
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 18px; }
+
+    /* CARD */
+    .book-card { background: var(--card); border-radius: 14px; overflow: hidden; border: 1px solid var(--border); transition: transform 0.2s, box-shadow 0.2s; animation: fadeUp 0.4s ease both; }
+    .book-card:hover { transform: translateY(-4px); box-shadow: 0 10px 28px rgba(0,0,0,0.1); }
+    .book-img { width: 100%; height: 200px; object-fit: cover; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+    .book-img img { width: 100%; height: 100%; object-fit: cover; }
+    .book-body { padding: 14px; }
+    .book-condition { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+    .condition-like { background: rgba(16,185,129,0.1); color: #10b981; }
+    .condition-good { background: rgba(99,102,241,0.1); color: var(--indigo); }
+    .condition-fair { background: rgba(245,158,11,0.1); color: #f59e0b; }
+    .condition-poor { background: rgba(244,63,94,0.1); color: #f43f5e; }
+    .book-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .book-author { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+    .book-price { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 800; color: var(--indigo); }
+    .book-og-price { font-size: 12px; color: var(--muted); text-decoration: line-through; margin-left: 6px; }
+    .book-seller { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .btn-contact { width: 100%; margin-top: 12px; padding: 9px; background: var(--indigo); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-contact:hover { background: var(--indigo-dark); }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: center; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--card); border-radius: 20px; padding: 32px; width: 480px; max-height: 90vh; overflow-y: auto; animation: pop 0.3s ease; }
+    @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+    .form-group { margin-bottom: 16px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 7px; }
+    input, select, textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 14px; outline: none; transition: 0.2s; background: #fafafa; }
+    input:focus, select:focus, textarea:focus { border-color: var(--indigo); background: white; }
+    textarea { min-height: 80px; resize: vertical; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .btn-submit { width: 100%; padding: 13px; background: var(--indigo); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px; transition: 0.2s; }
+    .btn-submit:hover { background: var(--indigo-dark); }
+    .btn-cancel { width: 100%; padding: 11px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 8px; font-family: 'Nunito', sans-serif; }
+
+    .empty { text-align: center; padding: 60px; color: var(--muted); font-size: 15px; grid-column: 1/-1; }
+    .empty div { font-size: 44px; margin-bottom: 12px; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">Uni<span>Buddy</span></div>
+  <div class="nav-section">Main</div>
+  <a href="dashboard.html" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+  <a href="books.html" class="nav-item active"><span class="icon">📚</span> Books</a>
+  <a href="mentors.html" class="nav-item"><span class="icon">🧑‍🏫</span> Mentors</a>
+  <a href="quiz.html" class="nav-item"><span class="icon">📝</span> Quizzes</a>
+  <a href="partners.html" class="nav-item"><span class="icon">🤝</span> Study Partners</a>
+  <div class="nav-section">Account</div>
+  <a href="profile.html" class="nav-item"><span class="icon">👤</span> My Profile</a>
+  <a href="my_books.html" class="nav-item"><span class="icon">🏷️</span> My Listings</a>
+  <div class="sidebar-bottom">
+    <div class="user-mini">
+      <div class="avatar" id="sideAvatar">U</div>
+      <div>
+        <div class="user-name" id="sideName">User</div>
+        <div class="user-role" id="sideRole">student</div>
+      </div>
+      <button class="btn-logout-mini" onclick="logout()">⏻</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div class="page-title">📚 Book Marketplace</div>
+    <button class="btn-add" onclick="openModal()">+ List a Book</button>
+  </div>
+
+  <div class="filters">
+    <input class="filter-input search" id="search" placeholder="🔍 Search books..." oninput="applyFilters()">
+    <select class="filter-input" id="filterCourse" onchange="applyFilters()">
+      <option value="">All Courses</option>
+      <option>BCA</option><option>MCA</option><option>B.Tech</option><option>MBA</option><option>B.Sc</option>
+    </select>
+    <select class="filter-input" id="filterCondition" onchange="applyFilters()">
+      <option value="">All Conditions</option>
+      <option>Like New</option><option>Good</option><option>Fair</option><option>Poor</option>
+    </select>
+  </div>
+
+  <div class="grid" id="booksGrid">
+    <div class="empty"><div>⏳</div>Loading books...</div>
+  </div>
+</div>
+
+<!-- ADD BOOK MODAL -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title">📖 List a Book</div>
+    <div class="form-group"><label>Book Title *</label><input id="bTitle" placeholder="e.g. Let Us C"></div>
+    <div class="form-group"><label>Author</label><input id="bAuthor" placeholder="e.g. Yashavant Kanetkar"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Asking Price (₹) *</label><input type="number" id="bPrice" placeholder="150"></div>
+      <div class="form-group"><label>Original Price (₹)</label><input type="number" id="bOgPrice" placeholder="450"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Condition *</label>
+        <select id="bCondition">
+          <option value="">Select...</option>
+          <option>Like New</option><option>Good</option><option>Fair</option><option>Poor</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Course</label>
+        <select id="bCourse">
+          <option value="">Select...</option>
+          <option>BCA</option><option>MCA</option><option>B.Tech</option><option>MBA</option><option>B.Sc</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Subject</label><input id="bSubject" placeholder="e.g. C Programming"></div>
+      <div class="form-group"><label>Year</label><select id="bYear"><option value="">Any</option><option>1st</option><option>2nd</option><option>3rd</option><option>4th</option></select></div>
+    </div>
+    <div class="form-group"><label>Description</label><textarea id="bDesc" placeholder="Condition details, edition, any highlights..."></textarea></div>
+    <div class="form-group"><label>Image URL (optional)</label><input id="bImage" placeholder="https://..."></div>
+    <div class="form-group"><label>Your Phone (for buyer contact)</label><input id="bPhone" placeholder="9876543210"></div>
+    <button class="btn-submit" onclick="addBook()">List Book ✅</button>
+    <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+  </div>
+</div>
+
+<script>
+  const API = "https://unibuddy-1.onrender.com/api";
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  if (!token) window.location.href = "login.html";
+
+  document.getElementById("sideName").textContent = user.name || "User";
+  document.getElementById("sideRole").textContent = user.role || "student";
+  if (user.avatar) document.getElementById("sideAvatar").innerHTML = `<img src="${user.avatar}">`;
+  else document.getElementById("sideAvatar").textContent = (user.name || "U")[0].toUpperCase();
+
+  function logout() { localStorage.clear(); window.location.href = "login.html"; }
+
+  let allBooks = [];
+
+  const conditionClass = { "Like New": "condition-like", "Good": "condition-good", "Fair": "condition-fair", "Poor": "condition-poor" };
+
+  async function loadBooks() {
+    try {
+      const res = await fetch(`${API}/books`);
+      allBooks = await res.json();
+      renderBooks(allBooks);
+    } catch {
+      document.getElementById("booksGrid").innerHTML = '<div class="empty"><div>❌</div>Could not load books</div>';
+    }
+  }
+
+  function renderBooks(books) {
+    const grid = document.getElementById("booksGrid");
+    if (books.length === 0) { grid.innerHTML = '<div class="empty"><div>📭</div>No books found</div>'; return; }
+    grid.innerHTML = books.map((b, i) => `
+      <div class="book-card" style="animation-delay:${i * 0.05}s">
+        <div class="book-img">
+          ${b.image ? `<img src="${b.image}" alt="${b.title}" onerror="this.parentElement.innerHTML='📖'">` : "📖"}
+        </div>
+        <div class="book-body">
+          <span class="book-condition ${conditionClass[b.condition] || 'condition-good'}">${b.condition}</span>
+          <div class="book-title" title="${b.title}">${b.title}</div>
+          <div class="book-author">${b.author || "Unknown Author"}</div>
+          <div>
+            <span class="book-price">₹${b.price}</span>
+            ${b.originalPrice ? `<span class="book-og-price">₹${b.originalPrice}</span>` : ""}
+          </div>
+          <div class="book-seller">👤 ${b.seller || "Student"} • ${b.course || "General"}</div>
+          <button class="btn-contact" onclick="contactSeller('${b.sellerPhone || ''}', '${b.seller || ''}', '${b.title}')">📞 Contact Seller</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function applyFilters() {
+    const search = document.getElementById("search").value.toLowerCase();
+    const course = document.getElementById("filterCourse").value;
+    const condition = document.getElementById("filterCondition").value;
+    let filtered = allBooks.filter(b =>
+      (!search || b.title.toLowerCase().includes(search) || (b.author || "").toLowerCase().includes(search)) &&
+      (!course || b.course === course) &&
+      (!condition || b.condition === condition)
+    );
+    renderBooks(filtered);
+  }
+
+  function contactSeller(phone, seller, title) {
+    if (phone) {
+      window.open(`https://wa.me/91${phone}?text=Hi ${seller}, I'm interested in your book "${title}" on UniBuddy!`);
+    } else {
+      alert(`Contact ${seller} through the platform. Phone not provided.`);
+    }
+  }
+
+  function openModal() { document.getElementById("modal").classList.add("open"); }
+  function closeModal() { document.getElementById("modal").classList.remove("open"); }
+
+  async function addBook() {
+    const title = document.getElementById("bTitle").value.trim();
+    const price = document.getElementById("bPrice").value;
+    const condition = document.getElementById("bCondition").value;
+    if (!title || !price || !condition) { alert("Title, price & condition required"); return; }
+
+    try {
+      const res = await fetch(`${API}/books/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({
+          title, price,
+          author: document.getElementById("bAuthor").value,
+          originalPrice: document.getElementById("bOgPrice").value,
+          condition,
+          course: document.getElementById("bCourse").value,
+          subject: document.getElementById("bSubject").value,
+          year: document.getElementById("bYear").value,
+          description: document.getElementById("bDesc").value,
+          image: document.getElementById("bImage").value,
+          sellerPhone: document.getElementById("bPhone").value,
+        })
+      });
+      const data = await res.json();
+      if (res.ok) { closeModal(); loadBooks(); alert("Book listed ✅"); }
+      else alert(data.message || "Failed");
+    } catch { alert("Server error"); }
+  }
+
+  loadBooks();
+</script>
+<script src="theme.js"></script>
+<script src="mobile.js"></script>
+</body>
+</html>

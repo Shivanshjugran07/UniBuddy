@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - UniBuddy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--indigo:#6366f1;--emerald:#10b981;--amber:#f59e0b;--rose:#f43f5e;--bg:#0c0e1a;--card:#13162a;--border:#1e2240;--text:#f1f5f9;--muted:#64748b}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:"Nunito",sans-serif;background:var(--bg);min-height:100vh;color:var(--text)}
+    .hdr{background:#13162a;border-bottom:1px solid #1e2240;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+    .logo{font-family:"Outfit",sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:-1px}
+    .logo span{color:var(--indigo)}
+    .abadge{background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:5px 12px;font-size:12px;font-weight:700;color:#f87171}
+    .btn-lo{padding:7px 16px;background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2);border-radius:8px;font-family:"Outfit",sans-serif;font-size:13px;font-weight:700;cursor:pointer}
+    .wrap{padding:32px;max-width:1200px;margin:0 auto}
+    .ptitle{font-family:"Outfit",sans-serif;font-size:28px;font-weight:800;color:#fff;margin-bottom:6px}
+    .psub{font-size:14px;color:var(--muted);margin-bottom:28px}
+    .stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:32px}
+    .sc{background:var(--card);border-radius:14px;padding:20px;border:1px solid var(--border);text-align:center}
+    .sv{font-family:"Outfit",sans-serif;font-size:32px;font-weight:800;margin-bottom:4px}
+    .sl{font-size:12px;color:var(--muted);font-weight:600}
+    .tabs{display:flex;gap:4px;background:#0c0e1a;border:1px solid var(--border);border-radius:12px;padding:4px;width:fit-content;margin-bottom:24px}
+    .tab{padding:9px 20px;border:none;border-radius:9px;background:transparent;color:var(--muted);font-family:"Outfit",sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:.2s}
+    .tab.active{background:var(--indigo);color:#fff}
+    .tw{background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden}
+    .th2{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .tt{font-family:"Outfit",sans-serif;font-size:15px;font-weight:700;color:#fff}
+    .tc{font-size:12px;color:var(--muted)}
+    .sb{padding:8px 14px;background:#0c0e1a;border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:"Nunito",sans-serif;font-size:13px;outline:none;width:220px}
+    .sb:focus{border-color:var(--indigo)}
+    table{width:100%;border-collapse:collapse}
+    th{padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);background:#0c0e1a}
+    td{padding:14px 16px;font-size:13px;color:var(--text);border-bottom:1px solid rgba(30,34,64,.5)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(99,102,241,.04)}
+    .rb{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+    .rb.student{background:rgba(99,102,241,.15);color:#818cf8}
+    .rb.mentor{background:rgba(16,185,129,.15);color:#4ade80}
+    .rb.admin{background:rgba(239,68,68,.15);color:#f87171}
+    .stb{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+    .stb.pending{background:rgba(245,158,11,.15);color:#fbbf24}
+    .stb.accepted{background:rgba(16,185,129,.15);color:#4ade80}
+    .stb.rejected{background:rgba(239,68,68,.15);color:#f87171}
+    .bdel{padding:5px 12px;background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.2);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;font-family:"Nunito",sans-serif}
+    .avmini{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),#818cf8);display:inline-flex;align-items:center;justify-content:center;font-family:"Outfit",sans-serif;font-size:12px;font-weight:700;color:#fff;margin-right:8px;vertical-align:middle;overflow:hidden;flex-shrink:0}
+    .avmini img{width:100%;height:100%;object-fit:cover}
+    .empty{text-align:center;padding:48px;color:var(--muted);font-size:14px}
+    .empty div{font-size:40px;margin-bottom:10px}
+    .mov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:999;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
+    .mov.open{display:flex}
+    .mod{background:#13162a;border:1px solid #1e2240;border-radius:16px;padding:28px;width:380px;text-align:center}
+    .mod h3{font-family:"Outfit",sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:8px}
+    .mod p{font-size:13px;color:var(--muted);margin-bottom:20px;line-height:1.5}
+    .mbtns{display:flex;gap:10px;justify-content:center}
+    .bcd{padding:10px 24px;background:#ef4444;color:#fff;border:none;border-radius:8px;font-family:"Outfit",sans-serif;font-size:14px;font-weight:700;cursor:pointer}
+    .bcl{padding:10px 24px;background:rgba(255,255,255,.1);color:var(--text);border:none;border-radius:8px;font-family:"Outfit",sans-serif;font-size:14px;font-weight:700;cursor:pointer}
+    .toast{position:fixed;bottom:24px;right:24px;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;transform:translateY(60px);opacity:0;transition:all .3s;z-index:9999}
+    .toast.show{transform:translateY(0);opacity:1}
+  </style>
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<div class="hdr">
+  <div class="logo">Uni<span>Buddy</span> <span style="font-size:14px;color:var(--muted);font-weight:400;margin-left:8px">Admin</span></div>
+  <div class="abadge">ADMIN PANEL</div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span style="font-size:13px;color:var(--muted)" id="adminName">Admin</span>
+    <button class="btn-lo" onclick="logout()">Logout</button>
+  </div>
+</div>
+<div class="wrap">
+  <div class="ptitle">Admin Dashboard</div>
+  <div class="psub">Manage students, mentors, and platform data</div>
+  <div class="stats">
+    <div class="sc"><div class="sv" style="color:var(--indigo)" id="s1">-</div><div class="sl">Total Users</div></div>
+    <div class="sc"><div class="sv" style="color:#38bdf8" id="s2">-</div><div class="sl">Students</div></div>
+    <div class="sc"><div class="sv" style="color:var(--emerald)" id="s3">-</div><div class="sl">Mentors</div></div>
+    <div class="sc"><div class="sv" style="color:var(--amber)" id="s4">-</div><div class="sl">Books</div></div>
+    <div class="sc"><div class="sv" style="color:#a78bfa" id="s5">-</div><div class="sl">Quizzes</div></div>
+    <div class="sc"><div class="sv" style="color:var(--rose)" id="s6">-</div><div class="sl">Pending Reqs</div></div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" onclick="sw(0)">Students</button>
+    <button class="tab" onclick="sw(1)">Mentors</button>
+    <button class="tab" onclick="sw(2)">Requests</button>
+    <button class="tab" onclick="sw(3)">All Users</button>
+  </div>
+  <div class="tw">
+    <div class="th2">
+      <div><div class="tt" id="ttitle">Students</div><div class="tc" id="tcount"></div></div>
+      <input class="sb" id="srch" placeholder="Search..." oninput="filt()">
+    </div>
+    <div id="tbody"><div class="empty"><div>⏳</div>Loading...</div></div>
+  </div>
+</div>
+<div class="mov" id="delMod">
+  <div class="mod">
+    <h3>Delete User?</h3>
+    <p id="delMsg">This cannot be undone.</p>
+    <div class="mbtns">
+      <button class="bcd" onclick="doDelete()">Delete</button>
+      <button class="bcl" onclick="document.getElementById('delMod').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+const API="https://unibuddy-1.onrender.com/api",tok=localStorage.getItem("token"),usr=JSON.parse(localStorage.getItem("user")||"{}");
+if(!tok||usr.role!=="admin"){window.location.href="login.html";}
+document.getElementById("adminName").textContent=usr.name||"Admin";
+function logout(){localStorage.clear();window.location.href="login.html";}
+function toast(m,c){const t=document.getElementById("toast");t.textContent=m;t.style.background=c||"#0f172a";t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);}
+let all=[],reqs=[],tab=0,delId=null;
+async function loadStats(){
+  try{const r=await fetch(API+"/mentors/admin/stats",{headers:{"Authorization":"Bearer "+tok}});const d=await r.json();
+  document.getElementById("s1").textContent=d.totalUsers||0;document.getElementById("s2").textContent=d.totalStudents||0;
+  document.getElementById("s3").textContent=d.totalMentors||0;document.getElementById("s4").textContent=d.totalBooks||0;
+  document.getElementById("s5").textContent=d.totalQuizzes||0;document.getElementById("s6").textContent=d.pendingRequests||0;}catch(e){}
+}
+async function loadAll(){
+  try{const r=await fetch(API+"/mentors/admin/users",{headers:{"Authorization":"Bearer "+tok}});all=await r.json();render();}
+  catch(e){document.getElementById("tbody").innerHTML="<div class=\"empty\"><div>❌</div>Load failed</div>";}
+}
+async function loadReqs(){
+  document.getElementById("tbody").innerHTML="<div class=\"empty\"><div>⏳</div>Loading...</div>";
+  try{const r=await fetch(API+"/mentors/admin/requests",{headers:{"Authorization":"Bearer "+tok}});reqs=await r.json();renderReqs();}
+  catch(e){document.getElementById("tbody").innerHTML="<div class=\"empty\"><div>❌</div>Load failed</div>";}
+}
+function sw(n){
+  tab=n;document.querySelectorAll(".tab").forEach((t,i)=>t.classList.toggle("active",i===n));
+  document.getElementById("srch").value="";
+  if(n===2){loadReqs();return;}render();
+}
+function filt(){if(tab!==2)render();}
+function render(){
+  const s=document.getElementById("srch").value.toLowerCase();
+  let f=tab===0?all.filter(u=>u.role==="student"):tab===1?all.filter(u=>u.role==="mentor"):all;
+  if(s)f=f.filter(u=>(u.name||"").toLowerCase().includes(s)||(u.email||"").toLowerCase().includes(s)||(u.course||"").toLowerCase().includes(s));
+  const titles=["Students","Mentors","Requests","All Users"];
+  document.getElementById("ttitle").textContent=titles[tab];
+  document.getElementById("tcount").textContent=f.length+" records";
+  if(!f.length){document.getElementById("tbody").innerHTML="<div class=\"empty\"><div>🔍</div>Koi result nahi</div>";return;}
+  let html="<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Course</th><th>Year</th><th>Joined</th><th>Action</th></tr></thead><tbody>";
+  f.forEach(u=>{
+    const av=u.avatar?"<div class=\"avmini\"><img src=\""+u.avatar+"\"></div>":"<div class=\"avmini\">"+(u.name||"?")[0].toUpperCase()+"</div>";
+    const dt=new Date(u.created_at).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+    const del=u.role!=="admin"?"<button class=\"bdel\" onclick=\"delU('"+u.id+"','"+u.name+"')\" >Delete</button>":"<span style=\"color:var(--muted);font-size:12px\">Protected</span>";
+    html+="<tr><td>"+av+"<strong>"+u.name+"</strong></td><td style=\"color:var(--muted)\">"+u.email+"</td><td><span class=\"rb "+u.role+"\">"+u.role+"</span></td><td>"+(u.course||"—")+"</td><td>"+(u.year||"—")+"</td><td style=\"color:var(--muted)\">"+dt+"</td><td>"+del+"</td></tr>";
+  });
+  html+="</tbody></table>";document.getElementById("tbody").innerHTML=html;
+}
+function renderReqs(){
+  document.getElementById("ttitle").textContent="Mentor Requests";
+  document.getElementById("tcount").textContent=reqs.length+" records";
+  if(!reqs.length){document.getElementById("tbody").innerHTML="<div class=\"empty\"><div>📭</div>Koi request nahi</div>";return;}
+  let html="<table><thead><tr><th>ID</th><th>Mentor ID</th><th>Student ID</th><th>Status</th><th>Date</th></tr></thead><tbody>";
+  reqs.forEach(r=>{
+    const dt=new Date(r.created_at).toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+    html+="<tr><td style=\"font-family:monospace;font-size:11px;color:var(--muted)\">"+(r.id||"").substring(0,8)+"...</td><td style=\"font-family:monospace;font-size:11px;color:var(--muted)\">"+(r.mentor_id||"").substring(0,8)+"...</td><td style=\"font-family:monospace;font-size:11px;color:var(--muted)\">"+(r.student_id||"").substring(0,8)+"...</td><td><span class=\"stb "+r.status+"\">"+r.status+"</span></td><td style=\"color:var(--muted)\">"+dt+"</td></tr>";
+  });
+  html+="</tbody></table>";document.getElementById("tbody").innerHTML=html;
+}
+function delU(id,name){delId=id;document.getElementById("delMsg").textContent="Delete \""+name+"\": This cannot be undone.";document.getElementById("delMod").classList.add("open");}
+async function doDelete(){
+  if(!delId)return;document.getElementById("delMod").classList.remove("open");
+  try{const r=await fetch(API+"/mentors/admin/users/"+delId,{method:"DELETE",headers:{"Authorization":"Bearer "+tok}});const d=await r.json();
+  if(r.ok){toast("User deleted",  "#059669");all=all.filter(u=>u.id!==delId);render();loadStats();}
+  else toast(d.message||"Error","#dc2626");}catch(e){toast("Server error","#dc2626");}
+  delId=null;
+}
+loadStats();loadAll();
+</script>
+<script src="theme.js"></script>
+<script src="mobile.js"></script>
+</body>
+</html>

@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Listings — UniBuddy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --indigo: #6366f1; --indigo-dark: #4f46e5; --indigo-light: #eef2ff; --emerald: #10b981; --red: #ef4444; --bg: #f8fafc; --card: #fff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b; --sidebar: #0c0e1a; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Nunito', sans-serif; background: var(--bg); display: flex; min-height: 100vh; }
+
+    /* SIDEBAR */
+    .sidebar { width: 240px; background: var(--sidebar); display: flex; flex-direction: column; padding: 24px 0; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; }
+    .sidebar-logo { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; color: white; letter-spacing: -1px; padding: 0 24px 28px; border-bottom: 1px solid #1e2240; }
+    .sidebar-logo span { color: var(--indigo); }
+    .nav-section { padding: 20px 12px 8px; font-size: 10px; color: #3a4060; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: #6b7280; font-size: 14px; font-weight: 600; text-decoration: none; border-left: 3px solid transparent; transition: 0.2s; }
+    .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+    .nav-item.active { color: var(--indigo); border-left-color: var(--indigo); background: rgba(99,102,241,0.08); }
+    .nav-item .icon { font-size: 18px; width: 22px; text-align: center; }
+    .sidebar-bottom { margin-top: auto; padding: 20px 12px; border-top: 1px solid #1e2240; }
+    .user-mini { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; }
+    .avatar-sm { width: 36px; height: 36px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; overflow: hidden; flex-shrink: 0; }
+    .avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+    .user-name { font-size: 13px; font-weight: 700; color: white; }
+    .user-role-text { font-size: 11px; color: var(--muted); }
+    .btn-logout-mini { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px; margin-left: auto; }
+
+    /* MAIN */
+    .main { margin-left: 240px; flex: 1; padding: 32px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .page-title { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; color: var(--text); }
+    .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+
+    /* STATS */
+    .stats-row { display: flex; gap: 14px; margin-bottom: 28px; }
+    .stat-card { background: white; border: 1px solid var(--border); border-radius: 14px; padding: 18px 24px; flex: 1; animation: fadeUp 0.4s ease both; }
+    .stat-val { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800; color: var(--text); }
+    .stat-label { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 2px; }
+
+    /* ADD BUTTON */
+    .btn-add { padding: 11px 22px; background: var(--indigo); color: white; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+    .btn-add:hover { background: var(--indigo-dark); transform: translateY(-1px); }
+
+    /* FILTER TABS */
+    .filter-tabs { display: flex; gap: 4px; background: white; border: 1px solid var(--border); border-radius: 10px; padding: 4px; width: fit-content; margin-bottom: 22px; }
+    .filter-tab { padding: 8px 18px; border: none; border-radius: 7px; background: transparent; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; transition: 0.2s; }
+    .filter-tab.active { background: var(--indigo); color: white; }
+
+    /* BOOKS GRID */
+    .books-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+
+    .book-card { background: white; border-radius: 16px; border: 1px solid var(--border); overflow: hidden; transition: 0.2s; animation: fadeUp 0.4s ease both; }
+    .book-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.08); }
+
+    .book-img { width: 100%; height: 160px; object-fit: cover; background: linear-gradient(135deg, #eef2ff, #e0e7ff); display: flex; align-items: center; justify-content: center; font-size: 48px; }
+    .book-img img { width: 100%; height: 100%; object-fit: cover; }
+
+    .book-body { padding: 16px; }
+    .book-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+    .book-title { font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); line-height: 1.3; flex: 1; }
+    .book-author { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+
+    .book-meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .badge { padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .badge.condition { background: var(--indigo-light); color: var(--indigo); }
+    .badge.sold { background: rgba(239,68,68,0.1); color: var(--red); }
+    .badge.available { background: rgba(16,185,129,0.1); color: var(--emerald); }
+    .badge.course { background: #f1f5f9; color: var(--muted); }
+
+    .book-price { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 800; color: var(--indigo); margin-bottom: 14px; }
+    .book-price span { font-size: 12px; color: var(--muted); text-decoration: line-through; font-weight: 400; margin-left: 6px; }
+
+    .book-actions { display: flex; gap: 8px; }
+    .btn-sold { flex: 1; padding: 8px; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; background: rgba(16,185,129,0.1); color: var(--emerald); }
+    .btn-sold:hover { background: var(--emerald); color: white; }
+    .btn-delete { flex: 1; padding: 8px; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; transition: 0.2s; background: rgba(239,68,68,0.08); color: var(--red); }
+    .btn-delete:hover { background: var(--red); color: white; }
+
+    /* ADD BOOK MODAL */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 999; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .modal-overlay.show { opacity: 1; pointer-events: all; }
+    .modal { background: white; border-radius: 20px; padding: 32px; width: 480px; max-height: 85vh; overflow-y: auto; transform: scale(0.9); transition: transform 0.2s; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+    .modal-overlay.show .modal { transform: scale(1); }
+    .modal-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 20px; }
+    .form-group { margin-bottom: 14px; }
+    .form-label { display: block; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 6px; }
+    .form-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 14px; color: var(--text); outline: none; transition: 0.2s; }
+    .form-input:focus { border-color: var(--indigo); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+    select.form-input { cursor: pointer; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .btn-submit { flex: 1; padding: 12px; background: var(--indigo); color: white; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-submit:hover { background: var(--indigo-dark); }
+    .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-cancel { padding: 12px 20px; background: #f1f5f9; color: var(--muted); border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+    /* CONFIRM MODAL */
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+    .confirm-overlay.show { opacity: 1; pointer-events: all; }
+    .confirm-box { background: white; border-radius: 16px; padding: 28px; width: 340px; text-align: center; transform: scale(0.9); transition: 0.2s; }
+    .confirm-overlay.show .confirm-box { transform: scale(1); }
+    .confirm-icon { font-size: 40px; margin-bottom: 12px; }
+    .confirm-title { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+    .confirm-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .confirm-actions { display: flex; gap: 10px; }
+    .btn-confirm-yes { flex: 1; padding: 10px; background: var(--red); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+    .btn-confirm-no { flex: 1; padding: 10px; background: #f1f5f9; color: var(--muted); border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(60px); opacity: 0; transition: all 0.3s; z-index: 9999; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    .empty { text-align: center; padding: 60px; color: var(--muted); font-size: 15px; grid-column: 1/-1; }
+    .empty div { font-size: 48px; margin-bottom: 12px; }
+
+    .alert { padding: 11px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; margin-bottom: 14px; display: none; }
+    .alert.error { background: rgba(239,68,68,0.1); color: #f87171; border: 1px solid rgba(239,68,68,0.2); }
+    .alert.success { background: rgba(16,185,129,0.1); color: #34d399; border: 1px solid rgba(16,185,129,0.2); }
+    .alert.show { display: block; }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">Uni<span>Buddy</span></div>
+  <div class="nav-section">Main</div>
+  <a href="dashboard.html" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+  <a href="books.html" class="nav-item"><span class="icon">📚</span> Books</a>
+  <a href="mentors.html" class="nav-item"><span class="icon">🧑‍🏫</span> Mentors</a>
+  <a href="quiz.html" class="nav-item"><span class="icon">📝</span> Quizzes</a>
+  <a href="partners.html" class="nav-item"><span class="icon">🤝</span> Study Partners</a>
+  <div class="nav-section">Account</div>
+  <a href="profile.html" class="nav-item"><span class="icon">👤</span> My Profile</a>
+  <a href="my-books.html" class="nav-item active"><span class="icon">🏷️</span> My Listings</a>
+  <div class="sidebar-bottom">
+    <div class="user-mini">
+      <div class="avatar-sm" id="sideAvatar">U</div>
+      <div><div class="user-name" id="sideName">User</div><div class="user-role-text" id="sideRole">student</div></div>
+      <button class="btn-logout-mini" onclick="logout()">⏻</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title">🏷️ My Listings</div>
+    </div>
+    <button class="btn-add" onclick="openAddModal()">➕ List a Book</button>
+  </div>
+  <div class="page-sub">Apni listed books manage karo — mark as sold ya delete karo</div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card" style="animation-delay:0s">
+      <div class="stat-val" id="statTotal">0</div>
+      <div class="stat-label">📚 Total Listed</div>
+    </div>
+    <div class="stat-card" style="animation-delay:0.1s">
+      <div class="stat-val" id="statAvailable">0</div>
+      <div class="stat-label">✅ Available</div>
+    </div>
+    <div class="stat-card" style="animation-delay:0.2s">
+      <div class="stat-val" id="statSold">0</div>
+      <div class="stat-label">🏷️ Sold</div>
+    </div>
+  </div>
+
+  <!-- FILTER TABS -->
+  <div class="filter-tabs">
+    <button class="filter-tab active" id="tabAll" onclick="filterBooks('all')">All</button>
+    <button class="filter-tab" id="tabAvailable" onclick="filterBooks('available')">Available</button>
+    <button class="filter-tab" id="tabSold" onclick="filterBooks('sold')">Sold</button>
+  </div>
+
+  <div class="books-grid" id="booksGrid">
+    <div class="empty"><div>⏳</div>Loading your listings...</div>
+  </div>
+</div>
+
+<!-- ADD BOOK MODAL -->
+<div class="modal-overlay" id="addModal" onclick="closeAddModal(event)">
+  <div class="modal">
+    <div class="modal-title">📚 New Book Listing</div>
+    <div class="alert" id="formAlert"></div>
+    <div class="form-group">
+      <label class="form-label">Book Title *</label>
+      <input class="form-input" id="bookTitle" placeholder="e.g. Data Structures by Lipschutz">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Author</label>
+        <input class="form-input" id="bookAuthor" placeholder="Author name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <input class="form-input" id="bookSubject" placeholder="e.g. DSA">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Selling Price (₹) *</label>
+        <input class="form-input" id="bookPrice" type="number" placeholder="150">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Original Price (₹)</label>
+        <input class="form-input" id="bookOriginal" type="number" placeholder="350">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Condition *</label>
+        <select class="form-input" id="bookCondition">
+          <option value="">Select condition</option>
+          <option value="Like New">Like New</option>
+          <option value="Good">Good</option>
+          <option value="Fair">Fair</option>
+          <option value="Poor">Poor</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Course</label>
+        <select class="form-input" id="bookCourse">
+          <option value="">Select course</option>
+          <option value="BCA">BCA</option>
+          <option value="MCA">MCA</option>
+          <option value="B.Tech">B.Tech</option>
+          <option value="MBA">MBA</option>
+          <option value="B.Sc">B.Sc</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Year</label>
+        <select class="form-input" id="bookYear">
+          <option value="">Select year</option>
+          <option value="1st">1st Year</option>
+          <option value="2nd">2nd Year</option>
+          <option value="3rd">3rd Year</option>
+          <option value="4th">4th Year</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your Phone (WhatsApp)</label>
+        <input class="form-input" id="bookPhone" placeholder="9876543210">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Description</label>
+      <input class="form-input" id="bookDesc" placeholder="Any notes about the book...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Image URL (optional)</label>
+      <input class="form-input" id="bookImage" placeholder="https://...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddModalDirect()">Cancel</button>
+      <button class="btn-submit" id="submitBtn" onclick="addBook()">List Book ✅</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM DELETE MODAL -->
+<div class="confirm-overlay" id="confirmModal">
+  <div class="confirm-box">
+    <div class="confirm-icon">🗑️</div>
+    <div class="confirm-title">Delete Listing?</div>
+    <div class="confirm-sub">Yeh book listing permanently delete ho jayegi.</div>
+    <div class="confirm-actions">
+      <button class="btn-confirm-no" onclick="closeConfirm()">Cancel</button>
+      <button class="btn-confirm-yes" id="confirmYesBtn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = "https://unibuddy-1.onrender.com/api";
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  if (!token) window.location.href = "login.html";
+
+  document.getElementById("sideName").textContent = user.name || "User";
+  document.getElementById("sideRole").textContent = user.role || "student";
+  if (user.avatar) document.getElementById("sideAvatar").innerHTML = `<img src="${user.avatar}">`;
+  else document.getElementById("sideAvatar").textContent = (user.name || "U")[0].toUpperCase();
+
+  function logout() { localStorage.clear(); window.location.href = "login.html"; }
+
+  let allBooks = [];
+  let currentFilter = "all";
+
+  function showToast(msg) {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 2500);
+  }
+
+  function showFormAlert(msg, type = "error") {
+    const el = document.getElementById("formAlert");
+    el.textContent = msg;
+    el.className = `alert ${type} show`;
+  }
+
+  async function loadMyBooks() {
+    try {
+      const res = await fetch(`${API}/books/mine`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      allBooks = await res.json();
+      updateStats();
+      renderBooks();
+    } catch {
+      document.getElementById("booksGrid").innerHTML = '<div class="empty"><div>❌</div>Could not load listings</div>';
+    }
+  }
+
+  function updateStats() {
+    const available = allBooks.filter(b => !b.sold).length;
+    const sold = allBooks.filter(b => b.sold).length;
+    document.getElementById("statTotal").textContent = allBooks.length;
+    document.getElementById("statAvailable").textContent = available;
+    document.getElementById("statSold").textContent = sold;
+  }
+
+  function filterBooks(filter) {
+    currentFilter = filter;
+    ["All", "Available", "Sold"].forEach(f => {
+      document.getElementById(`tab${f}`).classList.toggle("active", filter === f.toLowerCase());
+    });
+    renderBooks();
+  }
+
+  function renderBooks() {
+    const grid = document.getElementById("booksGrid");
+    let books = allBooks;
+    if (currentFilter === "available") books = allBooks.filter(b => !b.sold);
+    if (currentFilter === "sold") books = allBooks.filter(b => b.sold);
+
+    if (books.length === 0) {
+      grid.innerHTML = `<div class="empty"><div>📭</div>${currentFilter === "all" ? "Koi book listed nahi hai. Pehli book list karo!" : "Is category mein koi book nahi hai."}</div>`;
+      return;
+    }
+
+    grid.innerHTML = books.map((b, i) => `
+      <div class="book-card" style="animation-delay:${i * 0.06}s">
+        <div class="book-img">
+          ${b.image ? `<img src="${b.image}" alt="${b.title}" onerror="this.parentElement.innerHTML='📚'">` : "📚"}
+        </div>
+        <div class="book-body">
+          <div class="book-header">
+            <div class="book-title">${b.title}</div>
+          </div>
+          ${b.author ? `<div class="book-author">by ${b.author}</div>` : ""}
+          <div class="book-meta">
+            <span class="badge condition">${b.condition}</span>
+            <span class="badge ${b.sold ? 'sold' : 'available'}">${b.sold ? '🔴 Sold' : '🟢 Available'}</span>
+            ${b.course ? `<span class="badge course">${b.course}</span>` : ""}
+          </div>
+          <div class="book-price">
+            ₹${b.price}
+            ${b.original_price ? `<span>₹${b.original_price}</span>` : ""}
+          </div>
+          <div class="book-actions">
+            ${!b.sold ? `<button class="btn-sold" onclick="markSold('${b.id}')">✅ Mark as Sold</button>` : ""}
+            <button class="btn-delete" onclick="confirmDelete('${b.id}', '${b.title.replace(/'/g, "\\'")}')">🗑️ Delete</button>
+          </div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  async function markSold(id) {
+    try {
+      const res = await fetch(`${API}/books/${id}/sold`, {
+        method: "PUT",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if (res.ok) {
+        showToast("Book sold mark ho gayi! ✅");
+        await loadMyBooks();
+      }
+    } catch { showToast("Error aaya, dobara try karo"); }
+  }
+
+  let deleteId = null;
+  function confirmDelete(id, title) {
+    deleteId = id;
+    document.querySelector(".confirm-sub").textContent = `"${title}" permanently delete ho jayegi.`;
+    document.getElementById("confirmModal").classList.add("show");
+    document.getElementById("confirmYesBtn").onclick = () => deleteBook(id);
+  }
+  function closeConfirm() {
+    document.getElementById("confirmModal").classList.remove("show");
+    deleteId = null;
+  }
+
+  async function deleteBook(id) {
+    try {
+      const res = await fetch(`${API}/books/${id}`, {
+        method: "DELETE",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      if (res.ok) {
+        closeConfirm();
+        showToast("Book delete ho gayi! 🗑️");
+        await loadMyBooks();
+      }
+    } catch { showToast("Error aaya, dobara try karo"); }
+  }
+
+  // ADD BOOK MODAL
+  function openAddModal() {
+    document.getElementById("addModal").classList.add("show");
+  }
+  function closeAddModal(e) {
+    if (e.target === document.getElementById("addModal")) closeAddModalDirect();
+  }
+  function closeAddModalDirect() {
+    document.getElementById("addModal").classList.remove("show");
+    document.getElementById("formAlert").className = "alert";
+  }
+
+  async function addBook() {
+    const title = document.getElementById("bookTitle").value.trim();
+    const price = document.getElementById("bookPrice").value;
+    const condition = document.getElementById("bookCondition").value;
+
+    if (!title || !price || !condition) {
+      showFormAlert("Title, price aur condition required hai ❌");
+      return;
+    }
+
+    const btn = document.getElementById("submitBtn");
+    btn.disabled = true;
+    btn.textContent = "Listing...";
+
+    try {
+      const res = await fetch(`${API}/books/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({
+          title,
+          author: document.getElementById("bookAuthor").value.trim(),
+          price: Number(price),
+          original_price: Number(document.getElementById("bookOriginal").value) || 0,
+          condition,
+          subject: document.getElementById("bookSubject").value.trim(),
+          course: document.getElementById("bookCourse").value,
+          year: document.getElementById("bookYear").value,
+          seller_phone: document.getElementById("bookPhone").value.trim(),
+          description: document.getElementById("bookDesc").value.trim(),
+          image: document.getElementById("bookImage").value.trim()
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        closeAddModalDirect();
+        showToast("Book listed ho gayi! 📚");
+        // Clear form
+        ["bookTitle","bookAuthor","bookSubject","bookPrice","bookOriginal","bookPhone","bookDesc","bookImage"].forEach(id => document.getElementById(id).value = "");
+        document.getElementById("bookCondition").value = "";
+        document.getElementById("bookCourse").value = "";
+        document.getElementById("bookYear").value = "";
+        await loadMyBooks();
+      } else {
+        showFormAlert(data.message || "Error aaya ❌");
+      }
+    } catch {
+      showFormAlert("Server se connect nahi ho pa raha ❌");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "List Book ✅";
+    }
+  }
+
+  loadMyBooks();
+</script>
+<script src="theme.js"></script>
+<script src="mobile.js"></script>
+</body>
+</html>

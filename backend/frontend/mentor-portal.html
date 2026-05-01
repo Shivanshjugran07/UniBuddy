@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentor Portal — UniBuddy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root{--indigo:#6366f1;--indigo-dark:#4f46e5;--indigo-light:#eef2ff;--emerald:#10b981;--amber:#f59e0b;--rose:#f43f5e;--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--sidebar:#0c0e1a}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh}
+
+    /* WELCOME SCREEN */
+    .welcome-screen{position:fixed;inset:0;background:linear-gradient(135deg,#0c0e1a 0%,#1e1b4b 50%,#0c0e1a 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;transition:opacity .8s ease,transform .8s ease}
+    .welcome-screen.hide{opacity:0;pointer-events:none;transform:scale(1.05)}
+    .welcome-logo{font-family:'Outfit',sans-serif;font-size:18px;font-weight:800;color:rgba(255,255,255,.5);margin-bottom:32px;letter-spacing:2px}
+    .welcome-logo span{color:var(--indigo)}
+    .welcome-avatar{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:40px;font-weight:700;color:#fff;margin-bottom:20px;animation:pulse 2s infinite;overflow:hidden}
+    .welcome-avatar img{width:100%;height:100%;object-fit:cover}
+    @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(99,102,241,.4)}50%{box-shadow:0 0 0 20px rgba(99,102,241,0)}}
+    .welcome-name{font-family:'Outfit',sans-serif;font-size:32px;font-weight:800;color:#fff;margin-bottom:8px;text-align:center}
+    .welcome-sub{font-size:16px;color:rgba(255,255,255,.6);margin-bottom:40px;text-align:center}
+    .welcome-dots{display:flex;gap:8px}
+    .dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.3);animation:blink 1.4s infinite}
+    .dot:nth-child(2){animation-delay:.2s}
+    .dot:nth-child(3){animation-delay:.4s}
+    @keyframes blink{0%,80%,100%{opacity:.3}40%{opacity:1}}
+
+    /* LAYOUT */
+    .layout{display:flex;min-height:100vh}
+    .sidebar{width:240px;background:var(--sidebar);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;height:100vh;z-index:100;transform:translateX(-100%);transition:transform .5s ease}
+    .sidebar.show{transform:translateX(0)}
+    .sidebar-logo{font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:-1px;padding:0 20px 20px;border-bottom:1px solid #1e2240}
+    .sidebar-logo span{color:var(--indigo)}
+    .mentor-tag{margin:12px 16px;background:linear-gradient(135deg,rgba(240,147,251,.2),rgba(245,87,108,.2));border:1px solid rgba(240,147,251,.3);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:700;color:#f0c3f7;text-align:center}
+    .nav-sec{padding:16px 12px 6px;font-size:10px;color:#3a4060;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#6b7280;font-size:13px;font-weight:600;cursor:pointer;border-left:3px solid transparent;transition:.2s}
+    .nav-item:hover{color:#fff;background:rgba(255,255,255,.05)}
+    .nav-item.active{color:var(--indigo);border-left-color:var(--indigo);background:rgba(99,102,241,.08)}
+    .nav-item .icon{font-size:16px;width:20px;text-align:center}
+    .sb-bottom{margin-top:auto;padding:16px 12px;border-top:1px solid #1e2240}
+    .back-btn{display:flex;align-items:center;gap:8px;padding:10px 12px;color:#6b7280;font-size:13px;font-weight:600;cursor:pointer;border-radius:8px;text-decoration:none;transition:.2s}
+    .back-btn:hover{color:#fff;background:rgba(255,255,255,.05)}
+
+    /* MAIN */
+    .main{margin-left:240px;flex:1;padding:0;opacity:0;transition:opacity .5s ease .3s}
+    .main.show{opacity:1}
+
+    /* PAYMENT GATE */
+    .pay-gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px}
+    .pay-card{background:var(--card);border-radius:24px;padding:40px;max-width:520px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.1);animation:slideUp .5s ease}
+    @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+    .mentor-hero{text-align:center;margin-bottom:32px}
+    .mentor-hero-av{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:36px;font-weight:700;color:#fff;margin:0 auto 16px;overflow:hidden}
+    .mentor-hero-av img{width:100%;height:100%;object-fit:cover}
+    .mentor-hero-name{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:var(--text)}
+    .mentor-hero-exp{font-size:13px;color:var(--muted);margin-top:4px}
+    .mentor-hero-subjects{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:12px}
+    .sub-tag{padding:4px 12px;background:var(--indigo-light);color:var(--indigo);border-radius:20px;font-size:12px;font-weight:600}
+    .mentor-hero-bio{font-size:14px;color:var(--muted);margin-top:12px;line-height:1.6;text-align:center}
+    .pay-divider{border:none;border-top:1px solid var(--border);margin:24px 0}
+    .pay-title{font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;text-align:center}
+    .pay-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px}
+    .pay-amount{font-family:'Outfit',sans-serif;font-size:42px;font-weight:800;color:var(--emerald);text-align:center;margin-bottom:24px}
+    .qr-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;margin-bottom:24px}
+    .qr-box{padding:16px;background:#fff;border-radius:16px;border:2px solid var(--border);box-shadow:0 4px 20px rgba(0,0,0,.08)}
+    .qr-label{font-size:12px;color:var(--muted);text-align:center}
+    .upi-display{background:var(--indigo-light);border:1px solid rgba(99,102,241,.3);border-radius:10px;padding:12px 20px;text-align:center;cursor:pointer;transition:.2s}
+    .upi-display:hover{background:rgba(99,102,241,.15)}
+    .upi-id{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--indigo)}
+    .upi-hint{font-size:11px;color:var(--muted);margin-top:2px}
+    .form-group{margin-bottom:14px}
+    label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px}
+    input,textarea{width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:14px;outline:none;transition:.2s;background:#fafafa;color:var(--text)}
+    input:focus,textarea:focus{border-color:var(--indigo);background:#fff;box-shadow:0 0 0 3px rgba(99,102,241,.08)}
+    .btn-pay{width:100%;padding:14px;background:linear-gradient(135deg,#059669,#0ea572);color:#fff;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:.2s;margin-top:8px}
+    .btn-pay:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(16,185,129,.35)}
+    .pending-notice{background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:10px;padding:14px;text-align:center;font-size:13px;color:#d97706;margin-top:16px}
+
+    /* PORTAL (after payment) */
+    .portal{display:none}
+    .portal.show{display:block}
+    .portal-header{background:linear-gradient(135deg,#1e1b4b,#312e81);padding:28px 32px;display:flex;align-items:center;gap:20px}
+    .ph-avatar{width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:26px;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
+    .ph-avatar img{width:100%;height:100%;object-fit:cover}
+    .ph-info{flex:1}
+    .ph-name{font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:#fff}
+    .ph-sub{font-size:13px;color:rgba(255,255,255,.6);margin-top:2px}
+    .ph-badge{padding:5px 12px;background:rgba(16,185,129,.2);border:1px solid rgba(16,185,129,.3);border-radius:20px;font-size:12px;font-weight:700;color:#4ade80}
+
+    .portal-body{display:flex;min-height:calc(100vh - 120px)}
+    .portal-sidebar{width:220px;background:var(--sidebar);padding:20px 0;flex-shrink:0}
+    .ps-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:#6b7280;font-size:13px;font-weight:600;cursor:pointer;border-left:3px solid transparent;transition:.2s}
+    .ps-item:hover{color:#fff;background:rgba(255,255,255,.05)}
+    .ps-item.active{color:var(--indigo);border-left-color:var(--indigo);background:rgba(99,102,241,.08)}
+    .ps-item .icon{font-size:16px;width:20px;text-align:center}
+
+    .portal-content{flex:1;padding:28px;overflow-y:auto}
+
+    /* SECTION CARDS */
+    .sec{display:none}.sec.active{display:block}
+    .sec-title{font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:var(--text);margin-bottom:20px}
+
+    /* ANNOUNCEMENTS */
+    .ann-card{background:var(--card);border-radius:14px;border-left:4px solid var(--indigo);padding:20px;margin-bottom:14px;box-shadow:0 2px 10px rgba(0,0,0,.05);animation:fadeUp .3s ease}
+    .ann-title{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px}
+    .ann-content{font-size:14px;color:var(--muted);line-height:1.6}
+    .ann-date{font-size:11px;color:var(--muted);margin-top:8px}
+
+    /* SCHEDULE */
+    .class-card{background:var(--card);border-radius:14px;padding:20px;margin-bottom:14px;border:1px solid var(--border);display:flex;align-items:center;gap:16px;box-shadow:0 2px 10px rgba(0,0,0,.05);animation:fadeUp .3s ease}
+    .class-time{background:linear-gradient(135deg,var(--indigo),#818cf8);border-radius:12px;padding:12px 16px;text-align:center;flex-shrink:0}
+    .class-date{font-size:11px;color:rgba(255,255,255,.8);font-weight:600}
+    .class-hour{font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:#fff}
+    .class-info{flex:1}
+    .class-title{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--text)}
+    .class-sub{font-size:13px;color:var(--muted);margin-top:2px}
+    .class-dur{font-size:12px;color:var(--muted);margin-top:4px}
+    .btn-join{padding:9px 20px;background:var(--emerald);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-decoration:none;display:inline-block;transition:.2s}
+    .btn-join:hover{background:#059669;transform:translateY(-1px)}
+    .btn-join.soon{background:rgba(99,102,241,.1);color:var(--indigo);cursor:default}
+
+    /* CONTENT */
+    .content-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+    .content-card{background:var(--card);border-radius:14px;padding:20px;border:1px solid var(--border);transition:.2s;animation:fadeUp .3s ease}
+    .content-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+    .content-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:12px}
+    .content-icon.note{background:rgba(99,102,241,.1)}
+    .content-icon.video{background:rgba(239,68,68,.1)}
+    .content-icon.pdf{background:rgba(245,158,11,.1)}
+    .content-icon.link{background:rgba(16,185,129,.1)}
+    .content-title{font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:6px}
+    .content-desc{font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:14px}
+    .btn-view{width:100%;padding:9px;background:var(--indigo);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:.2s;text-decoration:none;display:block;text-align:center}
+    .btn-view:hover{background:var(--indigo-dark)}
+
+    /* NOTES MODAL */
+    .note-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;justify-content:center;align-items:flex-start;overflow-y:auto;padding:40px 20px;backdrop-filter:blur(4px)}
+    .note-modal.open{display:flex}
+    .note-box{background:var(--card);border-radius:20px;padding:32px;max-width:700px;width:100%;margin:auto;animation:slideUp .3s ease}
+    .note-box-title{font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:16px}
+    .note-body{font-size:15px;color:var(--text);line-height:1.8;white-space:pre-wrap}
+    .btn-close-note{padding:10px 24px;background:var(--indigo);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:20px}
+
+    /* CHAT */
+    .chat-wrap{background:var(--card);border-radius:16px;border:1px solid var(--border);overflow:hidden;height:calc(100vh - 220px);display:flex;flex-direction:column}
+    .chat-msgs{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;background:#f8fafc}
+    .chat-msgs::-webkit-scrollbar{width:4px}
+    .chat-msgs::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:2px}
+    .msg{display:flex;flex-direction:column;max-width:70%}
+    .msg.mine{align-self:flex-end;align-items:flex-end}
+    .msg.theirs{align-self:flex-start}
+    .bubble{padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-break:break-word}
+    .msg.mine .bubble{background:var(--indigo);color:#fff;border-bottom-right-radius:4px}
+    .msg.theirs .bubble{background:#fff;color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px}
+    .msg-del{display:none;position:absolute;top:2px;right:calc(100% + 6px);width:26px;height:26px;border-radius:50%;background:#fee2e2;border:1px solid #fca5a5;color:#ef4444;font-size:13px;cursor:pointer;align-items:center;justify-content:center;z-index:10}
+    .msg:hover .msg-del{display:flex}
+    .chat-input-row{padding:12px 16px;background:#fff;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center}
+    .chat-inp{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:24px;font-family:'Nunito',sans-serif;font-size:14px;outline:none;transition:.2s}
+    .chat-inp:focus{border-color:var(--indigo)}
+    .btn-send{width:40px;height:40px;border-radius:50%;background:var(--indigo);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s;flex-shrink:0}
+    .btn-send:hover{background:var(--indigo-dark)}
+
+    .empty{text-align:center;padding:48px;color:var(--muted);font-size:14px}
+    .empty div{font-size:44px;margin-bottom:12px}
+    .toast{position:fixed;bottom:24px;right:24px;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;transform:translateY(60px);opacity:0;transition:all .3s;z-index:9999}
+    .toast.show{transform:translateY(0);opacity:1}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ── RATING ── */
+    .rate-fab{position:fixed;bottom:30px;right:30px;z-index:200;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:50px;padding:13px 22px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 6px 24px rgba(245,158,11,.4);display:none;align-items:center;gap:8px;transition:.2s}
+    .rate-fab:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(245,158,11,.5)}
+    .rate-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;justify-content:center;align-items:center;backdrop-filter:blur(6px)}
+    .rate-ov.open{display:flex}
+    .rate-box{background:#fff;border-radius:24px;padding:36px 32px;width:400px;text-align:center;animation:pop .3s ease}
+    @keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+    .rate-box h3{font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:var(--text);margin-bottom:6px}
+    .rate-box p{font-size:13px;color:var(--muted);margin-bottom:24px}
+    .stars-row{display:flex;justify-content:center;gap:10px;margin-bottom:20px}
+    .star-btn{font-size:38px;cursor:pointer;transition:transform .15s;background:none;border:none;padding:0;line-height:1;filter:grayscale(1);opacity:.35}
+    .star-btn.lit{filter:grayscale(0);opacity:1;transform:scale(1.15)}
+    .star-btn:hover{transform:scale(1.2)}
+    .rate-label{font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:var(--amber);min-height:22px;margin-bottom:16px;transition:.2s}
+    .rate-review{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Nunito',sans-serif;font-size:13px;outline:none;resize:none;min-height:72px;transition:.2s;margin-bottom:20px}
+    .rate-review:focus{border-color:var(--indigo)}
+    .btn-submit-rate{width:100%;padding:13px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:.2s;margin-bottom:10px}
+    .btn-submit-rate:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,158,11,.4)}
+    .btn-close-rate{width:100%;padding:11px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+    .rated-badge{display:none;align-items:center;gap:6px;padding:7px 16px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:20px;font-size:13px;font-weight:700;color:#d97706;position:fixed;bottom:30px;right:30px;z-index:200}
+  </style>
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+
+<!-- WELCOME ANIMATION SCREEN -->
+<div class="welcome-screen" id="welcomeScreen">
+  <div class="welcome-logo">Uni<span>Buddy</span></div>
+  <div class="welcome-avatar" id="wAvatar">?</div>
+  <div class="welcome-name" id="wName">Loading...</div>
+  <div class="welcome-sub" id="wSub">Mentor Portal</div>
+  <div class="welcome-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="layout">
+
+  <!-- PAY GATE (shown if not paid) -->
+  <div class="pay-gate" id="payGate" style="display:none;width:100%">
+    <div class="pay-card">
+      <div class="mentor-hero">
+        <div class="mentor-hero-av" id="pgAvatar">?</div>
+        <div class="mentor-hero-name" id="pgName">Mentor</div>
+        <div class="mentor-hero-exp" id="pgExp"></div>
+        <div class="mentor-hero-subjects" id="pgSubjects"></div>
+        <div class="mentor-hero-bio" id="pgBio"></div>
+      </div>
+
+      <hr class="pay-divider">
+
+      <div class="pay-title">🔐 Unlock Full Course Access</div>
+      <div class="pay-sub">Pay session fee to access live classes, notes, and course content</div>
+      <div class="pay-amount" id="pgAmount">₹0</div>
+
+      <div class="qr-wrap">
+        <div class="qr-box" id="qrCode"></div>
+        <div class="qr-label">Scan QR to pay via any UPI app</div>
+      </div>
+
+      <div class="upi-display" onclick="copyUpi()" id="upiDisplay">
+        <div class="upi-id" id="upiId">mentor@upi</div>
+        <div class="upi-hint">📋 Tap to copy UPI ID</div>
+      </div>
+
+      <hr class="pay-divider">
+
+      <div class="form-group">
+        <label>UPI Transaction ID</label>
+        <input id="txnInput" placeholder="Enter transaction ID after paying">
+      </div>
+      <button class="btn-pay" onclick="submitPayment()">✅ I've Paid — Submit for Verification</button>
+
+      <div class="pending-notice" id="pendingNotice" style="display:none">
+        ⏳ Payment verification pending. Mentor will approve soon and your course will unlock!
+      </div>
+    </div>
+  </div>
+
+  <!-- PORTAL (shown after payment approved) -->
+  <div class="portal" id="portalView" style="width:100%">
+    <div class="portal-header">
+      <div class="ph-avatar" id="portalAvatar">?</div>
+      <div class="ph-info">
+        <div class="ph-name" id="portalName">Mentor</div>
+        <div class="ph-sub" id="portalSub">Your personal learning portal</div>
+      </div>
+      <div class="ph-badge">✅ Course Unlocked</div>
+      <a href="mentors.html" style="margin-left:auto;padding:8px 16px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">← Back</a>
+    </div>
+
+    <div class="portal-body">
+      <!-- PORTAL SIDEBAR -->
+      <div class="portal-sidebar">
+        <div class="ps-item active" id="psAnn" onclick="showPortalSec('ann')"><span class="icon">📢</span> Announcements</div>
+        <div class="ps-item" id="psSchedule" onclick="showPortalSec('schedule')"><span class="icon">📅</span> Schedule</div>
+        <div class="ps-item" id="psContent" onclick="showPortalSec('content')"><span class="icon">📚</span> Course Content</div>
+        <div class="ps-item" id="psChat" onclick="showPortalSec('chat')"><span class="icon">💬</span> Live Chat</div>
+      </div>
+
+      <!-- PORTAL CONTENT -->
+      <div class="portal-content">
+
+        <!-- ANNOUNCEMENTS -->
+        <div class="sec active" id="secAnn">
+          <div class="sec-title">📢 Announcements</div>
+          <div id="annList"><div class="empty"><div>⏳</div>Loading...</div></div>
+        </div>
+
+        <!-- SCHEDULE -->
+        <div class="sec" id="secSchedule">
+          <div class="sec-title">📅 Live Class Schedule</div>
+          <div id="scheduleList"><div class="empty"><div>⏳</div>Loading...</div></div>
+        </div>
+
+        <!-- COURSE CONTENT -->
+        <div class="sec" id="secContent">
+          <div class="sec-title">📚 Course Content</div>
+          <div class="content-grid" id="contentList"><div class="empty" style="grid-column:1/-1"><div>⏳</div>Loading...</div></div>
+        </div>
+
+        <!-- CHAT -->
+        <div class="sec" id="secChat">
+          <div class="sec-title">💬 Live Chat with Mentor</div>
+          <div class="chat-wrap">
+            <div class="chat-msgs" id="chatMsgs"><div class="empty"><div>💬</div>Start the conversation!</div></div>
+            <div id="portalEmojiPicker" style="display:none;flex-direction:column;padding:8px 14px;background:#fff;border-top:1px solid var(--border)"></div>
+            <div class="chat-input-row">
+              <button onclick="togglePortalEmoji()" style="width:36px;height:36px;border-radius:50%;background:#f1f5f9;border:1px solid var(--border);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">😊</button>
+              <button id="portalVoiceBtn" onclick="togglePortalVoice()" style="width:36px;height:36px;border-radius:50%;background:#f1f5f9;border:1px solid var(--border);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">🎤</button>
+              <input class="chat-inp" id="chatInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter')sendChat()">
+              <button class="btn-send" onclick="sendChat()">➤</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- NOTE MODAL -->
+<div class="note-modal" id="noteModal">
+  <div class="note-box">
+    <div class="note-box-title" id="noteTitle"></div>
+    <div class="note-body" id="noteBody"></div>
+    <button class="btn-close-note" onclick="document.getElementById('noteModal').classList.remove('open')">Close</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const API = "https://unibuddy-1.onrender.com/api";
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+if (!token) window.location.href = "login.html";
+
+// Get mentor ID from URL: mentor-portal.html?id=MENTOR_ID
+const urlParams = new URLSearchParams(window.location.search);
+const mentorId = urlParams.get("id");
+if (!mentorId) window.location.href = "mentors.html";
+
+// Supabase for realtime chat
+const SUPABASE_URL = "https://ognlrlguombhjbyocpss.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nbmxybGd1b21iaGpieW9jcHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2NTczMDgsImV4cCI6MjA5MDIzMzMwOH0.x6Mbo8d_-3osljcCPgo868dGKpaIa0E9LtxQ260ocQA";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let mentorData = null;
+let chatChannel = null;
+
+function toast(msg, color) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.style.background = color || "#0f172a";
+  t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+async function init() {
+  // Load mentor profile
+  try {
+    const res = await fetch(API + "/mentors");
+    const all = await res.json();
+    mentorData = all.find(m => m.id === mentorId);
+    if (!mentorData) { window.location.href = "mentors.html"; return; }
+  } catch(e) { window.location.href = "mentors.html"; return; }
+
+  // Show welcome animation
+  const wAv = document.getElementById("wAvatar");
+  wAv.innerHTML = mentorData.avatar ? '<img src="' + mentorData.avatar + '">' : mentorData.name[0].toUpperCase();
+  document.getElementById("wName").textContent = mentorData.name;
+  document.getElementById("wSub").textContent = (mentorData.subjects || []).slice(0,2).join(" • ") || "Mentor Portal";
+
+  // After 2.5s, hide welcome and show content
+  setTimeout(async () => {
+    document.getElementById("welcomeScreen").classList.add("hide");
+
+    // Check payment status
+    const payRes = await fetch(API + "/mentors/" + mentorId + "/payment-status", {
+      headers: { "Authorization": "Bearer " + token }
+    });
+    const payData = await payRes.json();
+
+    setTimeout(() => {
+      if (payData.status === "approved") {
+        showPortal();
+      } else {
+        showPayGate(payData.status);
+      }
+    }, 600);
+  }, 2500);
+}
+
+// ── PAY GATE ──────────────────────────────────────────────────────────────
+function showPayGate(payStatus) {
+  document.getElementById("payGate").style.display = "flex";
+
+  // Fill mentor details
+  const pgAv = document.getElementById("pgAvatar");
+  pgAv.innerHTML = mentorData.avatar ? '<img src="' + mentorData.avatar + '">' : mentorData.name[0].toUpperCase();
+  document.getElementById("pgName").textContent = mentorData.name;
+  document.getElementById("pgExp").textContent = mentorData.experience || "";
+  document.getElementById("pgBio").textContent = mentorData.bio || "";
+  document.getElementById("pgAmount").textContent = "₹" + (mentorData.price || 0);
+  document.getElementById("pgSubjects").innerHTML = (mentorData.subjects || []).map(s =>
+    '<span class="sub-tag">' + s + '</span>').join("");
+
+  // UPI ID
+  const upiId = mentorData.upi_id || mentorData.name.toLowerCase().replace(/\s/g, "") + "@upi";
+  document.getElementById("upiId").textContent = upiId;
+
+  // Generate QR code for UPI payment
+  const upiUrl = "upi://pay?pa=" + upiId + "&pn=" + encodeURIComponent(mentorData.name) + "&am=" + (mentorData.price || 0) + "&cu=INR&tn=UniBuddy+Course+Fee";
+  document.getElementById("qrCode").innerHTML = "";
+  new QRCode(document.getElementById("qrCode"), {
+    text: upiUrl,
+    width: 180, height: 180,
+    colorDark: "#0f172a", colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
+  // If pending, show notice
+  if (payStatus === "pending") {
+    document.getElementById("pendingNotice").style.display = "block";
+    document.getElementById("txnInput").disabled = true;
+    document.querySelector(".btn-pay").disabled = true;
+    document.querySelector(".btn-pay").textContent = "⏳ Verification Pending...";
+    document.querySelector(".btn-pay").style.background = "rgba(245,158,11,.5)";
+  }
+}
+
+function copyUpi() {
+  const upi = document.getElementById("upiId").textContent;
+  navigator.clipboard.writeText(upi).then(() => toast("UPI ID copied! 📋", "#059669")).catch(() => {});
+}
+
+async function submitPayment() {
+  const txnId = document.getElementById("txnInput").value.trim();
+  if (!txnId) { toast("Transaction ID daalo!", "#dc2626"); return; }
+
+  try {
+    const res = await fetch(API + "/mentors/" + mentorId + "/payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ txn_id: txnId, amount: mentorData.price || 0 })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      toast(data.message, "#059669");
+      document.getElementById("pendingNotice").style.display = "block";
+      document.getElementById("txnInput").disabled = true;
+      document.querySelector(".btn-pay").disabled = true;
+      document.querySelector(".btn-pay").textContent = "⏳ Verification Pending...";
+      document.querySelector(".btn-pay").style.background = "rgba(245,158,11,.5)";
+    } else { toast(data.message || "Error", "#dc2626"); }
+  } catch(e) { toast("Server error", "#dc2626"); }
+}
+
+// ── PORTAL ────────────────────────────────────────────────────────────────
+function showPortal() {
+  document.getElementById("portalView").style.display = "block";
+  document.getElementById("portalView").classList.add("show");
+
+  const pAv = document.getElementById("portalAvatar");
+  pAv.innerHTML = mentorData.avatar ? '<img src="' + mentorData.avatar + '">' : mentorData.name[0].toUpperCase();
+  document.getElementById("portalName").textContent = mentorData.name;
+  document.getElementById("portalSub").textContent = (mentorData.subjects || []).join(" • ");
+
+  loadAnnouncements();
+  subscribeChat();
+  loadMyRating(mentorId);
+}
+
+function showPortalSec(name) {
+  document.querySelectorAll(".sec").forEach(s => s.classList.remove("active"));
+  document.querySelectorAll(".ps-item").forEach(p => p.classList.remove("active"));
+  document.getElementById("sec" + name.charAt(0).toUpperCase() + name.slice(1)).classList.add("active");
+  document.getElementById("ps" + name.charAt(0).toUpperCase() + name.slice(1)).classList.add("active");
+  if (name === "ann") loadAnnouncements();
+  if (name === "schedule") loadSchedule();
+  if (name === "content") loadContent();
+}
+
+// ── ANNOUNCEMENTS ─────────────────────────────────────────────────────────
+async function loadAnnouncements() {
+  const el = document.getElementById("annList");
+  try {
+    const res = await fetch(API + "/mentors/" + mentorId + "/announcements", { headers: { "Authorization": "Bearer " + token } });
+    const anns = await res.json();
+    if (!anns.length) { el.innerHTML = '<div class="empty"><div>📢</div>Koi announcement nahi abhi</div>'; return; }
+    el.innerHTML = anns.map(a => {
+      const dt = new Date(a.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+      return '<div class="ann-card"><div class="ann-title">📌 ' + a.title + '</div>' +
+        (a.content ? '<div class="ann-content">' + a.content + '</div>' : '') +
+        '<div class="ann-date">' + dt + '</div></div>';
+    }).join("");
+  } catch(e) { el.innerHTML = '<div class="empty"><div>❌</div>Load nahi hua</div>'; }
+}
+
+// ── SCHEDULE ──────────────────────────────────────────────────────────────
+async function loadSchedule() {
+  const el = document.getElementById("scheduleList");
+  try {
+    const res = await fetch(API + "/mentors/" + mentorId + "/live-classes", { headers: { "Authorization": "Bearer " + token } });
+    const classes = await res.json();
+    if (!classes.length) { el.innerHTML = '<div class="empty"><div>📅</div>Koi class scheduled nahi abhi</div>'; return; }
+    el.innerHTML = classes.map(c => {
+      const dt = new Date(c.scheduled_at);
+      const now = new Date();
+      const isLive = Math.abs(dt - now) < 30 * 60 * 1000; // within 30 mins
+      const isPast = dt < now;
+      const dateStr = dt.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      const timeStr = dt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+      let btn = "";
+      if (isLive && c.meet_link) btn = '<a href="' + c.meet_link + '" target="_blank" class="btn-join">🔴 Join Live</a>';
+      else if (c.meet_link && !isPast) btn = '<a href="' + c.meet_link + '" target="_blank" class="btn-join soon">📅 Join Soon</a>';
+      else if (isPast) btn = '<span style="font-size:12px;color:var(--muted)">Completed</span>';
+      return '<div class="class-card">' +
+        '<div class="class-time"><div class="class-date">' + dateStr + '</div><div class="class-hour">' + timeStr + '</div></div>' +
+        '<div class="class-info"><div class="class-title">' + c.title + '</div>' +
+        '<div class="class-sub">' + (c.subject || "") + '</div>' +
+        '<div class="class-dur">⏱ ' + c.duration_mins + ' minutes</div></div>' +
+        btn + '</div>';
+    }).join("");
+  } catch(e) { el.innerHTML = '<div class="empty"><div>❌</div>Load nahi hua</div>'; }
+}
+
+// ── COURSE CONTENT ────────────────────────────────────────────────────────
+async function loadContent() {
+  const el = document.getElementById("contentList");
+  try {
+    const res = await fetch(API + "/mentors/" + mentorId + "/content", { headers: { "Authorization": "Bearer " + token } });
+    const items = await res.json();
+    if (!items.length) { el.innerHTML = '<div class="empty" style="grid-column:1/-1"><div>📚</div>Koi content nahi abhi</div>'; return; }
+    const icons = { note: "📝", video: "🎥", pdf: "📄", link: "🔗" };
+    el.innerHTML = items.map(item => {
+      let action = "";
+      if (item.content_type === "note") {
+        action = '<button class="btn-view" onclick="openNote(\'' + item.id + '\',\'' + item.title.replace(/'/g, "\\'") + '\',\'' + (item.content||"").replace(/'/g, "\\'").replace(/\n/g, "\\n") + '\')">📖 Read Note</button>';
+      } else if (item.file_url) {
+        action = '<a href="' + item.file_url + '" target="_blank" class="btn-view">🔗 Open</a>';
+      }
+      return '<div class="content-card">' +
+        '<div class="content-icon ' + item.content_type + '">' + (icons[item.content_type] || "📄") + '</div>' +
+        '<div class="content-title">' + item.title + '</div>' +
+        '<div class="content-desc">' + (item.description || "") + '</div>' +
+        action + '</div>';
+    }).join("");
+  } catch(e) { el.innerHTML = '<div class="empty" style="grid-column:1/-1"><div>❌</div>Load nahi hua</div>'; }
+}
+
+function openNote(id, title, content) {
+  document.getElementById("noteTitle").textContent = title;
+  document.getElementById("noteBody").textContent = content.replace(/\\n/g, "\n");
+  document.getElementById("noteModal").classList.add("open");
+}
+
+// ── CHAT ──────────────────────────────────────────────────────────────────
+function getRoomId() {
+  return [user.id, mentorData?.user_id].sort().join("_");
+}
+
+async function subscribeChat() {
+  const roomId = getRoomId();
+  // Load history
+  const { data: msgs } = await sb.from("messages").select("*").eq("room_id", roomId).order("created_at", { ascending: true }).limit(100);
+  renderChatHistory(msgs || []);
+
+  // Subscribe
+  chatChannel = sb.channel("room:" + roomId)
+    .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: "room_id=eq." + roomId }, payload => {
+      if (payload.new.sender_id !== user.id) appendChatMsg(payload.new);
+    }).subscribe();
+}
+
+function renderChatHistory(msgs) {
+  const box = document.getElementById("chatMsgs");
+  if (!msgs.length) { box.innerHTML = '<div class="empty"><div>💬</div>Start the conversation!</div>'; return; }
+  box.innerHTML = "";
+  msgs.forEach(m => appendChatMsg(m));
+}
+
+function toIST(dateStr) {
+  return new Date(dateStr).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" });
+}
+
+const EMOJIS_P = ["😊","😂","🤣","👍","❤️","🔥","😍","🙏","💯","👏","😭","😅","🥳","🤔","👌","💪","🎉","📚","✅","⭐","🚀","😎","🤝","👋","😴","🤯","🥺","😤","🎯","📝","💡","🏆","⚡","🌟","😇","🤗","😌","🥰","😘","🤩","😜","🤫","🫡","💬","📢","🔔","✍️","🧠","💻"];
+
+function togglePortalEmoji() {
+  const picker = document.getElementById("portalEmojiPicker");
+  if (!picker.dataset.built) {
+    picker.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:3px;max-height:110px;overflow-y:auto;padding:4px">' +
+      EMOJIS_P.map(e => '<span onclick="insertPortalEmoji(\'' + e + '\')" style="font-size:22px;cursor:pointer;padding:3px;border-radius:6px" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'transparent\'">' + e + '</span>').join("") + '</div>';
+    picker.dataset.built = "1";
+  }
+  picker.style.display = picker.style.display === "none" ? "flex" : "none";
+}
+
+function insertPortalEmoji(e) {
+  const inp = document.getElementById("chatInput");
+  const p = inp.selectionStart, v = inp.value;
+  inp.value = v.slice(0,p) + e + v.slice(p);
+  inp.focus(); inp.setSelectionRange(p+e.length, p+e.length);
+}
+
+function appendChatMsg(m) {
+  const box = document.getElementById("chatMsgs");
+  const empty = box.querySelector(".empty");
+  if (empty) empty.remove();
+  const isMe = m.sender_id === user.id;
+  const divId = "pmsg-" + (m.id || "tmp-" + Date.now());
+  const div = document.createElement("div");
+  div.id = divId;
+  div.className = "msg " + (isMe ? "mine" : "theirs");
+  div.style.position = "relative";
+  const time = toIST(m.created_at);
+
+  let bubbleContent = "";
+  if (m.type === "voice" && m.content && m.content.startsWith("data:audio")) {
+    bubbleContent = '<audio controls style="max-width:200px;height:36px" src="' + m.content + '"></audio>';
+  } else {
+    bubbleContent = (m.content || "").replace(/</g, "&lt;").replace(/\n/g, "<br>");
+  }
+
+  const delBtn = (isMe && m.id)
+    ? '<button class="msg-del" onclick="deletePortalMsg(\'' + m.id + '\',\'' + divId + '\')">🗑️</button>'
+    : '';
+
+  div.innerHTML = delBtn +
+    '<div class="bubble">' + bubbleContent + '</div><div class="msg-time">' + time + (isMe ? ' ✓' : '') + '</div>';
+
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function togglePortalMsgDelete(divId, e) {
+  e.stopPropagation();
+  document.querySelectorAll('.msg-del.visible').forEach(btn => {
+    if (btn.id !== 'del-' + divId) {
+      btn.classList.remove('visible');
+      btn.closest('.msg')?.classList.remove('selected');
+    }
+  });
+  const wrap = document.getElementById(divId);
+  const delBtn = document.getElementById('del-' + divId);
+  if (!delBtn) return;
+  const isVisible = delBtn.classList.contains('visible');
+  delBtn.classList.toggle('visible', !isVisible);
+  wrap.classList.toggle('selected', !isVisible);
+}
+
+document.addEventListener('click', function() {
+  document.querySelectorAll('.msg-del.visible').forEach(btn => {
+    btn.classList.remove('visible');
+    btn.closest('.msg')?.classList.remove('selected');
+  });
+});
+
+async function deletePortalMsg(msgId, divId, e) {
+  if (e) e.stopPropagation();
+  const el = document.getElementById(divId);
+  if (!el) return;
+  el.style.transition = "all .3s cubic-bezier(.4,0,.2,1)";
+  el.style.transform = "scale(.8) translateX(20px)";
+  el.style.opacity = "0";
+  el.style.maxHeight = el.offsetHeight + "px";
+  setTimeout(() => {
+    el.style.maxHeight = "0";
+    el.style.margin = "0";
+    el.style.padding = "0";
+    el.style.overflow = "hidden";
+  }, 200);
+  setTimeout(async () => {
+    el.remove();
+    try { await sb.from("messages").delete().eq("id", msgId); } catch(e) {}
+    toast("Message delete ho gaya 🗑️", "#059669");
+  }, 400);
+}
+
+let portalRecorder = null;
+let portalAudioChunks = [];
+let portalRecording = false;
+
+async function togglePortalVoice() {
+  const btn = document.getElementById("portalVoiceBtn");
+  if (!portalRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      portalRecorder = new MediaRecorder(stream);
+      portalAudioChunks = [];
+      portalRecorder.ondataavailable = e => portalAudioChunks.push(e.data);
+      portalRecorder.onstop = async () => {
+        const blob = new Blob(portalAudioChunks, { type: "audio/webm" });
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64 = reader.result;
+          const msg = { room_id: getRoomId(), sender_id: user.id, sender_name: user.name, content: base64, type: "voice", created_at: new Date().toISOString() };
+          appendChatMsg(msg);
+          try { await sb.from("messages").insert([msg]); } catch(e) {}
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(t => t.stop());
+      };
+      portalRecorder.start();
+      portalRecording = true;
+      btn.textContent = "⏹️";
+      btn.style.background = "#fee2e2";
+    } catch(e) { alert("Microphone access denied!"); }
+  } else {
+    portalRecorder.stop();
+    portalRecording = false;
+    btn.textContent = "🎤";
+    btn.style.background = "#f1f5f9";
+  }
+}
+
+async function sendChat() {
+  const input = document.getElementById("chatInput");
+  const text = input.value.trim();
+  if (!text || !mentorData) return;
+  input.value = "";
+  const msg = { room_id: getRoomId(), sender_id: user.id, sender_name: user.name, content: text, type: "text", created_at: new Date().toISOString() };
+  appendChatMsg(msg);
+  try { await sb.from("messages").insert([msg]); } catch(e) {}
+}
+
+init();
+</script>
+
+<!-- ── RATING FAB BUTTON ── -->
+<button class="rate-fab" id="rateFab" onclick="openRateModal()">⭐ Rate your Mentor</button>
+<div class="rated-badge" id="ratedBadge">⭐ <span id="myRatingText">You rated</span></div>
+
+<!-- ── RATING MODAL ── -->
+<div class="rate-ov" id="rateModal">
+  <div class="rate-box">
+    <div style="font-size:52px;margin-bottom:12px">🧑‍🏫</div>
+    <h3 id="rateModalTitle">Rate your Mentor</h3>
+    <p id="rateModalSub">Apna experience share karo!</p>
+    <div class="stars-row" id="starsRow">
+      <button class="star-btn" data-val="1" onclick="selectStar(1)">⭐</button>
+      <button class="star-btn" data-val="2" onclick="selectStar(2)">⭐</button>
+      <button class="star-btn" data-val="3" onclick="selectStar(3)">⭐</button>
+      <button class="star-btn" data-val="4" onclick="selectStar(4)">⭐</button>
+      <button class="star-btn" data-val="5" onclick="selectStar(5)">⭐</button>
+    </div>
+    <div class="rate-label" id="rateLabel">Stars choose karo 👆</div>
+    <textarea class="rate-review" id="rateReview" placeholder="Optional: Kuch feedback likhna chahte ho? (e.g. 'Bahut helpful hain!')"></textarea>
+    <button class="btn-submit-rate" onclick="submitRating()">Submit Rating ✅</button>
+    <button class="btn-close-rate" onclick="closeRateModal()">Baad mein</button>
+  </div>
+</div>
+
+<script>
+const RATE_LABELS = ["", "Bilkul theek nahi 😞", "Theek tha 😐", "Acha tha 🙂", "Bahut acha! 😊", "Outstanding! 🔥"];
+let selectedRating = 0;
+let existingRating = null;
+
+function openRateModal() {
+  document.getElementById("rateModal").classList.add("open");
+  if (existingRating) {
+    selectStar(existingRating.rating);
+    document.getElementById("rateReview").value = existingRating.review || "";
+    document.getElementById("rateModalTitle").textContent = "Rating Update Karo";
+    document.getElementById("rateModalSub").textContent = "Apni purani rating badal sakte ho!";
+  }
+}
+function closeRateModal() { document.getElementById("rateModal").classList.remove("open"); }
+
+function selectStar(val) {
+  selectedRating = val;
+  document.querySelectorAll(".star-btn").forEach((btn, i) => {
+    btn.classList.toggle("lit", i < val);
+  });
+  document.getElementById("rateLabel").textContent = RATE_LABELS[val] || "";
+}
+
+async function loadMyRating(mentorId) {
+  try {
+    const r = await fetch(API + "/mentors/" + mentorId + "/my-rating", { headers: { "Authorization": "Bearer " + token } });
+    const d = await r.json();
+    if (d.rating) {
+      existingRating = d;
+      document.getElementById("ratedBadge").style.display = "flex";
+      document.getElementById("ratedBadge").style.cursor = "pointer";
+      document.getElementById("ratedBadge").onclick = openRateModal;
+      document.getElementById("myRatingText").textContent = "Tumne " + "⭐".repeat(d.rating) + " diya — edit karo";
+      document.getElementById("rateFab").style.display = "none";
+    } else {
+      document.getElementById("rateFab").style.display = "flex";
+      document.getElementById("ratedBadge").style.display = "none";
+    }
+  } catch(e) {}
+}
+
+async function submitRating() {
+  if (!selectedRating) { toast("Pehle stars select karo ⭐", "#d97706"); return; }
+  const review = document.getElementById("rateReview").value.trim();
+  const mentorId = new URLSearchParams(window.location.search).get("id");
+  const btn = document.querySelector(".btn-submit-rate");
+  btn.disabled = true; btn.textContent = "Submitting...";
+  try {
+    const r = await fetch(API + "/mentors/" + mentorId + "/rate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ rating: selectedRating, review })
+    });
+    const d = await r.json();
+    if (r.ok) {
+      toast(d.message, "#059669");
+      existingRating = { rating: selectedRating, review };
+      document.getElementById("ratedBadge").style.display = "flex";
+      document.getElementById("ratedBadge").style.cursor = "pointer";
+      document.getElementById("ratedBadge").onclick = openRateModal;
+      document.getElementById("myRatingText").textContent = "Tumne " + "⭐".repeat(selectedRating) + " diya — edit karo";
+      document.getElementById("rateFab").style.display = "none";
+      document.getElementById("rateModalTitle").textContent = "Rating Update Karo";
+      document.getElementById("rateModalSub").textContent = "Apni purani rating badal sakte ho!";
+      setTimeout(closeRateModal, 1200);
+    } else {
+      toast(d.message || "Error", "#dc2626");
+    }
+  } catch(e) { toast("Server error", "#dc2626"); }
+  btn.disabled = false; btn.textContent = "Submit Rating ✅";
+}
+</script>
+<script src="theme.js"></script>
+<script src="mobile.js"></script>
+</body>
+</html>  

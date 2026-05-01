@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Dashboard — UniBuddy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── VARIABLES ─────────────────────────────────────── */
+    :root {
+      --indigo:#6366f1; --indigo-dark:#4f46e5; --indigo-light:#eef2ff;
+      --emerald:#10b981; --amber:#f59e0b; --rose:#f43f5e;
+      --bg:#f8fafc; --card:#fff; --border:#e2e8f0;
+      --text:#0f172a; --muted:#64748b; --sidebar:#0c0e1a;
+    }
+    body.dark-mode {
+      --bg:#0c0e1a; --card:#13162a; --border:#1e2240;
+      --text:#f1f5f9; --muted:#64748b; --indigo-light:rgba(99,102,241,0.15);
+    }
+    *{margin:0;padding:0;box-sizing:border-box;}
+    html,body{overflow-x:hidden;width:100%;max-width:100vw;}
+    body{font-family:'Nunito',sans-serif;background:var(--bg);min-height:100vh;transition:background .25s,color .25s;}
+
+    /* ── SIDEBAR (desktop) ─────────────────────────────── */
+    .sidebar{width:240px;background:var(--sidebar);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto;}
+    .sidebar-logo{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:#fff;letter-spacing:-1px;padding:0 24px 20px;border-bottom:1px solid #1e2240;}
+    .sidebar-logo span{color:var(--indigo);}
+    .nav-section{padding:16px 12px 6px;font-size:10px;color:#3a4060;text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+    .nav-item{display:flex;align-items:center;gap:12px;padding:10px 24px;color:#6b7280;font-size:14px;font-weight:600;cursor:pointer;transition:.2s;text-decoration:none;border-left:3px solid transparent;}
+    .nav-item:hover{color:#fff;background:rgba(255,255,255,.05);}
+    .nav-item.active{color:var(--indigo);border-left-color:var(--indigo);background:rgba(99,102,241,.08);}
+    .nav-item .icon{font-size:17px;width:22px;text-align:center;}
+    .sidebar-bottom{margin-top:auto;padding:16px 12px;border-top:1px solid #1e2240;}
+    .user-mini{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;}
+    .avatar{width:36px;height:36px;border-radius:50%;background:var(--indigo);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0;}
+    .avatar img{width:100%;height:100%;object-fit:cover;}
+    .user-name{font-size:13px;font-weight:700;color:#fff;}
+    .user-role{font-size:11px;color:var(--muted);}
+    .btn-logout-mini{background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px;margin-left:auto;}
+
+    /* ── THEME TOGGLE in sidebar ───────────────────────── */
+    .theme-toggle{display:flex;align-items:center;gap:8px;padding:8px 14px;margin:6px 12px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.05);color:#9ca3af;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;width:calc(100% - 24px);transition:.2s;}
+    .theme-toggle:hover{background:rgba(255,255,255,.1);color:#fff;}
+    .t-track{margin-left:auto;width:34px;height:18px;border-radius:9px;background:#374151;position:relative;flex-shrink:0;transition:background .3s;}
+    .t-thumb{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#9ca3af;transition:transform .3s,background .3s;}
+    body.light-mode .t-track{background:#6366f1;}
+    body.light-mode .t-thumb{transform:translateX(16px);background:#fff;}
+
+    /* ── VIEW MODE TOGGLE ──────────────────────────────── */
+    .view-toggle{display:flex;align-items:center;gap:8px;padding:8px 14px;margin:0 12px 6px;border:1px solid rgba(255,255,255,.1);border-radius:10px;background:rgba(255,255,255,.05);color:#9ca3af;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;width:calc(100% - 24px);transition:.2s;}
+    .view-toggle:hover{background:rgba(255,255,255,.1);color:#fff;}
+
+    /* ── MAIN ──────────────────────────────────────────── */
+    .main{margin-left:240px;flex:1;padding:32px;}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+    .page-title{font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;color:var(--text);}
+    .page-sub{font-size:14px;color:var(--muted);margin-top:2px;}
+
+    /* ── STATS ─────────────────────────────────────────── */
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+    .stat-card{background:var(--card);border-radius:14px;padding:20px;border:1px solid var(--border);display:flex;align-items:center;gap:14px;}
+    .stat-icon{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
+    .stat-icon.indigo{background:var(--indigo-light);}
+    .stat-icon.emerald{background:rgba(16,185,129,.1);}
+    .stat-icon.amber{background:rgba(245,158,11,.1);}
+    .stat-icon.rose{background:rgba(244,63,94,.1);}
+    .stat-value{font-family:'Outfit',sans-serif;font-size:26px;font-weight:800;color:var(--text);}
+    .stat-label{font-size:12px;color:var(--muted);}
+
+    /* ── GRID ──────────────────────────────────────────── */
+    .dashboard-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+    .full{grid-column:1/-1;}
+    .card{background:var(--card);border-radius:16px;padding:24px;border:1px solid var(--border);}
+    .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+    .card-title{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--text);}
+    .btn-link{font-size:13px;color:var(--indigo);text-decoration:none;font-weight:600;}
+
+    /* ── MODULES ───────────────────────────────────────── */
+    .module-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    .module-card{border-radius:14px;padding:22px;text-decoration:none;display:block;transition:.2s;overflow:hidden;}
+    .module-card:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.1);}
+    .module-card.books{background:linear-gradient(135deg,#667eea,#764ba2);}
+    .module-card.mentors{background:linear-gradient(135deg,#f093fb,#f5576c);}
+    .module-card.quiz{background:linear-gradient(135deg,#4facfe,#00f2fe);}
+    .module-card.partners{background:linear-gradient(135deg,#43e97b,#38f9d7);}
+    .module-icon{font-size:32px;margin-bottom:10px;}
+    .module-name{font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:#fff;}
+    .module-desc{font-size:12px;color:rgba(255,255,255,.8);margin-top:3px;}
+
+    /* ── LIST ──────────────────────────────────────────── */
+    .list-item{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--border);}
+    .list-item:last-child{border-bottom:none;}
+    .list-thumb{width:44px;height:44px;border-radius:10px;background:#f1f5f9;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;overflow:hidden;}
+    .list-thumb img{width:100%;height:100%;object-fit:cover;border-radius:10px;}
+    .list-info{flex:1;min-width:0;}
+    .list-title{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .list-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+    .list-price{font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:var(--indigo);flex-shrink:0;}
+    .empty{text-align:center;padding:28px;color:var(--muted);font-size:13px;}
+    .profile-bar{background:#f1f5f9;border-radius:8px;height:8px;margin-top:8px;overflow:hidden;}
+    .profile-fill{height:100%;background:linear-gradient(90deg,var(--indigo),var(--emerald));border-radius:8px;transition:width .8s ease;}
+
+    /* ── TOAST ─────────────────────────────────────────── */
+    .toast{position:fixed;bottom:24px;right:24px;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;transform:translateY(60px);opacity:0;transition:all .3s;z-index:9999;}
+    .toast.show{transform:translateY(0);opacity:1;}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+    /* ════════════════════════════════════════════════════
+       MOBILE MODE STYLES
+    ════════════════════════════════════════════════════ */
+    /* Mobile top bar */
+    .mob-topbar{display:none;align-items:center;justify-content:space-between;padding:10px 14px;background:#0c0e1a;position:sticky;top:0;z-index:300;border-bottom:1px solid rgba(255,255,255,.07);}
+    .mob-logo{font-family:'Outfit',sans-serif;font-size:20px;font-weight:800;color:#fff;letter-spacing:-1px;}
+    .mob-logo span{color:#6366f1;}
+    .mob-topbar-right{display:flex;align-items:center;gap:8px;}
+    .mob-av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#818cf8);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;overflow:hidden;}
+    .mob-av img{width:100%;height:100%;object-fit:cover;}
+    .mob-logout{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:8px;color:#ef4444;font-size:13px;padding:5px 9px;cursor:pointer;}
+
+    /* Bottom nav */
+    .mob-bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:58px;background:#0c0e1a;border-top:1px solid rgba(255,255,255,.08);z-index:400;box-shadow:0 -4px 20px rgba(0,0,0,.3);}
+    .mob-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;text-decoration:none;color:#4b5563;font-size:9px;font-weight:700;font-family:'Nunito',sans-serif;border-top:2px solid transparent;transition:.2s;}
+    .mob-nav-item.active{color:#6366f1;border-top-color:#6366f1;background:rgba(99,102,241,.07);}
+    .mob-nav-icon{font-size:18px;line-height:1;}
+
+    /* ── MOBILE MODE ACTIVE ─────────────────────────────── */
+    body.mobile-mode .sidebar{display:none !important;}
+    body.mobile-mode .mob-topbar{display:flex !important;}
+    body.mobile-mode .mob-bottom-nav{display:flex !important;}
+    body.mobile-mode .main{
+      margin-left:0 !important;
+      padding:0 !important;
+      width:100% !important;
+    }
+    body.mobile-mode .main-inner{
+      padding:12px 12px 70px 12px;
+    }
+    body.mobile-mode .stats{
+      grid-template-columns:1fr 1fr !important;
+      gap:8px !important;
+      margin-bottom:12px !important;
+    }
+    body.mobile-mode .stat-card{padding:12px 10px !important;gap:8px !important;}
+    body.mobile-mode .stat-icon{width:34px !important;height:34px !important;font-size:16px !important;}
+    body.mobile-mode .stat-value{font-size:18px !important;}
+    body.mobile-mode .stat-label{font-size:10px !important;}
+    body.mobile-mode .dashboard-grid{grid-template-columns:1fr !important;gap:10px !important;}
+    body.mobile-mode .full{grid-column:1 !important;}
+    body.mobile-mode .module-grid{grid-template-columns:1fr 1fr !important;gap:8px !important;}
+    body.mobile-mode .module-card{padding:14px !important;}
+    body.mobile-mode .module-icon{font-size:24px !important;margin-bottom:6px !important;}
+    body.mobile-mode .module-name{font-size:12px !important;}
+    body.mobile-mode .module-desc{font-size:10px !important;}
+    body.mobile-mode .card{padding:14px !important;border-radius:12px !important;}
+    body.mobile-mode .page-title{font-size:18px !important;}
+    body.mobile-mode .page-sub{font-size:11px !important;}
+    body.mobile-mode .topbar{margin-bottom:10px !important;}
+    body.mobile-mode .toast{bottom:68px !important;left:12px !important;right:12px !important;text-align:center;}
+
+    /* Auto-mobile for small screens */
+    @media(max-width:768px){
+      body:not(.desktop-mode){
+        /* same as mobile-mode */
+      }
+      body:not(.desktop-mode) .sidebar{display:none !important;}
+      body:not(.desktop-mode) .mob-topbar{display:flex !important;}
+      body:not(.desktop-mode) .mob-bottom-nav{display:flex !important;}
+      body:not(.desktop-mode) .main{margin-left:0 !important;padding:0 !important;width:100% !important;}
+      body:not(.desktop-mode) .main-inner{padding:12px 12px 70px 12px;}
+      body:not(.desktop-mode) .stats{grid-template-columns:1fr 1fr !important;gap:8px !important;margin-bottom:12px !important;}
+      body:not(.desktop-mode) .stat-card{padding:12px 10px !important;gap:8px !important;}
+      body:not(.desktop-mode) .stat-icon{width:34px !important;height:34px !important;font-size:16px !important;}
+      body:not(.desktop-mode) .stat-value{font-size:18px !important;}
+      body:not(.desktop-mode) .stat-label{font-size:10px !important;}
+      body:not(.desktop-mode) .dashboard-grid{grid-template-columns:1fr !important;gap:10px !important;}
+      body:not(.desktop-mode) .full{grid-column:1 !important;}
+      body:not(.desktop-mode) .module-grid{grid-template-columns:1fr 1fr !important;gap:8px !important;}
+      body:not(.desktop-mode) .module-card{padding:14px !important;}
+      body:not(.desktop-mode) .module-icon{font-size:24px !important;margin-bottom:6px !important;}
+      body:not(.desktop-mode) .module-name{font-size:12px !important;}
+      body:not(.desktop-mode) .module-desc{font-size:10px !important;}
+      body:not(.desktop-mode) .card{padding:14px !important;border-radius:12px !important;}
+      body:not(.desktop-mode) .page-title{font-size:18px !important;}
+      body:not(.desktop-mode) .topbar{margin-bottom:10px !important;}
+      body:not(.desktop-mode) .toast{bottom:68px !important;left:12px !important;right:12px !important;text-align:center;}
+      html,body{overflow-x:hidden !important;}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── DESKTOP SIDEBAR ─────────────────────────────────── -->
+<div class="sidebar">
+  <div class="sidebar-logo">Uni<span>Buddy</span></div>
+  <div class="nav-section">Main</div>
+  <a href="dashboard.html" class="nav-item active"><span class="icon">🏠</span> Dashboard</a>
+  <a href="books.html" class="nav-item"><span class="icon">📚</span> Books</a>
+  <a href="mentors.html" class="nav-item"><span class="icon">🧑‍🏫</span> Mentors</a>
+  <a href="quiz.html" class="nav-item"><span class="icon">📝</span> Quizzes</a>
+  <a href="partners.html" class="nav-item"><span class="icon">🤝</span> Study Partners</a>
+  <div class="nav-section">Account</div>
+  <a href="profile.html" class="nav-item"><span class="icon">👤</span> My Profile</a>
+  <a href="my_books.html" class="nav-item"><span class="icon">🏷️</span> My Listings</a>
+  <div class="sidebar-bottom">
+    <!-- Theme toggle -->
+    <button class="theme-toggle" onclick="toggleTheme()">
+      <span id="themeIcon">🌙</span>
+      <span id="themeLabel">Dark Mode</span>
+      <span class="t-track"><span class="t-thumb"></span></span>
+    </button>
+    <!-- View mode toggle -->
+    <button class="view-toggle" onclick="toggleViewMode()">
+      <span id="viewIcon">📱</span>
+      <span id="viewLabel">Mobile View</span>
+    </button>
+    <div class="user-mini">
+      <div class="avatar" id="sideAvatar">U</div>
+      <div style="flex:1">
+        <div class="user-name" id="sideName">Loading...</div>
+        <div class="user-role" id="sideRole">student</div>
+      </div>
+      <button class="btn-logout-mini" onclick="logout()">⏻</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MOBILE TOP BAR ──────────────────────────────────── -->
+<div class="mob-topbar">
+  <div class="mob-logo">Uni<span>Buddy</span></div>
+  <div class="mob-topbar-right">
+    <button onclick="toggleTheme()" style="background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;color:#9ca3af;font-size:14px;padding:5px 9px;cursor:pointer;" id="mobThemeBtn">🌙</button>
+    <button onclick="toggleViewMode()" style="background:rgba(99,102,241,.15);border:1px solid rgba(99,102,241,.3);border-radius:8px;color:#818cf8;font-size:11px;font-weight:700;padding:5px 9px;cursor:pointer;">🖥️ Desktop</button>
+    <div class="mob-av" id="mobAv">U</div>
+    <button class="mob-logout" onclick="logout()">⏻</button>
+  </div>
+</div>
+
+<!-- ── MAIN CONTENT ────────────────────────────────────── -->
+<div class="main">
+  <div class="main-inner">
+    <div class="topbar">
+      <div>
+        <div class="page-title">Good morning, <span id="greetName">Student</span> 👋</div>
+        <div class="page-sub" id="greetDate"></div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-icon indigo">📚</div>
+        <div><div class="stat-value" id="statBooks">0</div><div class="stat-label">Books Listed</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon emerald">🧑‍🏫</div>
+        <div><div class="stat-value" id="statMentors">0</div><div class="stat-label">Mentors Connected</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon amber">📝</div>
+        <div><div class="stat-value" id="statQuizzes">0</div><div class="stat-label">Quizzes Available</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon rose">🤝</div>
+        <div><div class="stat-value" id="statPartners">0</div><div class="stat-label">Partner Matches</div></div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD GRID -->
+    <div class="dashboard-grid">
+      <!-- MODULES -->
+      <div class="card full">
+        <div class="card-header"><div class="card-title">Explore Modules</div></div>
+        <div class="module-grid">
+          <a href="books.html" class="module-card books">
+            <div class="module-icon">📚</div>
+            <div class="module-name">Book Marketplace</div>
+            <div class="module-desc">Buy & sell academic books</div>
+          </a>
+          <a href="mentors.html" class="module-card mentors">
+            <div class="module-icon">🧑‍🏫</div>
+            <div class="module-name">Mentor Connect</div>
+            <div class="module-desc">Learn from subject experts</div>
+          </a>
+          <a href="quiz.html" class="module-card quiz">
+            <div class="module-icon">📝</div>
+            <div class="module-name">Quizzes & Tests</div>
+            <div class="module-desc">Test your knowledge</div>
+          </a>
+          <a href="partners.html" class="module-card partners">
+            <div class="module-icon">🤝</div>
+            <div class="module-name">AI Study Partners</div>
+            <div class="module-desc">Find your perfect study match</div>
+          </a>
+        </div>
+      </div>
+
+      <!-- RECENT BOOKS -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Recent Books</div>
+          <a href="books.html" class="btn-link">View all →</a>
+        </div>
+        <div id="recentBooks"><div class="empty">Loading...</div></div>
+      </div>
+
+      <!-- PROFILE COMPLETION -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Profile Completion</div>
+          <a href="profile.html" class="btn-link">Edit →</a>
+        </div>
+        <div id="profileChecks"></div>
+        <div class="profile-bar" style="margin-top:14px">
+          <div class="profile-fill" id="profileFill" style="width:0%"></div>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:6px"><span id="profilePct">0</span>% complete</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MOBILE BOTTOM NAV ───────────────────────────────── -->
+<nav class="mob-bottom-nav">
+  <a href="dashboard.html" class="mob-nav-item active"><span class="mob-nav-icon">🏠</span>Home</a>
+  <a href="books.html" class="mob-nav-item"><span class="mob-nav-icon">📚</span>Books</a>
+  <a href="mentors.html" class="mob-nav-item"><span class="mob-nav-icon">🧑‍🏫</span>Mentors</a>
+  <a href="quiz.html" class="mob-nav-item"><span class="mob-nav-icon">📝</span>Quiz</a>
+  <a href="profile.html" class="mob-nav-item"><span class="mob-nav-icon">👤</span>Profile</a>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = "https://unibuddy-1.onrender.com/api";
+const token = localStorage.getItem("token");
+const user = JSON.parse(localStorage.getItem("user") || "{}");
+if (!token) window.location.href = "login.html";
+
+// ── INIT UI ──────────────────────────────────────────────
+document.getElementById("greetName").textContent = (user.name || "Student").split(" ")[0];
+document.getElementById("greetDate").textContent = new Date().toLocaleDateString("en-IN",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+document.getElementById("sideName").textContent = user.name || "User";
+document.getElementById("sideRole").textContent = user.role || "student";
+const av = user.avatar ? '<img src="'+user.avatar+'">' : (user.name||"U")[0].toUpperCase();
+document.getElementById("sideAvatar").innerHTML = av;
+document.getElementById("mobAv").innerHTML = av;
+
+function logout(){ localStorage.clear(); window.location.href="login.html"; }
+function toast(m,c){const t=document.getElementById("toast");t.textContent=m;t.style.background=c||"#0f172a";t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);}
+
+// ── THEME ────────────────────────────────────────────────
+function applyTheme(t){
+  document.body.classList.remove("dark-mode","light-mode");
+  document.body.classList.add(t==="dark"?"dark-mode":"light-mode");
+  localStorage.setItem("ub_theme",t);
+  document.getElementById("themeIcon").textContent = t==="dark"?"🌙":"☀️";
+  document.getElementById("themeLabel").textContent = t==="dark"?"Dark Mode":"Light Mode";
+  document.getElementById("mobThemeBtn").textContent = t==="dark"?"🌙":"☀️";
+}
+function toggleTheme(){
+  applyTheme(localStorage.getItem("ub_theme")==="dark"?"light":"dark");
+}
+applyTheme(localStorage.getItem("ub_theme")||"light");
+
+// ── VIEW MODE ────────────────────────────────────────────
+function applyViewMode(mode){
+  document.body.classList.remove("mobile-mode","desktop-mode");
+  document.body.classList.add(mode+"-mode");
+  localStorage.setItem("ub_view",mode);
+  document.getElementById("viewIcon").textContent = mode==="mobile"?"🖥️":"📱";
+  document.getElementById("viewLabel").textContent = mode==="mobile"?"Desktop View":"Mobile View";
+}
+function toggleViewMode(){
+  applyViewMode(localStorage.getItem("ub_view")==="mobile"?"desktop":"mobile");
+}
+
+// Auto-detect: if screen <= 768px, default to mobile mode
+(function(){
+  const saved = localStorage.getItem("ub_view");
+  if(saved){ applyViewMode(saved); }
+  else if(window.innerWidth <= 768){ applyViewMode("mobile"); }
+  else { applyViewMode("desktop"); }
+})();
+
+// ── DATA ─────────────────────────────────────────────────
+function renderProfileCompletion(){
+  const checks=[
+    {label:"Name set",done:!!user.name},
+    {label:"Course added",done:!!user.course},
+    {label:"Year added",done:!!user.year},
+    {label:"Subjects added",done:!!(user.subjects&&user.subjects.length)},
+    {label:"Avatar uploaded",done:!!user.avatar},
+  ];
+  const done=checks.filter(c=>c.done).length;
+  const pct=Math.round(done/checks.length*100);
+  document.getElementById("profileFill").style.width=pct+"%";
+  document.getElementById("profilePct").textContent=pct;
+  document.getElementById("profileChecks").innerHTML=checks.map(c=>
+    '<div style="display:flex;align-items:center;gap:8px;padding:5px 0;font-size:13px;color:'+(c.done?"#10b981":"#94a3b8")+'">'+(c.done?"✅":"⭕")+' '+c.label+'</div>'
+  ).join("");
+}
+
+async function loadRecentBooks(){
+  try{
+    const res=await fetch(API+"/books");
+    const books=await res.json();
+    document.getElementById("statBooks").textContent=books.length;
+    const recent=books.slice(0,3);
+    if(!recent.length){document.getElementById("recentBooks").innerHTML='<div class="empty">No books yet</div>';return;}
+    document.getElementById("recentBooks").innerHTML=recent.map(b=>
+      '<div class="list-item">'+
+      '<div class="list-thumb">'+(b.image?'<img src="'+b.image+'">':"📖")+'</div>'+
+      '<div class="list-info"><div class="list-title">'+b.title+'</div><div class="list-sub">'+b.condition+' • '+(b.course||"General")+'</div></div>'+
+      '<div class="list-price">₹'+b.price+'</div></div>'
+    ).join("");
+  }catch{document.getElementById("recentBooks").innerHTML='<div class="empty">Could not load</div>';}
+}
+
+async function loadQuizCount(){
+  try{const res=await fetch(API+"/quiz");const q=await res.json();document.getElementById("statQuizzes").textContent=q.length;}catch{}
+}
+
+renderProfileCompletion();
+loadRecentBooks();
+loadQuizCount();
+</script>
+</body>
+</html>

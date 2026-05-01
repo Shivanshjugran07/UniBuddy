@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UniBuddy — Login</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#6366f1">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="UniBuddy">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: #0a0b14;
+      overflow: hidden;
+    }
+
+    /* ── LEFT PANEL ─────────────────────────────────────────────── */
+    .left {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 60px 64px;
+      overflow: hidden;
+    }
+
+    .left::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 30%, rgba(99,102,241,0.25) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 70%, rgba(16,185,129,0.15) 0%, transparent 55%),
+        linear-gradient(135deg, #0d0f1f 0%, #0a0b14 100%);
+      z-index: 0;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      animation: float 8s ease-in-out infinite;
+      z-index: 0;
+    }
+    .orb-1 { width: 320px; height: 320px; background: rgba(99,102,241,0.18); top: -80px; left: -60px; animation-delay: 0s; }
+    .orb-2 { width: 200px; height: 200px; background: rgba(16,185,129,0.12); bottom: 60px; right: 80px; animation-delay: 3s; }
+    .orb-3 { width: 150px; height: 150px; background: rgba(168,85,247,0.1); top: 50%; left: 50%; animation-delay: 5s; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-20px) scale(1.05); }
+    }
+
+    .grid-overlay {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(99,102,241,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(99,102,241,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      z-index: 0;
+    }
+
+    .left-content { position: relative; z-index: 1; }
+
+    .brand {
+      font-family: 'Outfit', sans-serif;
+      font-size: 46px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -2px;
+      margin-bottom: 16px;
+      line-height: 1;
+    }
+    .brand span {
+      background: linear-gradient(135deg, #6366f1, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tagline {
+      font-size: 17px;
+      color: rgba(255,255,255,0.5);
+      line-height: 1.7;
+      max-width: 360px;
+      margin-bottom: 52px;
+    }
+
+    .features { display: flex; flex-direction: column; gap: 18px; }
+
+    .feature {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 14px 18px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 14px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      cursor: default;
+    }
+    .feature:hover {
+      background: rgba(99,102,241,0.08);
+      border-color: rgba(99,102,241,0.2);
+      transform: translateX(6px);
+    }
+    .feature-icon {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .fi-blue { background: rgba(99,102,241,0.2); }
+    .fi-green { background: rgba(16,185,129,0.2); }
+    .fi-purple { background: rgba(168,85,247,0.2); }
+    .fi-amber { background: rgba(245,158,11,0.2); }
+
+    .feature-name { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.85); }
+    .feature-desc { font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+
+    /* ── RIGHT PANEL ─────────────────────────────────────────────── */
+    .right {
+      width: 500px;
+      background: #111320;
+      border-left: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 52px 48px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .right::before {
+      content: "";
+      position: absolute;
+      top: 0; right: 0;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(99,102,241,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .form-header { margin-bottom: 32px; }
+    .form-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 30px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .form-sub { font-size: 14px; color: rgba(255,255,255,0.4); }
+
+    /* Tab switcher */
+    .tab-switch {
+      display: flex;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 28px;
+    }
+    .tab-btn {
+      flex: 1; padding: 10px 16px;
+      border: none; border-radius: 9px;
+      background: transparent;
+      color: rgba(255,255,255,0.4);
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .tab-btn.active {
+      background: #6366f1;
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+    }
+
+    /* Google Button */
+    .btn-google {
+      width: 100%;
+      padding: 13px;
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      color: #fff;
+      font-family: 'Outfit', sans-serif;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      display: flex; align-items: center; justify-content: center;
+      gap: 10px;
+      margin-bottom: 4px;
+    }
+    .btn-google:hover {
+      background: rgba(255,255,255,0.09);
+      border-color: rgba(255,255,255,0.2);
+      transform: translateY(-1px);
+    }
+    .btn-google:active { transform: translateY(0); }
+    .google-icon {
+      width: 20px; height: 20px;
+      flex-shrink: 0;
+    }
+
+    /* Divider */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 18px 0;
+      color: rgba(255,255,255,0.2);
+      font-size: 12px;
+    }
+    .divider::before, .divider::after {
+      content: ""; flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+
+    /* Role selector */
+    .role-select { display: flex; gap: 10px; margin-bottom: 20px; }
+    .role-btn {
+      flex: 1; padding: 16px 10px;
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      background: rgba(255,255,255,0.03);
+      color: rgba(255,255,255,0.4);
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      text-align: center;
+    }
+    .role-btn .role-icon { font-size: 26px; display: block; margin-bottom: 8px; }
+    .role-btn .role-label { display: block; font-size: 14px; color: rgba(255,255,255,0.7); font-family: 'Outfit', sans-serif; font-weight: 700; }
+    .role-btn .role-desc { display: block; font-size: 10px; color: rgba(255,255,255,0.3); margin-top: 3px; font-weight: 400; }
+    .role-btn.active {
+      border-color: #6366f1;
+      background: rgba(99,102,241,0.12);
+      box-shadow: 0 0 0 1px rgba(99,102,241,0.2);
+    }
+    .role-btn.active .role-label { color: #818cf8; }
+    .role-btn.active .role-desc { color: rgba(129,140,248,0.6); }
+
+    /* Mentor info banner */
+    .mentor-banner {
+      display: none;
+      background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(16,185,129,0.08));
+      border: 1px solid rgba(99,102,241,0.2);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.6;
+    }
+    .mentor-banner.show { display: block; }
+    .mentor-banner strong { color: #818cf8; }
+
+    /* Form fields */
+    .form-group { margin-bottom: 18px; position: relative; }
+    .field-label {
+      display: block;
+      font-size: 11px; font-weight: 700;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+    .field-wrap { position: relative; }
+    .field-icon {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      pointer-events: none;
+      z-index: 1;
+    }
+    input {
+      width: 100%;
+      padding: 13px 14px 13px 44px;
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      color: #f1f5f9;
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.2s;
+    }
+    input:focus {
+      border-color: #6366f1;
+      background: rgba(99,102,241,0.06);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
+    }
+    input::placeholder { color: rgba(255,255,255,0.18); }
+
+    .pw-toggle {
+      position: absolute;
+      right: 14px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none;
+      color: rgba(255,255,255,0.3);
+      cursor: pointer; font-size: 16px;
+      padding: 4px;
+      transition: color 0.2s;
+    }
+    .pw-toggle:hover { color: rgba(255,255,255,0.7); }
+
+    /* Alert */
+    .alert {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 18px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .alert.error { background: rgba(239,68,68,0.1); color: #fca5a5; border: 1px solid rgba(239,68,68,0.2); display: flex; }
+    .alert.success { background: rgba(16,185,129,0.1); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.2); display: flex; }
+
+    /* Main Button */
+    .btn-main {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 15px; font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px;
+      box-shadow: 0 4px 20px rgba(99,102,241,0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-main::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent);
+      pointer-events: none;
+    }
+    .btn-main:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(99,102,241,0.45);
+    }
+    .btn-main:active:not(:disabled) { transform: translateY(0); }
+    .btn-main:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-main.mentor-btn {
+      background: linear-gradient(135deg, #059669, #10b981);
+      box-shadow: 0 4px 20px rgba(16,185,129,0.3);
+    }
+    .btn-main.mentor-btn:hover:not(:disabled) {
+      box-shadow: 0 8px 28px rgba(16,185,129,0.45);
+    }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Footer link */
+    .switch-link {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 13px;
+      color: rgba(255,255,255,0.35);
+    }
+    .switch-link button {
+      background: none; border: none;
+      color: #818cf8; font-weight: 700;
+      cursor: pointer; font-size: 13px;
+      font-family: 'Nunito', sans-serif;
+      text-decoration: underline;
+      text-decoration-color: rgba(129,140,248,0.3);
+    }
+    .switch-link button:hover { color: #6366f1; }
+
+    @media (max-width: 768px) {
+      .left { display: none; }
+      .right { width: 100%; padding: 32px 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- LEFT PANEL -->
+<div class="left">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="grid-overlay"></div>
+  <div class="left-content">
+    <div class="brand">Uni<span>Buddy</span></div>
+    <div class="tagline">Your complete academic companion — learn smarter, connect better, grow together.</div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon fi-blue">📚</div>
+        <div class="feature-text">
+          <div class="feature-name">Book Marketplace</div>
+          <div class="feature-desc">Buy & sell academic books at student-friendly prices</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon fi-green">🧑‍🏫</div>
+        <div class="feature-text">
+          <div class="feature-name">Expert Mentors</div>
+          <div class="feature-desc">Connect with seniors & subject mentors, take quizzes</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon fi-purple">🤝</div>
+        <div class="feature-text">
+          <div class="feature-name">AI Study Matching</div>
+          <div class="feature-desc">Find your perfect study partner using AI</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon fi-amber">🎯</div>
+        <div class="feature-text">
+          <div class="feature-name">Personal Dashboard</div>
+          <div class="feature-desc">Track progress, deadlines & everything in one place</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right">
+  <div class="form-header">
+    <div class="form-title" id="formTitle">Welcome back 👋</div>
+    <div class="form-sub" id="formSub">Sign in to your UniBuddy account</div>
+  </div>
+
+  <div class="tab-switch">
+    <button class="tab-btn active" id="tabLogin" onclick="switchTab('login')">Sign In</button>
+    <button class="tab-btn" id="tabRegister" onclick="switchTab('register')">Create Account</button>
+  </div>
+
+  <div class="alert" id="alert"><span id="alertIcon">⚠️</span><span id="alertMsg"></span></div>
+
+  <!-- ── LOGIN FORM ── -->
+  <div id="loginForm">
+    <!-- Google Sign In Button -->
+    <button class="btn-google" onclick="loginWithGoogle()">
+      <svg class="google-icon" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <div class="divider">or sign in with email</div>
+
+    <div class="form-group">
+      <label class="field-label">Email Address</label>
+      <div class="field-wrap">
+        <span class="field-icon">✉️</span>
+        <input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="email">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="field-label">Password</label>
+      <div class="field-wrap">
+        <span class="field-icon">🔒</span>
+        <input type="password" id="loginPassword" placeholder="Enter your password" autocomplete="current-password">
+        <button class="pw-toggle" onclick="togglePw('loginPassword', this)" type="button">👁️</button>
+      </div>
+    </div>
+    <button class="btn-main" id="loginBtn" onclick="login()">Sign In →</button>
+    <div class="switch-link">Don't have an account? <button onclick="switchTab('register')">Create one</button></div>
+  </div>
+
+  <!-- ── REGISTER FORM ── -->
+  <div id="registerForm" style="display:none">
+    <!-- Google Sign Up Button -->
+    <button class="btn-google" onclick="loginWithGoogle()">
+      <svg class="google-icon" viewBox="0 0 24 24">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Continue with Google
+    </button>
+
+    <div class="divider">or create with email</div>
+
+    <div class="role-select">
+      <button class="role-btn active" id="roleStudent" onclick="selectRole('student')">
+        <span class="role-icon">🎓</span>
+        <span class="role-label">Student</span>
+        <span class="role-desc">Learn, buy books, find partners</span>
+      </button>
+      <button class="role-btn" id="roleMentor" onclick="selectRole('mentor')">
+        <span class="role-icon">🧑‍🏫</span>
+        <span class="role-label">Mentor</span>
+        <span class="role-desc">Teach, quiz, earn</span>
+      </button>
+    </div>
+
+    <div class="mentor-banner" id="mentorBanner">
+      <strong>Mentor Account:</strong> You'll get a dedicated dashboard to manage students, create quizzes, schedule live classes & track your earnings.
+    </div>
+
+    <div class="form-group">
+      <label class="field-label">Full Name</label>
+      <div class="field-wrap">
+        <span class="field-icon">👤</span>
+        <input type="text" id="regName" placeholder="Your full name" autocomplete="name">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="field-label">Email Address</label>
+      <div class="field-wrap">
+        <span class="field-icon">✉️</span>
+        <input type="email" id="regEmail" placeholder="your@email.com" autocomplete="email">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="field-label">Password</label>
+      <div class="field-wrap">
+        <span class="field-icon">🔒</span>
+        <input type="password" id="regPassword" placeholder="Min 6 characters" autocomplete="new-password">
+        <button class="pw-toggle" onclick="togglePw('regPassword', this)" type="button">👁️</button>
+      </div>
+    </div>
+    <button class="btn-main" id="registerBtn" onclick="register()">Create Account →</button>
+    <div class="switch-link">Already have an account? <button onclick="switchTab('login')">Sign in</button></div>
+  </div>
+</div>
+
+<script>
+  // ══════════════════════════════════════════
+  // CONFIG — apna Supabase URL & Anon Key yahan daalo
+  // ══════════════════════════════════════════
+  const SUPABASE_URL = "https://ognlrlguombhjbyocpss.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nbmxybGd1b21iaGpieW9jcHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2NTczMDgsImV4cCI6MjA5MDIzMzMwOH0.x6Mbo8d_-3osljcCPgo868dGKpaIa0E9LtxQ260ocQA";
+  const API = "https://unibuddy-1.onrender.com/api";
+
+  let selectedRole = "student";
+
+  // Auto-redirect if already logged in
+  const existingToken = localStorage.getItem("token");
+  if (existingToken) {
+    const u = JSON.parse(localStorage.getItem("user") || "{}");
+    window.location.href = u.role === "mentor" ? "mentor-dashboard.html" : u.role === "admin" ? "admin.html" : "dashboard.html";
+  }
+
+  // ── GOOGLE LOGIN ───────────────────────────
+  async function loginWithGoogle() {
+    try {
+      // Supabase Google OAuth redirect
+      const redirectUrl = `${SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${encodeURIComponent(window.location.origin + "/auth-callback.html")}`;
+      window.location.href = redirectUrl;
+    } catch (err) {
+      showAlert("Google login failed. Please try again.");
+    }
+  }
+
+  // ── TAB SWITCH ─────────────────────────────
+  function switchTab(tab) {
+    const isLogin = tab === "login";
+    document.getElementById("tabLogin").classList.toggle("active", isLogin);
+    document.getElementById("tabRegister").classList.toggle("active", !isLogin);
+    document.getElementById("loginForm").style.display = isLogin ? "block" : "none";
+    document.getElementById("registerForm").style.display = isLogin ? "none" : "block";
+    document.getElementById("alert").className = "alert";
+    document.getElementById("formTitle").textContent = isLogin ? "Welcome back 👋" : "Create Account ✨";
+    document.getElementById("formSub").textContent = isLogin ? "Sign in to your UniBuddy account" : "Join thousands of students today";
+  }
+
+  function selectRole(role) {
+    selectedRole = role;
+    document.getElementById("roleStudent").classList.toggle("active", role === "student");
+    document.getElementById("roleMentor").classList.toggle("active", role === "mentor");
+    document.getElementById("mentorBanner").classList.toggle("show", role === "mentor");
+    const btn = document.getElementById("registerBtn");
+    btn.className = role === "mentor" ? "btn-main mentor-btn" : "btn-main";
+    btn.textContent = role === "mentor" ? "Create Mentor Account →" : "Create Account →";
+  }
+
+  function togglePw(inputId, btn) {
+    const inp = document.getElementById(inputId);
+    const isText = inp.type === "text";
+    inp.type = isText ? "password" : "text";
+    btn.textContent = isText ? "👁️" : "🙈";
+  }
+
+  function showAlert(msg, type = "error") {
+    const el = document.getElementById("alert");
+    document.getElementById("alertIcon").textContent = type === "error" ? "⚠️" : "✅";
+    document.getElementById("alertMsg").textContent = msg;
+    el.className = `alert ${type}`;
+  }
+
+  // ── EMAIL LOGIN ────────────────────────────
+  async function login() {
+    const email = document.getElementById("loginEmail").value.trim();
+    const password = document.getElementById("loginPassword").value;
+    if (!email || !password) { showAlert("Please fill all fields"); return; }
+
+    const btn = document.getElementById("loginBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Signing in...';
+
+    try {
+      const res = await fetch(`${API}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem("token", data.token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        showAlert("Login successful! Redirecting...", "success");
+        setTimeout(() => {
+          window.location.href = data.user.role === "mentor" ? "mentor-dashboard.html" : data.user.role === "admin" ? "admin.html" : "dashboard.html";
+        }, 800);
+      } else {
+        showAlert(data.message || "Invalid credentials");
+        btn.disabled = false;
+        btn.innerHTML = "Sign In →";
+      }
+    } catch {
+      showAlert("Cannot connect to server. Check your connection.");
+      btn.disabled = false;
+      btn.innerHTML = "Sign In →";
+    }
+  }
+
+  // ── EMAIL REGISTER ─────────────────────────
+  async function register() {
+    const name = document.getElementById("regName").value.trim();
+    const email = document.getElementById("regEmail").value.trim();
+    const password = document.getElementById("regPassword").value;
+    if (!name || !email || !password) { showAlert("Please fill all fields"); return; }
+    if (password.length < 6) { showAlert("Password must be at least 6 characters"); return; }
+
+    const btn = document.getElementById("registerBtn");
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> Creating account...';
+
+    try {
+      const res = await fetch(`${API}/auth/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password, role: selectedRole })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showAlert(selectedRole === "mentor" ? "Mentor account created! Please sign in 🧑‍🏫" : "Account created! Please sign in ✅", "success");
+        setTimeout(() => switchTab("login"), 1500);
+      } else {
+        showAlert(data.message || "Registration failed");
+      }
+    } catch {
+      showAlert("Cannot connect to server. Check your connection.");
+    } finally {
+      btn.disabled = false;
+      btn.textContent = selectedRole === "mentor" ? "Create Mentor Account →" : "Create Account →";
+    }
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+      const loginVisible = document.getElementById("loginForm").style.display !== "none";
+      if (loginVisible) login(); else register();
+    }
+  });
+</script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js")
+        .then(r => console.log("UniBuddy SW registered:", r.scope))
+        .catch(e => console.log("SW registration failed:", e));
+    });
+  }
+</script>
+</body>
+</html>

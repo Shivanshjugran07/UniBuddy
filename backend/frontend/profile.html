@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — UniBuddy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --indigo: #6366f1; --indigo-dark: #4f46e5; --indigo-light: #eef2ff; --emerald: #10b981; --bg: #f8fafc; --card: #fff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b; --sidebar: #0c0e1a; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Nunito', sans-serif; background: var(--bg); display: flex; min-height: 100vh; }
+    .sidebar { width: 240px; background: var(--sidebar); display: flex; flex-direction: column; padding: 24px 0; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; }
+    .sidebar-logo { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; color: white; letter-spacing: -1px; padding: 0 24px 28px; border-bottom: 1px solid #1e2240; }
+    .sidebar-logo span { color: var(--indigo); }
+    .nav-section { padding: 20px 12px 8px; font-size: 10px; color: #3a4060; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: #6b7280; font-size: 14px; font-weight: 600; text-decoration: none; border-left: 3px solid transparent; transition: 0.2s; }
+    .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+    .nav-item.active { color: var(--indigo); border-left-color: var(--indigo); background: rgba(99,102,241,0.08); }
+    .nav-item .icon { font-size: 18px; width: 22px; text-align: center; }
+    .sidebar-bottom { margin-top: auto; padding: 20px 12px; border-top: 1px solid #1e2240; }
+    .user-mini { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; }
+    .avatar-sm { width: 36px; height: 36px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; overflow: hidden; flex-shrink: 0; }
+    .avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+    .user-name { font-size: 13px; font-weight: 700; color: white; }
+    .user-role-text { font-size: 11px; color: var(--muted); }
+    .btn-logout-mini { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px; margin-left: auto; }
+    .main { margin-left: 240px; flex: 1; padding: 32px; max-width: 800px; }
+    .page-title { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; color: var(--text); margin-bottom: 24px; }
+    .card { background: var(--card); border-radius: 16px; padding: 28px; border: 1px solid var(--border); margin-bottom: 20px; animation: fadeUp 0.4s ease both; }
+    .card-title { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 20px; }
+    .avatar-section { display: flex; align-items: center; gap: 20px; margin-bottom: 24px; }
+    .big-avatar { width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, var(--indigo), #818cf8); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-size: 32px; font-weight: 700; color: white; overflow: hidden; flex-shrink: 0; }
+    .big-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .avatar-info h3 { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: var(--text); }
+    .avatar-info p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid .full { grid-column: 1 / -1; }
+    .form-group { display: flex; flex-direction: column; gap: 7px; }
+    label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; }
+    input, select, textarea { padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 14px; outline: none; transition: 0.2s; background: #fafafa; color: var(--text); }
+    input:focus, select:focus, textarea:focus { border-color: var(--indigo); background: white; }
+    textarea { min-height: 80px; resize: vertical; }
+    /* SUBJECTS */
+    .subjects-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+    .subject-chip { display: flex; align-items: center; gap: 6px; padding: 5px 12px; background: var(--indigo-light); color: var(--indigo); border-radius: 20px; font-size: 13px; font-weight: 600; }
+    .subject-chip button { background: none; border: none; cursor: pointer; color: var(--indigo); font-size: 14px; padding: 0; line-height: 1; }
+    .subject-add { display: flex; gap: 8px; }
+    .subject-add input { flex: 1; }
+    .btn-add-subject { padding: 11px 16px; background: var(--indigo); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; }
+    .btn-save { padding: 13px 32px; background: var(--indigo); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-save:hover { background: var(--indigo-dark); transform: translateY(-1px); }
+    .alert { padding: 11px 14px; border-radius: 8px; font-size: 13px; font-weight: 500; margin-bottom: 16px; display: none; }
+    .alert.success { background: rgba(16,185,129,0.1); color: var(--emerald); border: 1px solid rgba(16,185,129,0.2); }
+    .alert.error { background: rgba(244,63,94,0.1); color: var(--rose); border: 1px solid rgba(244,63,94,0.2); }
+    .alert.show { display: block; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo">Uni<span>Buddy</span></div>
+  <div class="nav-section">Main</div>
+  <a href="dashboard.html" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+  <a href="books.html" class="nav-item"><span class="icon">📚</span> Books</a>
+  <a href="mentors.html" class="nav-item"><span class="icon">🧑‍🏫</span> Mentors</a>
+  <a href="quiz.html" class="nav-item"><span class="icon">📝</span> Quizzes</a>
+  <a href="partners.html" class="nav-item"><span class="icon">🤝</span> Study Partners</a>
+  <div class="nav-section">Account</div>
+  <a href="profile.html" class="nav-item active"><span class="icon">👤</span> My Profile</a>
+  <a href="my_books.html" class="nav-item"><span class="icon">🏷️</span> My Listings</a>
+  <div class="sidebar-bottom">
+    <div class="user-mini">
+      <div class="avatar-sm" id="sideAvatar">U</div>
+      <div><div class="user-name" id="sideName">User</div><div class="user-role-text" id="sideRole">student</div></div>
+      <button class="btn-logout-mini" onclick="logout()">⏻</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="page-title">👤 My Profile</div>
+  <div class="alert" id="alert"></div>
+
+  <div class="card">
+    <div class="avatar-section">
+      <div class="big-avatar" id="bigAvatar">U</div>
+      <div class="avatar-info">
+        <h3 id="displayName">Loading...</h3>
+        <p id="displayEmail"></p>
+        <p id="displayRole" style="margin-top:4px;color:var(--indigo);font-weight:600;font-size:13px"></p>
+      </div>
+    </div>
+
+    <div class="card-title">Personal Info</div>
+    <div class="form-grid">
+      <div class="form-group"><label>Full Name</label><input id="pName" placeholder="Your name"></div>
+      <div class="form-group"><label>Phone</label><input id="pPhone" placeholder="9876543210"></div>
+      <div class="form-group">
+        <label>Course</label>
+        <select id="pCourse">
+          <option value="">Select course</option>
+          <option>BCA</option><option>MCA</option><option>B.Tech</option><option>MBA</option><option>B.Sc</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Year</label>
+        <select id="pYear">
+          <option value="">Select year</option>
+          <option>1st</option><option>2nd</option><option>3rd</option><option>4th</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Study Style</label>
+        <select id="pStyle">
+          <option value="">Select style</option>
+          <option value="morning">🌅 Morning</option>
+          <option value="night">🌙 Night Owl</option>
+          <option value="group">👥 Group Study</option>
+          <option value="solo">🧘 Solo Study</option>
+          <option value="flexible">⚡ Flexible</option>
+        </select>
+      </div>
+      <div class="form-group full"><label>Bio</label><textarea id="pBio" placeholder="Tell others about yourself..."></textarea></div>
+    </div>
+
+    <div class="card-title" style="margin-top:20px">My Subjects (for AI matching)</div>
+    <div class="subjects-wrap" id="subjectsWrap"></div>
+    <div class="subject-add">
+      <input id="subjectInput" placeholder="Add subject e.g. DSA, Python..." onkeydown="if(event.key==='Enter') addSubject()">
+      <button class="btn-add-subject" onclick="addSubject()">+ Add</button>
+    </div>
+
+    <div style="margin-top:24px">
+      <button class="btn-save" onclick="saveProfile()">Save Profile ✅</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API = "https://unibuddy-1.onrender.com/api";
+  const token = localStorage.getItem("token");
+  let user = JSON.parse(localStorage.getItem("user") || "{}");
+  if (!token) window.location.href = "login.html";
+
+  let subjects = user.subjects || [];
+
+  function logout() { localStorage.clear(); window.location.href = "login.html"; }
+
+  function renderSidebar() {
+    document.getElementById("sideName").textContent = user.name || "User";
+    document.getElementById("sideRole").textContent = user.role || "student";
+    if (user.avatar) document.getElementById("sideAvatar").innerHTML = `<img src="${user.avatar}">`;
+    else document.getElementById("sideAvatar").textContent = (user.name || "U")[0].toUpperCase();
+  }
+
+  function renderProfile() {
+    document.getElementById("displayName").textContent = user.name || "Your Name";
+    document.getElementById("displayEmail").textContent = user.email || "";
+    document.getElementById("displayRole").textContent = user.role === "mentor" ? "🧑‍🏫 Mentor" : "🎓 Student";
+    if (user.avatar) document.getElementById("bigAvatar").innerHTML = `<img src="${user.avatar}">`;
+    else document.getElementById("bigAvatar").textContent = (user.name || "U")[0].toUpperCase();
+
+    document.getElementById("pName").value = user.name || "";
+    document.getElementById("pPhone").value = user.phone || "";
+    document.getElementById("pCourse").value = user.course || "";
+    document.getElementById("pYear").value = user.year || "";
+    document.getElementById("pStyle").value = user.study_style || "";
+    document.getElementById("pBio").value = user.bio || "";
+    renderSubjects();
+  }
+
+  function renderSubjects() {
+    document.getElementById("subjectsWrap").innerHTML = subjects.map(s => `
+      <div class="subject-chip">${s}<button onclick="removeSubject('${s}')">×</button></div>
+    `).join("");
+  }
+
+  function addSubject() {
+    const val = document.getElementById("subjectInput").value.trim();
+    if (!val) return;
+    if (!subjects.includes(val)) { subjects.push(val); renderSubjects(); }
+    document.getElementById("subjectInput").value = "";
+  }
+
+  function removeSubject(s) {
+    subjects = subjects.filter(x => x !== s);
+    renderSubjects();
+  }
+
+  async function loadProfile() {
+    try {
+      const res = await fetch(`${API}/auth/profile`, { headers: { "Authorization": "Bearer " + token } });
+      const data = await res.json();
+      user = { ...user, ...data };
+      subjects = user.subjects || [];
+      localStorage.setItem("user", JSON.stringify(user));
+      renderProfile();
+      renderSidebar();
+    } catch {
+      renderProfile();
+      renderSidebar();
+    }
+  }
+
+  async function saveProfile() {
+    const body = {
+      name: document.getElementById("pName").value.trim(),
+      phone: document.getElementById("pPhone").value.trim(),
+      course: document.getElementById("pCourse").value,
+      year: document.getElementById("pYear").value,
+      study_style: document.getElementById("pStyle").value,
+      bio: document.getElementById("pBio").value.trim(),
+      subjects: JSON.stringify(subjects)
+    };
+
+    try {
+      const res = await fetch(`${API}/auth/profile`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (res.ok) {
+        user = { ...user, ...data.user };
+        localStorage.setItem("user", JSON.stringify(user));
+        renderProfile();
+        renderSidebar();
+        const el = document.getElementById("alert");
+        el.textContent = "Profile saved ✅";
+        el.className = "alert success show";
+        setTimeout(() => el.className = "alert", 3000);
+      } else {
+        const el = document.getElementById("alert");
+        el.textContent = data.message || "Failed to save";
+        el.className = "alert error show";
+      }
+    } catch {
+      const el = document.getElementById("alert");
+      el.textContent = "Server error";
+      el.className = "alert error show";
+    }
+  }
+
+  loadProfile();
+</script>
+<script src="theme.js"></script>
+<script src="mobile.js"></script>
+</body>
+</html>

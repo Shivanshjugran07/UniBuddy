@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentors — UniBuddy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --indigo: #6366f1; --indigo-dark: #4f46e5; --indigo-light: #eef2ff; --emerald: #10b981; --amber: #f59e0b; --bg: #f8fafc; --card: #fff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b; --sidebar: #0c0e1a; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Nunito', sans-serif; background: var(--bg); display: flex; min-height: 100vh; }
+    .sidebar { width: 240px; background: var(--sidebar); display: flex; flex-direction: column; padding: 24px 0; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; }
+    .sidebar-logo { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; color: white; letter-spacing: -1px; padding: 0 24px 28px; border-bottom: 1px solid #1e2240; }
+    .sidebar-logo span { color: var(--indigo); }
+    .nav-section { padding: 20px 12px 8px; font-size: 10px; color: #3a4060; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: #6b7280; font-size: 14px; font-weight: 600; text-decoration: none; border-left: 3px solid transparent; transition: 0.2s; }
+    .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+    .nav-item.active { color: var(--indigo); border-left-color: var(--indigo); background: rgba(99,102,241,0.08); }
+    .nav-item .icon { font-size: 18px; width: 22px; text-align: center; }
+    .sidebar-bottom { margin-top: auto; padding: 20px 12px; border-top: 1px solid #1e2240; }
+    .user-mini { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; }
+    .avatar-sm { width: 36px; height: 36px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; overflow: hidden; flex-shrink: 0; }
+    .avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+    .user-name { font-size: 13px; font-weight: 700; color: white; }
+    .user-role-text { font-size: 11px; color: var(--muted); }
+    .btn-logout-mini { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px; margin-left: auto; }
+    .main { margin-left: 240px; flex: 1; padding: 32px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .page-title { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; color: var(--text); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .mentor-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 24px; transition: transform 0.2s, box-shadow 0.2s; animation: fadeUp 0.4s ease both; }
+    .mentor-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.08); }
+    .mentor-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .mentor-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #f093fb, #f5576c); display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: white; font-family: 'Outfit', sans-serif; overflow: hidden; flex-shrink: 0; }
+    .mentor-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .mentor-name { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
+    .mentor-exp { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .stars { color: #f59e0b; font-size: 13px; margin-top: 2px; }
+    .mentor-subjects { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+    .subject-tag { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--indigo-light); color: var(--indigo); }
+    .mentor-bio { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+    .mentor-footer { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+    .mentor-price { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--emerald); }
+    .btn-request { padding: 9px 18px; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; white-space: nowrap; }
+    .btn-request.none { background: var(--indigo); color: white; }
+    .btn-request.none:hover { background: var(--indigo-dark); }
+    .btn-request.pending { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); cursor: default; }
+    .btn-request.accepted { background: rgba(16,185,129,0.1); color: var(--emerald); border: 1px solid rgba(16,185,129,0.3); cursor: default; }
+    .btn-request.rejected { background: rgba(239,68,68,0.1); color: #ef4444; border: 1px solid rgba(239,68,68,0.2); }
+    .empty { text-align: center; padding: 60px; color: var(--muted); font-size: 15px; grid-column: 1/-1; }
+    .empty div { font-size: 44px; margin-bottom: 12px; }
+    .toast { position: fixed; bottom: 24px; right: 24px; color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(60px); opacity: 0; transition: all 0.3s; z-index: 9999; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo">Uni<span>Buddy</span></div>
+  <div class="nav-section">Main</div>
+  <a href="dashboard.html" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+  <a href="books.html" class="nav-item"><span class="icon">📚</span> Books</a>
+  <a href="mentors.html" class="nav-item active"><span class="icon">🧑‍🏫</span> Mentors</a>
+  <a href="quiz.html" class="nav-item"><span class="icon">📝</span> Quizzes</a>
+  <a href="partners.html" class="nav-item"><span class="icon">🤝</span> Study Partners</a>
+  <div class="nav-section">Account</div>
+  <a href="profile.html" class="nav-item"><span class="icon">👤</span> My Profile</a>
+  <a href="my_books.html" class="nav-item"><span class="icon">🏷️</span> My Listings</a>
+  <div class="sidebar-bottom">
+    <div class="user-mini">
+      <div class="avatar-sm" id="sideAvatar">U</div>
+      <div><div class="user-name" id="sideName">User</div><div class="user-role-text" id="sideRole">student</div></div>
+      <button class="btn-logout-mini" onclick="logout()">⏻</button>
+    </div>
+  </div>
+</div>
+<div class="main">
+  <div class="topbar"><div class="page-title">🧑‍🏫 Mentors</div></div>
+  <div class="grid" id="mentorsGrid"><div class="empty"><div>⏳</div>Loading mentors...</div></div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+  const API = "https://unibuddy-1.onrender.com/api";
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  if (!token) window.location.href = "login.html";
+  if (user.role === "mentor") window.location.href = "mentor_dashboard.html";
+  if (user.role === "admin") window.location.href = "admin.html";
+
+  document.getElementById("sideName").textContent = user.name || "User";
+  document.getElementById("sideRole").textContent = user.role || "student";
+  if (user.avatar) document.getElementById("sideAvatar").innerHTML = '<img src="' + user.avatar + '">';
+  else document.getElementById("sideAvatar").textContent = (user.name || "U")[0].toUpperCase();
+  function logout() { localStorage.clear(); window.location.href = "login.html"; }
+
+  function showToast(msg, color) {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.style.background = color || "#0f172a";
+    t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3000);
+  }
+
+  function starsHTML(rating) {
+    if (!rating) return "<span style='color:var(--muted)'>No ratings yet</span>";
+    return "⭐".repeat(Math.round(rating)) + " (" + rating + ")";
+  }
+
+  async function loadMentors() {
+    try {
+      const res = await fetch(API + "/mentors");
+      const mentors = await res.json();
+      const grid = document.getElementById("mentorsGrid");
+      if (!mentors.length) { grid.innerHTML = '<div class="empty"><div>👨‍🏫</div>Koi mentor nahi hai abhi</div>'; return; }
+
+      const statuses = await Promise.all(mentors.map(function(m) {
+        return fetch(API + "/mentors/" + m.id + "/request-status", { headers: { "Authorization": "Bearer " + token } })
+          .then(function(r) { return r.json(); }).catch(function() { return { status: "none" }; });
+      }));
+
+      grid.innerHTML = mentors.map(function(m, i) {
+        const s = statuses[i] ? statuses[i].status : "none";
+        let btn = "";
+        if (s === "none") btn = '<button class="btn-request none" onclick="sendRequest(\'' + m.id + '\', this)">📩 Request Send</button>';
+        else if (s === "pending") btn = '<button class="btn-request pending" disabled>⏳ Pending</button>';
+        else if (s === "accepted") btn = '<button class="btn-request accepted" disabled>✅ Connected</button><a href="mentor-portal.html?id=' + m.id + '" style="padding:9px 16px;background:linear-gradient(135deg,#6366f1,#818cf8);color:white;border-radius:8px;font-family:Outfit,sans-serif;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap">🚀 Open Portal</a>';
+        else if (s === "rejected") btn = '<button class="btn-request rejected" onclick="sendRequest(\'' + m.id + '\', this)">🔄 Request Again</button>';
+
+        const subjects = (m.subjects || []).map(function(s) { return '<span class="subject-tag">' + s + '</span>'; }).join("");
+        return '<div class="mentor-card" style="animation-delay:' + (i*0.06) + 's">' +
+          '<div class="mentor-top">' +
+          '<div class="mentor-avatar">' + (m.avatar ? '<img src="' + m.avatar + '">' : m.name[0].toUpperCase()) + '</div>' +
+          '<div><div class="mentor-name">' + m.name + '</div>' +
+          '<div class="mentor-exp">' + (m.experience || "Experienced Mentor") + '</div>' +
+          '<div class="stars">' + starsHTML(m.rating) + ' <span style="color:var(--muted);font-size:11px">(' + m.total_ratings + ' reviews)</span></div></div>' +
+          '</div>' +
+          '<div class="mentor-subjects">' + subjects + '</div>' +
+          (m.bio ? '<div class="mentor-bio">' + m.bio + '</div>' : '') +
+          '<div class="mentor-footer">' +
+          '<div class="mentor-price">' + (m.price > 0 ? "₹" + m.price + "/session" : "Free 🎉") + '</div>' +
+          btn + '</div></div>';
+      }).join("");
+    } catch(e) {
+      document.getElementById("mentorsGrid").innerHTML = '<div class="empty"><div>❌</div>Load nahi hua</div>';
+    }
+  }
+
+  async function sendRequest(mentorId, btn) {
+    btn.disabled = true; btn.textContent = "Sending...";
+    try {
+      const res = await fetch(API + "/mentors/" + mentorId + "/request", {
+        method: "POST", headers: { "Authorization": "Bearer " + token }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(data.message, "#059669");
+        btn.className = "btn-request pending"; btn.textContent = "⏳ Pending"; btn.disabled = true;
+      } else {
+        showToast(data.message || "Error", "#dc2626"); btn.disabled = false; btn.textContent = "📩 Request Send";
+      }
+    } catch(e) { showToast("Server error", "#dc2626"); btn.disabled = false; }
+  }
+
+  loadMentors();
+</script>
+<script src="theme.js"></script>
+<script src="mobile.js"></script>
+</body>
+</html>

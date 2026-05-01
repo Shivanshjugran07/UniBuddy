@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Study Partners — UniBuddy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --indigo: #6366f1; --indigo-dark: #4f46e5; --indigo-light: #eef2ff; --emerald: #10b981; --red: #ef4444; --orange: #f59e0b; --bg: #f8fafc; --card: #fff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b; --sidebar: #0c0e1a; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Nunito', sans-serif; background: var(--bg); display: flex; min-height: 100vh; }
+
+    .sidebar { width: 240px; background: var(--sidebar); display: flex; flex-direction: column; padding: 24px 0; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; }
+    .sidebar-logo { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; color: white; letter-spacing: -1px; padding: 0 24px 28px; border-bottom: 1px solid #1e2240; }
+    .sidebar-logo span { color: var(--indigo); }
+    .nav-section { padding: 20px 12px 8px; font-size: 10px; color: #3a4060; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: #6b7280; font-size: 14px; font-weight: 600; text-decoration: none; border-left: 3px solid transparent; transition: 0.2s; }
+    .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+    .nav-item.active { color: var(--indigo); border-left-color: var(--indigo); background: rgba(99,102,241,0.08); }
+    .nav-item .icon { font-size: 18px; width: 22px; text-align: center; }
+    .sidebar-bottom { margin-top: auto; padding: 20px 12px; border-top: 1px solid #1e2240; }
+    .user-mini { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; }
+    .avatar-sm { width: 36px; height: 36px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; overflow: hidden; flex-shrink: 0; }
+    .avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+    .user-name { font-size: 13px; font-weight: 700; color: white; }
+    .user-role-text { font-size: 11px; color: var(--muted); }
+    .btn-logout-mini { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px; margin-left: auto; }
+
+    .main { margin-left: 240px; flex: 1; padding: 32px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .page-title { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; color: var(--text); }
+    .page-sub { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+
+    .ai-banner { background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%); border-radius: 16px; padding: 24px 28px; display: flex; align-items: center; gap: 20px; margin-bottom: 28px; animation: fadeUp 0.4s ease both; }
+    .ai-banner-icon { font-size: 48px; }
+    .ai-banner-text h2 { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: white; }
+    .ai-banner-text p { font-size: 14px; color: rgba(255,255,255,0.7); margin-top: 4px; }
+    .btn-update-profile { padding: 10px 20px; background: var(--indigo); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; margin-top: 12px; text-decoration: none; display: inline-block; transition: 0.2s; }
+    .btn-update-profile:hover { background: var(--indigo-dark); }
+
+    .top-tabs { display: flex; gap: 4px; background: white; border: 1px solid var(--border); border-radius: 10px; padding: 4px; width: fit-content; margin-bottom: 22px; }
+    .top-tab { padding: 8px 18px; border: none; border-radius: 7px; background: transparent; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; transition: 0.2s; position: relative; }
+    .top-tab.active { background: var(--indigo); color: white; }
+    .notif-dot { position: absolute; top: 4px; right: 4px; width: 8px; height: 8px; background: var(--red); border-radius: 50%; display: none; }
+    .notif-dot.show { display: block; }
+
+    .partners-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+
+    .partner-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 22px; transition: transform 0.2s, box-shadow 0.2s; animation: fadeUp 0.4s ease both; position: relative; }
+    .partner-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.08); }
+    .match-badge { position: absolute; top: 16px; right: 16px; background: linear-gradient(135deg, var(--indigo), var(--emerald)); color: white; padding: 4px 10px; border-radius: 20px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 700; }
+    .partner-top { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .partner-avatar { width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(135deg, var(--indigo), #818cf8); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: white; overflow: hidden; flex-shrink: 0; }
+    .partner-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .partner-name { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--text); }
+    .partner-course { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .partner-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+    .tag { padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: var(--indigo-light); color: var(--indigo); }
+    .tag.style { background: rgba(16,185,129,0.1); color: var(--emerald); }
+    .partner-bio { font-size: 13px; color: var(--muted); line-height: 1.5; margin-bottom: 14px; }
+    .partner-actions { display: flex; gap: 8px; }
+    .btn-connect { flex: 1; padding: 9px; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-connect.default { background: var(--indigo); color: white; }
+    .btn-connect.default:hover { background: var(--indigo-dark); }
+    .btn-connect.pending { background: rgba(245,158,11,0.1); color: var(--orange); cursor: default; border: 1px solid rgba(245,158,11,0.3); }
+    .btn-connect.incoming { background: rgba(99,102,241,0.1); color: var(--indigo); cursor: default; border: 1px solid rgba(99,102,241,0.3); }
+    .btn-connect.accepted { background: rgba(16,185,129,0.1); color: var(--emerald); cursor: default; border: 1px solid rgba(16,185,129,0.3); }
+    .btn-connect.rejected { background: rgba(239,68,68,0.1); color: var(--red); cursor: default; border: 1px solid rgba(239,68,68,0.2); }
+    .btn-chat { padding: 9px 12px; background: var(--indigo); color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; transition: 0.2s; }
+    .btn-chat:hover { background: var(--indigo-dark); transform: scale(1.05); }
+
+    /* REQUESTS */
+    .requests-list { display: flex; flex-direction: column; gap: 14px; }
+    .request-card { background: white; border-radius: 14px; border: 1px solid var(--border); padding: 18px; display: flex; align-items: center; gap: 14px; animation: fadeUp 0.3s ease both; transition: opacity 0.3s, transform 0.3s; }
+    .req-avatar { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, var(--indigo), #818cf8); display: flex; align-items: center; justify-content: center; font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: white; flex-shrink: 0; overflow: hidden; }
+    .req-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .req-info { flex: 1; }
+    .req-name { font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; color: var(--text); }
+    .req-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .req-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-accept { padding: 8px 16px; background: var(--emerald); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-accept:hover { background: #0ea572; }
+    .btn-reject { padding: 8px 16px; background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-reject:hover { background: var(--red); color: white; }
+
+    /* ===== CHAT MODAL ===== */
+    .chat-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
+    .chat-overlay.open { display: flex; }
+
+    .chat-modal {
+      background: white; border-radius: 20px;
+      width: 520px; height: 620px;
+      display: flex; flex-direction: column;
+      overflow: hidden; animation: popUp 0.3s ease;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.2);
+    }
+    @keyframes popUp { from { transform: scale(0.92) translateY(20px); opacity: 0; } to { transform: scale(1) translateY(0); opacity: 1; } }
+
+    /* Chat Header */
+    .chat-header {
+      background: linear-gradient(135deg, #1e1b4b, var(--indigo));
+      padding: 16px 20px;
+      display: flex; align-items: center; gap: 12px;
+      flex-shrink: 0;
+    }
+    .chat-peer-avatar {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 700; color: white;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .chat-peer-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .chat-peer-info { flex: 1; }
+    .chat-peer-name { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: white; }
+    .chat-peer-status { font-size: 12px; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 5px; }
+    .online-dot { width: 7px; height: 7px; background: #4ade80; border-radius: 50%; }
+    .chat-header-actions { display: flex; gap: 8px; }
+    .btn-icon-header {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: rgba(255,255,255,0.15); border: none;
+      color: white; font-size: 16px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: 0.2s;
+    }
+    .btn-icon-header:hover { background: rgba(255,255,255,0.25); }
+
+    /* Video call invite bar */
+    .call-bar {
+      background: linear-gradient(90deg, rgba(16,185,129,0.1), rgba(99,102,241,0.1));
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .call-bar-text { font-size: 13px; color: var(--text); font-weight: 600; }
+    .call-bar-text span { color: var(--muted); font-weight: 400; font-size: 12px; }
+    .btn-start-call {
+      padding: 7px 14px; background: var(--emerald); color: white;
+      border: none; border-radius: 8px;
+      font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px;
+    }
+    .btn-start-call:hover { background: #0ea572; }
+
+    /* Messages area */
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 10px;
+      background: #f8fafc;
+    }
+    .chat-messages::-webkit-scrollbar { width: 4px; }
+    .chat-messages::-webkit-scrollbar-track { background: transparent; }
+    .chat-messages::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+
+    /* Date separator */
+    .date-sep { text-align: center; font-size: 11px; color: var(--muted); margin: 4px 0; position: relative; }
+    .date-sep::before, .date-sep::after { content: ""; position: absolute; top: 50%; width: 28%; height: 1px; background: var(--border); }
+    .date-sep::before { left: 0; }
+    .date-sep::after { right: 0; }
+
+    /* Message bubbles */
+    .msg { display: flex; flex-direction: column; max-width: 72%; }
+    .msg.mine { align-self: flex-end; align-items: flex-end; }
+    .msg.theirs { align-self: flex-start; align-items: flex-start; }
+    .bubble {
+      padding: 10px 14px; border-radius: 16px;
+      font-size: 14px; line-height: 1.5;
+      word-break: break-word; position: relative;
+    }
+    .msg.mine .bubble { background: var(--indigo); color: white; border-bottom-right-radius: 4px; }
+    .msg.theirs .bubble { background: white; color: var(--text); border-bottom-left-radius: 4px; border: 1px solid var(--border); }
+
+    /* Special: video call invite bubble */
+    .bubble.call-invite {
+      background: linear-gradient(135deg, #0ea572, #059669);
+      color: white; display: flex; align-items: center; gap: 10px;
+      cursor: pointer;
+    }
+    .bubble.call-invite:hover { opacity: 0.9; }
+    .call-invite-icon { font-size: 22px; }
+    .call-invite-text { font-size: 13px; font-weight: 600; }
+    .call-invite-sub { font-size: 11px; opacity: 0.85; }
+    .btn-join-call { padding: 5px 12px; background: white; color: #059669; border: none; border-radius: 6px; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+
+    .msg-time { font-size: 10px; color: var(--muted); margin-top: 3px; padding: 0 4px; }
+
+    /* Typing indicator */
+    .typing-indicator { display: none; align-self: flex-start; align-items: center; gap: 6px; padding: 8px 0; }
+    .typing-indicator.show { display: flex; }
+    .typing-dots { display: flex; gap: 3px; }
+    .typing-dots span { width: 7px; height: 7px; background: var(--muted); border-radius: 50%; animation: bounce 1.2s infinite; }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100% { transform: translateY(0); } 30% { transform: translateY(-5px); } }
+    .typing-text { font-size: 12px; color: var(--muted); }
+
+    /* Empty chat */
+    .chat-empty { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: var(--muted); }
+    .chat-empty-icon { font-size: 40px; }
+    .chat-empty-text { font-size: 14px; font-weight: 600; }
+    .chat-empty-sub { font-size: 12px; text-align: center; max-width: 220px; }
+
+    /* Input area */
+    .chat-input-area {
+      padding: 12px 16px; background: white;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+      flex-shrink: 0;
+    }
+    .chat-input {
+      flex: 1; padding: 10px 14px;
+      border: 1.5px solid var(--border); border-radius: 24px;
+      font-family: 'Nunito', sans-serif; font-size: 14px;
+      outline: none; transition: 0.2s; resize: none;
+      max-height: 100px; line-height: 1.4;
+    }
+    .chat-input:focus { border-color: var(--indigo); }
+    .btn-send {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--indigo); border: none; color: white;
+      font-size: 18px; cursor: pointer; transition: 0.2s;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .btn-send:hover { background: var(--indigo-dark); transform: scale(1.05); }
+    .btn-send:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ===== VIDEO CALL MODAL ===== */
+    .call-overlay { display: none; position: fixed; inset: 0; background: #0c0e1a; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
+    .call-overlay.open { display: flex; }
+    .call-room-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: white; margin-bottom: 6px; }
+    .call-room-sub { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 28px; text-align: center; }
+    .call-iframe-wrap { width: 820px; height: 500px; border-radius: 16px; overflow: hidden; border: 2px solid #1e2240; }
+    .call-iframe-wrap iframe { width: 100%; height: 100%; border: none; }
+    .btn-end-call { margin-top: 20px; padding: 12px 32px; background: #ef4444; color: white; border: none; border-radius: 10px; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-end-call:hover { background: #dc2626; }
+    .call-tip { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 10px; }
+
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(60px); opacity: 0; transition: all 0.3s; z-index: 9999; max-width: 300px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .empty { text-align: center; padding: 60px; color: var(--muted); font-size: 15px; grid-column: 1/-1; }
+    .empty div { font-size: 44px; margin-bottom: 12px; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Loading spinner for chat */
+    .chat-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--muted); flex: 1; }
+    .spin { width: 28px; height: 28px; border: 3px solid #e2e8f0; border-top-color: var(--indigo); border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="sidebar-logo">Uni<span>Buddy</span></div>
+  <div class="nav-section">Main</div>
+  <a href="dashboard.html" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+  <a href="books.html" class="nav-item"><span class="icon">📚</span> Books</a>
+  <a href="mentors.html" class="nav-item"><span class="icon">🧑‍🏫</span> Mentors</a>
+  <a href="quiz.html" class="nav-item"><span class="icon">📝</span> Quizzes</a>
+  <a href="partners.html" class="nav-item active"><span class="icon">🤝</span> Study Partners</a>
+  <div class="nav-section">Account</div>
+  <a href="profile.html" class="nav-item"><span class="icon">👤</span> My Profile</a>
+  <a href="my_books.html" class="nav-item"><span class="icon">🏷️</span> My Listings</a>
+  <div class="sidebar-bottom">
+    <div class="user-mini">
+      <div class="avatar-sm" id="sideAvatar">U</div>
+      <div><div class="user-name" id="sideName">User</div><div class="user-role-text" id="sideRole">student</div></div>
+      <button class="btn-logout-mini" onclick="logout()">⏻</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar"><div class="page-title">🤝 Study Partners</div></div>
+  <div class="page-sub">AI-powered matching based on your course, subjects & study style</div>
+
+  <div class="ai-banner">
+    <div class="ai-banner-icon">🧠</div>
+    <div class="ai-banner-text">
+      <h2>AI Matching Active</h2>
+      <p>Partners are ranked by cosine similarity of your academic profile. Add more subjects & study style for better matches.</p>
+      <a href="profile.html" class="btn-update-profile">Update My Profile →</a>
+    </div>
+  </div>
+
+  <div class="top-tabs">
+    <button class="top-tab active" id="tabAI" onclick="switchView('ai')">🧠 AI Matches</button>
+    <button class="top-tab" id="tabBrowse" onclick="switchView('browse')">🔍 Browse All</button>
+    <button class="top-tab" id="tabRequests" onclick="switchView('requests')">
+      📬 Requests <span class="notif-dot" id="notifDot"></span>
+    </button>
+  </div>
+
+  <div id="mainContent">
+    <div class="partners-grid" id="partnersGrid">
+      <div class="empty"><div>⏳</div>Finding your matches...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHAT MODAL ===== -->
+<div class="chat-overlay" id="chatOverlay" onclick="handleOverlayClick(event)">
+  <div class="chat-modal" id="chatModal">
+
+    <div class="chat-header">
+      <div class="chat-peer-avatar" id="chatPeerAvatar">?</div>
+      <div class="chat-peer-info">
+        <div class="chat-peer-name" id="chatPeerName">Partner</div>
+        <div class="chat-peer-status">
+          <div class="online-dot"></div>
+          <span>Study partner</span>
+        </div>
+      </div>
+      <div class="chat-header-actions">
+        <button class="btn-icon-header" onclick="startVideoCall()" title="Start video call">📹</button>
+        <button class="btn-icon-header" onclick="closeChat()" title="Close">✕</button>
+      </div>
+    </div>
+
+    <div class="call-bar">
+      <div>
+        <div class="call-bar-text">📹 Video Study Room</div>
+        <div class="call-bar-text"><span>Like Google Meet — start a room, share the link!</span></div>
+      </div>
+      <button class="btn-start-call" onclick="startVideoCall()">🚀 Start Room</button>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-loading"><div class="spin"></div><span>Loading messages...</span></div>
+    </div>
+
+    <div class="typing-indicator" id="typingIndicator">
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+      <div class="typing-text" id="typingText">Partner is typing...</div>
+    </div>
+
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chatInput" placeholder="Type a message..." rows="1"
+        onkeydown="handleInputKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="btn-send" id="sendBtn" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VIDEO CALL MODAL ===== -->
+<div class="call-overlay" id="callOverlay">
+  <div class="call-room-title" id="callRoomTitle">📹 Study Room</div>
+  <div class="call-room-sub" id="callRoomSub">Share this link with your partner to join</div>
+  <div class="call-iframe-wrap">
+    <iframe id="callIframe" allow="camera; microphone; fullscreen; display-capture"></iframe>
+  </div>
+  <button class="btn-end-call" onclick="endCall()">📴 Leave Room</button>
+  <div class="call-tip">Tip: Share your screen to study together • Works like Discord/Google Meet</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+  const API = "https://unibuddy-1.onrender.com/api";
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  if (!token) window.location.href = "login.html";
+
+  // ── Supabase client (for Realtime) ──────────────────────────────────────
+  // Paste your Supabase URL and anon key here (NOT service key — anon is safe for frontend)
+ const SUPABASE_URL = "https://ognlrlguombhjbyocpss.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nbmxybGd1b21iaGpieW9jcHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2NTczMDgsImV4cCI6MjA5MDIzMzMwOH0.x6Mbo8d_-3osljcCPgo868dGKpaIa0E9LtxQ260ocQA";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ── Sidebar ──────────────────────────────────────────────────────────────
+  document.getElementById("sideName").textContent = user.name || "User";
+  document.getElementById("sideRole").textContent = user.role || "student";
+  if (user.avatar) document.getElementById("sideAvatar").innerHTML = `<img src="${user.avatar}">`;
+  else document.getElementById("sideAvatar").textContent = (user.name || "U")[0].toUpperCase();
+
+  function logout() { localStorage.clear(); window.location.href = "login.html"; }
+
+  function showToast(msg, color = "#0f172a") {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.style.background = color;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 3000);
+  }
+
+  // ── Toast shortcuts ──────────────────────────────────────────────────────
+  const toastSuccess = msg => showToast(msg, "#059669");
+  const toastError   = msg => showToast(msg, "#dc2626");
+
+  // ── Notifications: check incoming requests ───────────────────────────────
+  async function checkIncomingRequests() {
+    try {
+      const res = await fetch(`${API}/partners/requests/incoming`, {
+        headers: { "Authorization": "Bearer " + token }
+      });
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0)
+        document.getElementById("notifDot").classList.add("show");
+    } catch {}
+  }
+
+  // ── Partner cards ────────────────────────────────────────────────────────
+  async function sendRequest(receiverId, btnEl) {
+    btnEl.disabled = true;
+    btnEl.textContent = "Sending...";
+    try {
+      const res = await fetch(`${API}/partners/request/${receiverId}`, {
+        method: "POST",
+        headers: { "Authorization": "Bearer " + token }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        btnEl.className = "btn-connect pending";
+        btnEl.textContent = "⏳ Pending";
+        toastSuccess("Connection request bheji gayi! ✅");
+      } else {
+        toastError(data.message || "Error aaya");
+        btnEl.disabled = false;
+        btnEl.textContent = "Connect";
+      }
+    } catch {
+      toastError("Server se connect nahi ho pa raha");
+      btnEl.disabled = false;
+      btnEl.textContent = "Connect";
+    }
+  }
+
+  async function respondToRequest(requestId, status, cardEl) {
+    try {
+      const res = await fetch(`${API}/partners/request/${requestId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        status === "accepted" ? toastSuccess("Request accept ki! 🎉") : showToast("Request reject ki");
+        cardEl.style.opacity = "0";
+        cardEl.style.transform = "scale(0.95)";
+        setTimeout(() => { cardEl.remove(); checkIncomingRequests(); }, 300);
+      }
+    } catch { toastError("Error aaya, dobara try karo"); }
+  }
+
+  async function loadStatusesAndRender(partners, isAI) {
+    const statuses = await Promise.all(partners.map(p =>
+      fetch(`${API}/partners/status/${p.id}`, {
+        headers: { "Authorization": "Bearer " + token }
+      }).then(r => r.json()).catch(() => ({ status: "none" }))
+    ));
+    const enriched = partners.map((p, i) => ({
+      ...p,
+      _status: statuses[i].status || "none",
+      _isSender: statuses[i].isSender,
+      _requestId: statuses[i].requestId
+    }));
+    renderPartners(enriched, isAI);
+  }
+
+  function renderPartners(partners, isAI = false) {
+    const grid = document.getElementById("partnersGrid");
+    if (!partners || partners.length === 0) {
+      grid.innerHTML = '<div class="empty"><div>😕</div>No partners found. Try updating your profile!</div>';
+      return;
+    }
+    grid.innerHTML = partners.map((p, i) => {
+      const s = p._status;
+      let btnHTML = "";
+      if (s === "none") {
+        btnHTML = `<button class="btn-connect default" onclick="sendRequest('${p.id}', this)">Connect</button>`;
+      } else if (s === "pending" && p._isSender) {
+        btnHTML = `<button class="btn-connect pending" disabled>⏳ Request Bheji</button>`;
+      } else if (s === "pending" && !p._isSender) {
+        btnHTML = `<button class="btn-connect incoming" disabled>📬 Request Aayi Hai</button>`;
+      } else if (s === "accepted") {
+        btnHTML = `<button class="btn-connect accepted" disabled>✅ Connected</button>`;
+      } else if (s === "rejected") {
+        btnHTML = `<button class="btn-connect default" onclick="sendRequest('${p.id}', this)">Connect Again</button>`;
+      }
+
+      const chatBtn = s === "accepted"
+        ? `<button class="btn-chat" onclick='openChat(${JSON.stringify(p)})' title="Open chat">💬</button>`
+        : "";
+
+      return `
+        <div class="partner-card" style="animation-delay:${i * 0.06}s">
+          ${isAI ? `<div class="match-badge">🎯 ${p.matchScore}% match</div>` : ""}
+          <div class="partner-top">
+            <div class="partner-avatar">
+              ${p.avatar ? `<img src="${p.avatar}" alt="${p.name}">` : p.name[0].toUpperCase()}
+            </div>
+            <div>
+              <div class="partner-name">${p.name}</div>
+              <div class="partner-course">${p.course || "Course not set"} • ${p.year || "Year not set"}</div>
+            </div>
+          </div>
+          <div class="partner-tags">
+            ${(p.subjects || []).slice(0, 4).map(s => `<span class="tag">${s}</span>`).join("")}
+            ${p.study_style ? `<span class="tag style">🕐 ${p.study_style}</span>` : ""}
+          </div>
+          ${p.bio ? `<div class="partner-bio">${p.bio}</div>` : ""}
+          <div class="partner-actions">
+            ${btnHTML}
+            ${chatBtn}
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // ── Load views ───────────────────────────────────────────────────────────
+  async function loadAIMatches() {
+    document.getElementById("mainContent").innerHTML = '<div class="partners-grid" id="partnersGrid"><div class="empty"><div>🧠</div>Running AI matching...</div></div>';
+    try {
+      const res = await fetch(`${API}/partners/match`, { headers: { "Authorization": "Bearer " + token } });
+      const data = await res.json();
+      await loadStatusesAndRender(data, true);
+    } catch {
+      document.getElementById("partnersGrid").innerHTML = '<div class="empty"><div>❌</div>Could not load matches</div>';
+    }
+  }
+
+  async function loadBrowse() {
+    document.getElementById("mainContent").innerHTML = '<div class="partners-grid" id="partnersGrid"><div class="empty"><div>⏳</div>Loading students...</div></div>';
+    try {
+      const res = await fetch(`${API}/partners/browse`, { headers: { "Authorization": "Bearer " + token } });
+      const data = await res.json();
+      await loadStatusesAndRender(data, false);
+    } catch {
+      document.getElementById("partnersGrid").innerHTML = '<div class="empty"><div>❌</div>Could not load students</div>';
+    }
+  }
+
+  async function loadIncomingRequests() {
+    document.getElementById("mainContent").innerHTML = '<div style="padding:20px;color:var(--muted)">⏳ Loading requests...</div>';
+    try {
+      const res = await fetch(`${API}/partners/requests/incoming`, { headers: { "Authorization": "Bearer " + token } });
+      const requests = await res.json();
+      if (!requests.length) {
+        document.getElementById("mainContent").innerHTML = '<div class="empty"><div>📭</div>Koi incoming request nahi hai abhi</div>';
+        return;
+      }
+      document.getElementById("mainContent").innerHTML = `<div class="requests-list">${
+        requests.map((r, i) => `
+          <div class="request-card" id="req-${r.requestId}" style="animation-delay:${i*0.07}s">
+            <div class="req-avatar">
+              ${r.sender.avatar ? `<img src="${r.sender.avatar}">` : (r.sender.name || "?")[0].toUpperCase()}
+            </div>
+            <div class="req-info">
+              <div class="req-name">${r.sender.name || "Unknown"}</div>
+              <div class="req-sub">${r.sender.course || "Course not set"} • ${r.sender.year || "Year not set"}</div>
+              <div class="req-sub" style="margin-top:3px">${(r.sender.subjects||[]).slice(0,3).join(", ") || ""}</div>
+            </div>
+            <div class="req-actions">
+              <button class="btn-accept" onclick="respondToRequest('${r.requestId}', 'accepted', document.getElementById('req-${r.requestId}'))">✅ Accept</button>
+              <button class="btn-reject" onclick="respondToRequest('${r.requestId}', 'rejected', document.getElementById('req-${r.requestId}'))">❌ Reject</button>
+            </div>
+          </div>
+        `).join("")
+      }</div>`;
+      document.getElementById("notifDot").classList.remove("show");
+    } catch {
+      document.getElementById("mainContent").innerHTML = '<div class="empty">❌ Could not load requests</div>';
+    }
+  }
+
+  function switchView(view) {
+    document.getElementById("tabAI").classList.toggle("active", view === "ai");
+    document.getElementById("tabBrowse").classList.toggle("active", view === "browse");
+    document.getElementById("tabRequests").classList.toggle("active", view === "requests");
+    if (view === "ai") loadAIMatches();
+    else if (view === "browse") loadBrowse();
+    else loadIncomingRequests();
+  }
+
+  // ════════════════════════════════════════════════════
+  //   REAL-TIME CHAT
+  // ════════════════════════════════════════════════════
+
+  let currentPeer = null;       // the partner object whose chat is open
+  let chatChannel = null;       // Supabase Realtime channel
+  let typingTimeout = null;
+
+  // Build a deterministic room ID from two user IDs so both users land in the same channel
+  function getRoomId(id1, id2) {
+    return [id1, id2].sort().join("_");
+  }
+
+  function openChat(partner) {
+    currentPeer = partner;
+    const roomId = getRoomId(user.id, partner.id);
+
+    // Set header
+    const avatarEl = document.getElementById("chatPeerAvatar");
+    avatarEl.innerHTML = partner.avatar ? `<img src="${partner.avatar}">` : partner.name[0].toUpperCase();
+    document.getElementById("chatPeerName").textContent = partner.name;
+
+    // Open overlay
+    document.getElementById("chatOverlay").classList.add("open");
+    document.getElementById("chatMessages").innerHTML = '<div class="chat-loading"><div class="spin"></div><span>Loading messages...</span></div>';
+
+    loadMessages(roomId);
+    subscribeToChat(roomId, partner);
+  }
+
+  function closeChat() {
+    document.getElementById("chatOverlay").classList.remove("open");
+    if (chatChannel) { sb.removeChannel(chatChannel); chatChannel = null; }
+    currentPeer = null;
+  }
+
+  function handleOverlayClick(e) {
+    if (e.target === document.getElementById("chatOverlay")) closeChat();
+  }
+
+  // ── Load message history from Supabase ──────────────────────────────────
+  async function loadMessages(roomId) {
+    try {
+      const { data, error } = await sb
+        .from("messages")
+        .select("*")
+        .eq("room_id", roomId)
+        .order("created_at", { ascending: true })
+        .limit(100);
+
+      if (error) throw error;
+      renderMessages(data || []);
+    } catch (err) {
+      document.getElementById("chatMessages").innerHTML =
+        '<div class="chat-empty"><div class="chat-empty-icon">💬</div><div class="chat-empty-text">Start the conversation!</div><div class="chat-empty-sub">Say hi to your study partner 👋</div></div>';
+    }
+  }
+
+  // ── Render all messages ──────────────────────────────────────────────────
+  function renderMessages(msgs) {
+    const box = document.getElementById("chatMessages");
+    if (!msgs.length) {
+      box.innerHTML = `
+        <div class="chat-empty">
+          <div class="chat-empty-icon">💬</div>
+          <div class="chat-empty-text">Start the conversation!</div>
+          <div class="chat-empty-sub">Say hi to your study partner 👋</div>
+        </div>`;
+      return;
+    }
+
+    let html = "";
+    let lastDate = "";
+
+    msgs.forEach(m => {
+      const isMe = m.sender_id === user.id;
+      const d = new Date(m.created_at);
+      const dateStr = d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      const timeStr = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+
+      if (dateStr !== lastDate) {
+        html += `<div class="date-sep">${dateStr === new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short" }) ? "Today" : dateStr}</div>`;
+        lastDate = dateStr;
+      }
+
+      if (m.type === "call_invite") {
+        html += `
+          <div class="msg ${isMe ? "mine" : "theirs"}">
+            <div class="bubble call-invite" onclick="joinCallFromLink('${m.content}')">
+              <div class="call-invite-icon">📹</div>
+              <div>
+                <div class="call-invite-text">${isMe ? "You started" : currentPeer?.name + " started"} a Study Room</div>
+                <div class="call-invite-sub">${m.content}</div>
+                <button class="btn-join-call">Join Room →</button>
+              </div>
+            </div>
+            <div class="msg-time">${timeStr}</div>
+          </div>`;
+      } else {
+        html += `
+          <div class="msg ${isMe ? "mine" : "theirs"}">
+            <div class="bubble">${escapeHtml(m.content)}</div>
+            <div class="msg-time">${timeStr}</div>
+          </div>`;
+      }
+    });
+
+    box.innerHTML = html;
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // ── Append a single new message (from realtime) ──────────────────────────
+  function appendMessage(m) {
+    const box = document.getElementById("chatMessages");
+
+    // Remove empty state if present
+    const empty = box.querySelector(".chat-empty");
+    if (empty) empty.remove();
+
+    const isMe = m.sender_id === user.id;
+    const d = new Date(m.created_at);
+    const timeStr = d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" });
+
+    const div = document.createElement("div");
+    div.className = `msg ${isMe ? "mine" : "theirs"}`;
+
+    if (m.type === "call_invite") {
+      div.innerHTML = `
+        <div class="bubble call-invite" onclick="joinCallFromLink('${m.content}')">
+          <div class="call-invite-icon">📹</div>
+          <div>
+            <div class="call-invite-text">${isMe ? "You started" : (currentPeer?.name || "Partner") + " started"} a Study Room</div>
+            <div class="call-invite-sub">${m.content}</div>
+            <button class="btn-join-call">Join Room →</button>
+          </div>
+        </div>
+        <div class="msg-time">${timeStr}</div>`;
+    } else {
+      div.innerHTML = `<div class="bubble">${escapeHtml(m.content)}</div><div class="msg-time">${timeStr}</div>`;
+    }
+
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // ── Subscribe to Realtime ────────────────────────────────────────────────
+  function subscribeToChat(roomId, partner) {
+    if (chatChannel) sb.removeChannel(chatChannel);
+
+    chatChannel = sb.channel(`room:${roomId}`)
+      .on("postgres_changes", {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `room_id=eq.${roomId}`
+      }, payload => {
+        const msg = payload.new;
+        // Don't re-render messages we just sent (we optimistically appended them)
+        if (msg.sender_id !== user.id) {
+          appendMessage(msg);
+          hideTyping();
+        }
+      })
+      // Typing indicator via broadcast (ephemeral, not stored in DB)
+      .on("broadcast", { event: "typing" }, ({ payload }) => {
+        if (payload.userId !== user.id) {
+          showTyping(partner.name);
+        }
+      })
+      .subscribe();
+  }
+
+  // ── Send a message ────────────────────────────────────────────────────────
+  async function sendMessage() {
+    const input = document.getElementById("chatInput");
+    const text = input.value.trim();
+    if (!text || !currentPeer) return;
+
+    const btn = document.getElementById("sendBtn");
+    btn.disabled = true;
+    input.value = "";
+    autoResize(input);
+
+    const roomId = getRoomId(user.id, currentPeer.id);
+    const msg = {
+      room_id: roomId,
+      sender_id: user.id,
+      sender_name: user.name,
+      content: text,
+      type: "text",
+      created_at: new Date().toISOString()
+    };
+
+    // Optimistic UI — show immediately
+    appendMessage(msg);
+
+    try {
+      const { error } = await sb.from("messages").insert([msg]);
+      if (error) throw error;
+    } catch {
+      toastError("Message send nahi hua, dobara try karo");
+    } finally {
+      btn.disabled = false;
+      input.focus();
+    }
+  }
+
+  // ── Typing indicator ──────────────────────────────────────────────────────
+  function handleInputKey(e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+      return;
+    }
+    // Broadcast typing event
+    if (chatChannel && currentPeer) {
+      chatChannel.send({ type: "broadcast", event: "typing", payload: { userId: user.id } });
+      clearTimeout(typingTimeout);
+      typingTimeout = setTimeout(() => {}, 2000);
+    }
+  }
+
+  function showTyping(name) {
+    const el = document.getElementById("typingIndicator");
+    document.getElementById("typingText").textContent = `${name} is typing...`;
+    el.classList.add("show");
+    clearTimeout(typingTimeout);
+    typingTimeout = setTimeout(hideTyping, 2500);
+    document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
+  }
+
+  function hideTyping() {
+    document.getElementById("typingIndicator").classList.remove("show");
+  }
+
+  function autoResize(el) {
+    el.style.height = "auto";
+    el.style.height = Math.min(el.scrollHeight, 100) + "px";
+  }
+
+  // ════════════════════════════════════════════════════
+  //   VIDEO CALL (Jitsi Meet — free, no account needed)
+  // ════════════════════════════════════════════════════
+
+  function generateRoomName() {
+    // Deterministic per pair so both can land in same room via chat invite
+    const roomId = getRoomId(user.id, currentPeer?.id || "guest");
+    return `unibuddy-study-${roomId.substring(0, 12)}`;
+  }
+
+  async function startVideoCall() {
+    if (!currentPeer) return;
+    const roomName = generateRoomName();
+    const roomUrl  = `https://meet.jit.si/${roomName}`;
+
+    // Send call invite as a message so partner sees it in chat
+    const msg = {
+      room_id: getRoomId(user.id, currentPeer.id),
+      sender_id: user.id,
+      sender_name: user.name,
+      content: roomUrl,
+      type: "call_invite",
+      created_at: new Date().toISOString()
+    };
+    appendMessage(msg);
+    try { await sb.from("messages").insert([msg]); } catch {}
+
+    openCallWindow(roomUrl, roomName);
+  }
+
+  function joinCallFromLink(url) {
+    const roomName = url.split("/").pop();
+    openCallWindow(url, roomName);
+  }
+
+  function openCallWindow(url, roomName) {
+    document.getElementById("callRoomTitle").textContent = `📹 ${currentPeer?.name || "Study"} Room`;
+    document.getElementById("callRoomSub").textContent = `Room: ${roomName}  •  Share link: ${url}`;
+    document.getElementById("callIframe").src = url;
+    document.getElementById("callOverlay").classList.add("open");
+    // Close chat modal while on call
+    document.getElementById("chatOverlay").classList.remove("open");
+  }
+
+  function endCall() {
+    document.getElementById("callOverlay").classList.remove("open");
+    document.getElementById("callIframe").src = "";
+    // Re-open chat
+    if (currentPeer) document.getElementById("chatOverlay").classList.add("open");
+  }
+
+  // ── Utility: escape HTML to prevent XSS in messages ─────────────────────
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  // ── Init ─────────────────────────────────────────────────────────────────
+  checkIncomingRequests();
+  loadAIMatches();
+
+  // Poll for new requests every 30 seconds
+  setInterval(checkIncomingRequests, 30000);
+</script>
+<script src="theme.js"></script>
+<script src="mobile.js"></script>
+</body>
+</html>

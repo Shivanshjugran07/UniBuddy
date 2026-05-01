@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quizzes — UniBuddy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --indigo: #6366f1; --indigo-dark: #4f46e5; --indigo-light: #eef2ff; --emerald: #10b981; --amber: #f59e0b; --rose: #f43f5e; --bg: #f8fafc; --card: #fff; --border: #e2e8f0; --text: #0f172a; --muted: #64748b; --sidebar: #0c0e1a; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Nunito', sans-serif; background: var(--bg); display: flex; min-height: 100vh; }
+    .sidebar { width: 240px; background: var(--sidebar); display: flex; flex-direction: column; padding: 24px 0; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; }
+    .sidebar-logo { font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; color: white; letter-spacing: -1px; padding: 0 24px 28px; border-bottom: 1px solid #1e2240; }
+    .sidebar-logo span { color: var(--indigo); }
+    .nav-section { padding: 20px 12px 8px; font-size: 10px; color: #3a4060; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 24px; color: #6b7280; font-size: 14px; font-weight: 600; text-decoration: none; border-left: 3px solid transparent; transition: 0.2s; }
+    .nav-item:hover { color: white; background: rgba(255,255,255,0.05); }
+    .nav-item.active { color: var(--indigo); border-left-color: var(--indigo); background: rgba(99,102,241,0.08); }
+    .nav-item .icon { font-size: 18px; width: 22px; text-align: center; }
+    .sidebar-bottom { margin-top: auto; padding: 20px 12px; border-top: 1px solid #1e2240; }
+    .user-mini { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; }
+    .avatar-sm { width: 36px; height: 36px; border-radius: 50%; background: var(--indigo); display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: white; overflow: hidden; flex-shrink: 0; }
+    .avatar-sm img { width: 100%; height: 100%; object-fit: cover; }
+    .user-name { font-size: 13px; font-weight: 700; color: white; }
+    .user-role-text { font-size: 11px; color: var(--muted); }
+    .btn-logout-mini { background: none; border: none; color: #ef4444; cursor: pointer; font-size: 16px; margin-left: auto; }
+    .main { margin-left: 240px; flex: 1; padding: 32px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .page-title { font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800; color: var(--text); }
+    .info-banner { background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 14px; padding: 18px 22px; display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+    .info-banner-text { font-size: 13px; color: rgba(255,255,255,0.8); line-height: 1.6; }
+    .info-banner-text strong { color: white; font-family: 'Outfit', sans-serif; font-size: 14px; }
+    .btn-go-mentors { padding: 8px 16px; background: var(--indigo); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 10px; text-decoration: none; display: inline-block; }
+    .quiz-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+    .quiz-card { background: var(--card); border-radius: 16px; border: 1px solid var(--border); padding: 22px; animation: fadeUp 0.4s ease both; position: relative; overflow: hidden; }
+    .quiz-card.accessible { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .quiz-card.accessible:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.08); }
+    .lock-overlay { position: absolute; inset: 0; background: rgba(248,250,252,0.93); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; border-radius: 16px; padding: 20px; text-align: center; }
+    .lock-icon { font-size: 34px; }
+    .lock-msg { font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700; color: var(--text); }
+    .lock-sub { font-size: 11px; color: var(--muted); max-width: 190px; line-height: 1.4; }
+    .btn-go-connect { padding: 7px 16px; background: var(--indigo); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 4px; }
+    .premium-lock { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(245,158,11,0.93), rgba(217,119,6,0.96)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border-radius: 16px; padding: 20px; text-align: center; }
+    .premium-lock-icon { font-size: 36px; }
+    .premium-lock-msg { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 800; color: white; }
+    .premium-lock-sub { font-size: 12px; color: rgba(255,255,255,0.85); max-width: 190px; line-height: 1.4; }
+    .btn-pay { padding: 9px 20px; background: white; color: #d97706; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 800; cursor: pointer; margin-top: 6px; transition: 0.2s; }
+    .btn-pay:hover { transform: scale(1.03); }
+    .quiz-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
+    .quiz-badge.free { background: rgba(16,185,129,0.1); color: var(--emerald); }
+    .quiz-badge.premium { background: rgba(245,158,11,0.1); color: var(--amber); }
+    .quiz-title { font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+    .quiz-subject { font-size: 13px; color: var(--muted); margin-bottom: 12px; }
+    .quiz-meta { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+    .btn-start { width: 100%; padding: 10px; background: var(--indigo); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-start:hover { background: var(--indigo-dark); }
+    .quiz-view { display: none; }
+    .quiz-view.active { display: block; }
+    .list-view.hidden { display: none; }
+    .quiz-header { background: var(--card); border-radius: 16px; padding: 24px; border: 1px solid var(--border); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+    .quiz-h-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); }
+    .timer { font-family: 'Outfit', sans-serif; font-size: 22px; font-weight: 800; color: var(--rose); }
+    .progress-bar { background: #e2e8f0; border-radius: 8px; height: 6px; margin-bottom: 24px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--indigo); border-radius: 8px; transition: width 0.3s; }
+    .question-card { background: var(--card); border-radius: 16px; padding: 28px; border: 1px solid var(--border); margin-bottom: 20px; }
+    .q-number { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .q-text { font-family: 'Outfit', sans-serif; font-size: 18px; font-weight: 600; color: var(--text); margin-bottom: 20px; line-height: 1.5; }
+    .options { display: flex; flex-direction: column; gap: 10px; }
+    .option { padding: 14px 18px; border: 2px solid var(--border); border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 15px; display: flex; align-items: center; gap: 12px; }
+    .option:hover { border-color: var(--indigo); background: var(--indigo-light); }
+    .option.selected { border-color: var(--indigo); background: var(--indigo-light); color: var(--indigo); font-weight: 600; }
+    .option-letter { width: 28px; height: 28px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .nav-btns { display: flex; gap: 12px; justify-content: flex-end; }
+    .btn-next { padding: 12px 28px; background: var(--indigo); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .btn-prev { padding: 12px 28px; background: white; color: var(--text); border: 1px solid var(--border); border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .result-card { background: var(--card); border-radius: 20px; padding: 40px; border: 1px solid var(--border); text-align: center; }
+    .result-score { font-family: 'Outfit', sans-serif; font-size: 72px; font-weight: 800; color: var(--indigo); }
+    .result-label { font-size: 18px; color: var(--muted); margin-bottom: 20px; }
+    .result-pct { font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 700; }
+    .btn-back { margin-top: 20px; padding: 12px 28px; background: var(--indigo); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; justify-content: center; align-items: center; backdrop-filter: blur(3px); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: white; border-radius: 20px; padding: 32px; width: 420px; animation: pop 0.3s ease; }
+    @keyframes pop { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .modal-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; margin-bottom: 6px; color: var(--text); }
+    .modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .pay-amount { font-family: 'Outfit', sans-serif; font-size: 40px; font-weight: 800; color: var(--emerald); text-align: center; margin: 12px 0; }
+    .pay-info { background: #f8fafc; border-radius: 10px; padding: 14px; margin-bottom: 16px; font-size: 13px; color: var(--muted); line-height: 1.7; }
+    .pay-info strong { color: var(--text); }
+    .upi-box { background: var(--indigo-light); border: 1px solid rgba(99,102,241,0.3); border-radius: 10px; padding: 14px; text-align: center; margin-bottom: 16px; cursor: pointer; }
+    .upi-box:hover { background: rgba(99,102,241,0.15); }
+    .upi-id { font-family: 'Outfit', sans-serif; font-size: 16px; font-weight: 700; color: var(--indigo); }
+    .upi-label { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.7px; margin-bottom: 6px; }
+    input { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 14px; outline: none; transition: 0.2s; }
+    input:focus { border-color: var(--indigo); }
+    .btn-confirm-pay { width: 100%; padding: 13px; background: linear-gradient(135deg, #059669, #0ea572); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-cancel-pay { width: 100%; padding: 11px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 8px; }
+    .empty { text-align: center; padding: 60px; color: var(--muted); font-size: 15px; grid-column: 1/-1; }
+    .empty div { font-size: 44px; margin-bottom: 12px; }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(60px); opacity: 0; transition: all 0.3s; z-index: 9999; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo">Uni<span>Buddy</span></div>
+  <div class="nav-section">Main</div>
+  <a href="dashboard.html" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+  <a href="books.html" class="nav-item"><span class="icon">📚</span> Books</a>
+  <a href="mentors.html" class="nav-item"><span class="icon">🧑‍🏫</span> Mentors</a>
+  <a href="quiz.html" class="nav-item active"><span class="icon">📝</span> Quizzes</a>
+  <a href="partners.html" class="nav-item"><span class="icon">🤝</span> Study Partners</a>
+  <div class="nav-section">Account</div>
+  <a href="profile.html" class="nav-item"><span class="icon">👤</span> My Profile</a>
+  <a href="my_books.html" class="nav-item"><span class="icon">🏷️</span> My Listings</a>
+  <div class="sidebar-bottom">
+    <div class="user-mini">
+      <div class="avatar-sm" id="sideAvatar">U</div>
+      <div><div class="user-name" id="sideName">User</div><div class="user-role-text" id="sideRole">student</div></div>
+      <button class="btn-logout-mini" onclick="logout()">⏻</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="list-view" id="listView">
+    <div class="topbar"><div class="page-title">📝 Quizzes & Tests</div></div>
+    <div class="info-banner">
+      <div style="font-size:32px;flex-shrink:0">🔐</div>
+      <div class="info-banner-text">
+        <strong>How quizzes work</strong><br>
+        ✅ Free quizzes — connect with that mentor first<br>
+        ⭐ Premium quizzes — pay mentor's session fee to unlock<br>
+        🎮 Demo quizzes — open to everyone!
+        <br><a href="mentors.html" class="btn-go-mentors">Browse Mentors →</a>
+      </div>
+    </div>
+    <div class="quiz-grid" id="quizGrid">
+      <div class="empty"><div>⏳</div>Loading quizzes...</div>
+    </div>
+  </div>
+
+  <div class="quiz-view" id="quizView">
+    <div class="quiz-header">
+      <div>
+        <div class="quiz-h-title" id="qTitle">Quiz</div>
+        <div style="font-size:13px;color:var(--muted);margin-top:4px" id="qMeta"></div>
+      </div>
+      <div class="timer" id="timer">15:00</div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div id="questionArea"></div>
+    <div class="nav-btns">
+      <button class="btn-prev" id="prevBtn" onclick="prevQ()" style="display:none">← Prev</button>
+      <button class="btn-next" id="nextBtn" onclick="nextQ()">Next →</button>
+    </div>
+  </div>
+
+  <div class="quiz-view" id="resultView">
+    <div class="result-card">
+      <div style="font-size:48px;margin-bottom:16px">🎉</div>
+      <div class="result-score"><span id="rScore">0</span>/<span id="rTotal">0</span></div>
+      <div class="result-label">Quiz Complete!</div>
+      <div class="result-pct" id="rPct"></div>
+      <div style="font-size:14px;color:var(--muted);margin-top:12px" id="rMsg"></div>
+      <button class="btn-back" onclick="backToList()">← Back to Quizzes</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal">
+    <div class="modal-title">⭐ Unlock Premium Quiz</div>
+    <div class="modal-sub">Pay the mentor's session fee to get full access</div>
+    <div class="pay-amount" id="payAmount">₹0</div>
+    <div class="pay-info">
+      <strong>Quiz:</strong> <span id="payQuizName">-</span><br>
+      <strong>Mentor:</strong> <span id="payMentorName">-</span>
+    </div>
+    <div class="upi-box" onclick="copyUpi()">
+      <div class="upi-id" id="payUpiId">mentor@upi</div>
+      <div class="upi-label">📋 Tap to copy UPI ID — pay from any UPI app</div>
+    </div>
+    <div class="form-group">
+      <label>UPI Transaction ID</label>
+      <input id="payTxnId" placeholder="Enter transaction ID after paying">
+    </div>
+    <button class="btn-confirm-pay" onclick="confirmPayment()">✅ I've Paid — Unlock Quiz</button>
+    <button class="btn-cancel-pay" onclick="closePayModal()">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const API = "https://unibuddy-1.onrender.com/api";
+  const token = localStorage.getItem("token");
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  if (!token) window.location.href = "login.html";
+
+  document.getElementById("sideName").textContent = user.name || "User";
+  document.getElementById("sideRole").textContent = user.role || "student";
+  if (user.avatar) document.getElementById("sideAvatar").innerHTML = `<img src="${user.avatar}">`;
+  else document.getElementById("sideAvatar").textContent = (user.name || "U")[0].toUpperCase();
+  function logout() { localStorage.clear(); window.location.href = "login.html"; }
+
+  function showToast(msg, color = "#0f172a") {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.style.background = color;
+    t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3000);
+  }
+
+  let currentQuiz = null, currentQ = 0, answers = [], timerInterval = null;
+  let allMentors = [];
+  let pendingPayQuiz = null;
+
+  function getPaidQuizzes() { return JSON.parse(localStorage.getItem("paidQuizzes") || "[]"); }
+  function getConnectedMentors() { return JSON.parse(localStorage.getItem("connectedMentors") || "[]"); }
+
+  async function loadQuizzes() {
+    try {
+      // Load mentors for price info
+      const mRes = await fetch(`${API}/mentors`);
+      allMentors = await mRes.json();
+
+      const res = await fetch(`${API}/quiz`);
+      const quizzes = await res.json();
+
+      if (!quizzes.length) {
+        const demos = [
+          { id: "demo1", title: "DSA Basics", subject: "Data Structures", duration: 10, total_marks: 5, is_premium: false, mentor_name: "UniBuddy Team", mentor_id: "demo" },
+          { id: "demo2", title: "DBMS Fundamentals", subject: "Database Management", duration: 15, total_marks: 10, is_premium: false, mentor_name: "UniBuddy Team", mentor_id: "demo" },
+          { id: "demo3", title: "OS Concepts", subject: "Operating Systems", duration: 20, total_marks: 15, is_premium: true, mentor_name: "UniBuddy Demo", mentor_id: "demo" },
+        ];
+        renderQuizCards(demos);
+        return;
+      }
+      renderQuizCards(quizzes);
+    } catch {
+      document.getElementById("quizGrid").innerHTML = '<div class="empty"><div>❌</div>Could not load quizzes</div>';
+    }
+  }
+
+  function renderQuizCards(quizzes) {
+    const paid = getPaidQuizzes();
+    const connected = getConnectedMentors();
+
+    document.getElementById("quizGrid").innerHTML = quizzes.map((q, i) => {
+      const isDemo = q.id?.startsWith("demo");
+      const mentor = allMentors.find(m => m.user_id === q.mentor_id);
+      const isConnected = isDemo || connected.includes(q.mentor_id);
+      const isPaid = isDemo || paid.includes(q.id);
+
+      let lockHTML = "";
+      if (!isDemo) {
+        if (q.is_premium && !isPaid) {
+          const price = mentor?.price || 0;
+          lockHTML = `<div class="premium-lock">
+            <div class="premium-lock-icon">⭐</div>
+            <div class="premium-lock-msg">Premium Quiz</div>
+            <div class="premium-lock-sub">Pay ₹${price} session fee to ${q.mentor_name} to unlock</div>
+            <button class="btn-pay" onclick="event.stopPropagation();openPayModal('${q.id}','${q.title.replace(/'/g,"\\'")}','${q.mentor_name}',${mentor?.price||0},'${mentor?.id||''}','${q.mentor_name.toLowerCase().replace(/\s/g,"")}')">💰 Pay & Unlock</button>
+          </div>`;
+        } else if (!q.is_premium && !isConnected) {
+          lockHTML = `<div class="lock-overlay">
+            <div class="lock-icon">🔒</div>
+            <div class="lock-msg">Connect with mentor first</div>
+            <div class="lock-sub">Go to Mentors page and connect with ${q.mentor_name}</div>
+            <button class="btn-go-connect" onclick="event.stopPropagation();window.location.href='mentors.html'">Browse Mentors →</button>
+          </div>`;
+        }
+      }
+
+      const accessible = !lockHTML;
+      return `
+        <div class="quiz-card ${accessible ? 'accessible' : ''}" style="animation-delay:${i*0.06}s" ${accessible ? `onclick="startQuiz('${q.id}')"` : ""}>
+          <span class="quiz-badge ${q.is_premium ? 'premium' : 'free'}">${q.is_premium ? '⭐ Premium' : '✅ Free'}</span>
+          <div class="quiz-title">${q.title}</div>
+          <div class="quiz-subject">📘 ${q.subject}</div>
+          <div class="quiz-meta">
+            <span>⏱ ${q.duration} mins</span>
+            <span>📊 ${q.total_marks} marks</span>
+            <span>👨‍🏫 ${q.mentor_name || "UniBuddy"}</span>
+          </div>
+          ${accessible ? `<button class="btn-start">Start Quiz →</button>` : ""}
+          ${lockHTML}
+        </div>`;
+    }).join("");
+  }
+
+  // ── Payment ───────────────────────────────────────────────────────────────
+  function openPayModal(quizId, quizTitle, mentorName, price, mentorDbId, upiHandle) {
+    pendingPayQuiz = { quizId, quizTitle, mentorName, price };
+    document.getElementById("payQuizName").textContent = quizTitle;
+    document.getElementById("payMentorName").textContent = mentorName;
+    document.getElementById("payAmount").textContent = "₹" + price;
+    document.getElementById("payUpiId").textContent = upiHandle + "@upi";
+    document.getElementById("payTxnId").value = "";
+    document.getElementById("payModal").classList.add("open");
+  }
+  function closePayModal() { document.getElementById("payModal").classList.remove("open"); pendingPayQuiz = null; }
+
+  function copyUpi() {
+    const upi = document.getElementById("payUpiId").textContent;
+    navigator.clipboard.writeText(upi).then(() => showToast("UPI ID copied! 📋", "#059669")).catch(() => {});
+  }
+
+  function confirmPayment() {
+    const txnId = document.getElementById("payTxnId").value.trim();
+    if (!txnId) { showToast("Transaction ID daalo!", "#dc2626"); return; }
+    if (!pendingPayQuiz) return;
+    const paid = getPaidQuizzes();
+    if (!paid.includes(pendingPayQuiz.quizId)) {
+      paid.push(pendingPayQuiz.quizId);
+      localStorage.setItem("paidQuizzes", JSON.stringify(paid));
+    }
+    showToast("Payment recorded! Quiz unlock ho gaya ✅", "#059669");
+    closePayModal();
+    setTimeout(loadQuizzes, 400);
+  }
+
+  // ── Quiz engine ───────────────────────────────────────────────────────────
+  async function startQuiz(id) {
+    if (id.startsWith("demo")) {
+      currentQuiz = {
+        id, title: "Sample Quiz", duration: 5,
+        questions: [
+          { question: "What is the time complexity of Binary Search?", options: ["O(n)", "O(log n)", "O(n²)", "O(1)"], correct: 1, explanation: "Binary Search halves the search space each time — O(log n)." },
+          { question: "Which data structure uses LIFO order?", options: ["Queue", "Stack", "Array", "Linked List"], correct: 1, explanation: "Stack follows Last In First Out." },
+          { question: "What does SQL stand for?", options: ["Structured Query Language", "Simple Query Language", "Sequential Query Logic", "Standard Query List"], correct: 0, explanation: "SQL = Structured Query Language." },
+          { question: "Which is NOT a primary key property?", options: ["Unique", "Not Null", "Can repeat", "Identifies a row"], correct: 2, explanation: "Primary keys cannot repeat." },
+          { question: "What is a foreign key?", options: ["Key from abroad", "References another table's PK", "Duplicate primary key", "Index key"], correct: 1, explanation: "A foreign key references another table's primary key." },
+        ]
+      };
+      beginQuiz(); return;
+    }
+    try {
+      const res = await fetch(`${API}/quiz/${id}`, { headers: { "Authorization": "Bearer " + token } });
+      currentQuiz = await res.json();
+      beginQuiz();
+    } catch { showToast("Quiz load nahi hua", "#dc2626"); }
+  }
+
+  function beginQuiz() {
+    currentQ = 0;
+    answers = new Array(currentQuiz.questions.length).fill(null);
+    document.getElementById("qTitle").textContent = currentQuiz.title;
+    document.getElementById("qMeta").textContent = `${currentQuiz.questions.length} questions • ${currentQuiz.duration} minutes`;
+    document.getElementById("listView").classList.add("hidden");
+    document.getElementById("quizView").classList.add("active");
+    document.getElementById("resultView").classList.remove("active");
+    startTimer(currentQuiz.duration * 60);
+    renderQuestion();
+  }
+
+  function renderQuestion() {
+    const q = currentQuiz.questions[currentQ];
+    const total = currentQuiz.questions.length;
+    document.getElementById("progressFill").style.width = ((currentQ + 1) / total * 100) + "%";
+    document.getElementById("prevBtn").style.display = currentQ > 0 ? "block" : "none";
+    document.getElementById("nextBtn").textContent = currentQ === total - 1 ? "Submit ✅" : "Next →";
+    const letters = ["A","B","C","D"];
+    document.getElementById("questionArea").innerHTML = `
+      <div class="question-card">
+        <div class="q-number">Question ${currentQ + 1} of ${total}</div>
+        <div class="q-text">${q.question}</div>
+        <div class="options">
+          ${q.options.map((opt, i) => `
+            <div class="option ${answers[currentQ] === i ? 'selected' : ''}" onclick="selectAnswer(${i})">
+              <div class="option-letter">${letters[i]}</div>${opt}
+            </div>`).join("")}
+        </div>
+      </div>`;
+  }
+
+  function selectAnswer(i) { answers[currentQ] = i; renderQuestion(); }
+  function nextQ() { if (currentQ < currentQuiz.questions.length - 1) { currentQ++; renderQuestion(); } else submitQuiz(); }
+  function prevQ() { if (currentQ > 0) { currentQ--; renderQuestion(); } }
+
+  function submitQuiz() {
+    clearInterval(timerInterval);
+    let score = 0;
+    currentQuiz.questions.forEach((q, i) => { if (answers[i] === q.correct) score++; });
+    const total = currentQuiz.questions.length;
+    const pct = Math.round(score / total * 100);
+    document.getElementById("rScore").textContent = score;
+    document.getElementById("rTotal").textContent = total;
+    document.getElementById("rPct").textContent = pct + "%";
+    document.getElementById("rPct").style.color = pct >= 70 ? "var(--emerald)" : pct >= 40 ? "var(--amber)" : "var(--rose)";
+    document.getElementById("rMsg").textContent = pct >= 70 ? "Excellent! Great job! 🎉" : pct >= 40 ? "Good effort! Keep practicing 💪" : "Keep studying, you'll improve! 📚";
+    document.getElementById("quizView").classList.remove("active");
+    document.getElementById("resultView").classList.add("active");
+  }
+
+  function startTimer(seconds) {
+    let remaining = seconds;
+    const el = document.getElementById("timer");
+    timerInterval = setInterval(() => {
+      remaining--;
+      const m = Math.floor(remaining / 60).toString().padStart(2, "0");
+      const s = (remaining % 60).toString().padStart(2, "0");
+      el.textContent = `${m}:${s}`;
+      if (remaining <= 0) { clearInterval(timerInterval); submitQuiz(); }
+    }, 1000);
+  }
+
+  function backToList() {
+    clearInterval(timerInterval);
+    document.getElementById("listView").classList.remove("hidden");
+    document.getElementById("quizView").classList.remove("active");
+    document.getElementById("resultView").classList.remove("active");
+  }
+
+  loadQuizzes();
+</script>
+<script src="theme.js"></script>
+<script src="mobile.js"></script>
+</body>
+</html>

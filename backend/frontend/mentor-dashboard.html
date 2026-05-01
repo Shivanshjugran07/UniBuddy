@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mentor Dashboard — UniBuddy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{--indigo:#6366f1;--indigo-dark:#4f46e5;--indigo-light:#eef2ff;--emerald:#10b981;--amber:#f59e0b;--rose:#f43f5e;--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--sidebar:#0c0e1a}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Nunito',sans-serif;background:var(--bg);display:flex;min-height:100vh}
+    .sidebar{width:240px;background:var(--sidebar);display:flex;flex-direction:column;padding:24px 0;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto}
+    .sidebar-logo{font-family:'Outfit',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:-1px;padding:0 20px 16px;border-bottom:1px solid #1e2240}
+    .sidebar-logo span{color:var(--indigo)}
+    .mbadge{margin:10px 14px;background:linear-gradient(135deg,rgba(16,185,129,.2),rgba(99,102,241,.2));border:1px solid rgba(16,185,129,.3);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:700;color:#4ade80;text-align:center}
+    .nav-sec{padding:14px 12px 5px;font-size:10px;color:#3a4060;text-transform:uppercase;letter-spacing:1px;font-weight:700}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#6b7280;font-size:13px;font-weight:600;text-decoration:none;border-left:3px solid transparent;transition:.2s;cursor:pointer}
+    .nav-item:hover{color:#fff;background:rgba(255,255,255,.05)}
+    .nav-item.active{color:var(--indigo);border-left-color:var(--indigo);background:rgba(99,102,241,.08)}
+    .nav-item .icon{font-size:16px;width:20px;text-align:center}
+    .badge-pill{background:#ef4444;color:#fff;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:auto;display:none}
+    .badge-pill.show{display:block}
+    .sb-bottom{margin-top:auto;padding:16px 12px;border-top:1px solid #1e2240}
+    .user-mini{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px}
+    .av-sm{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,#059669,#0ea572);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
+    .av-sm img{width:100%;height:100%;object-fit:cover}
+    .u-name{font-size:13px;font-weight:700;color:#fff}
+    .u-role{font-size:11px;color:#4ade80}
+    .btn-lo{background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px;margin-left:auto}
+    .main{margin-left:240px;flex:1;padding:28px}
+    .sec{display:none}.sec.active{display:block}
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+    .page-title{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:var(--text)}
+    .page-sub{font-size:13px;color:var(--muted);margin-top:3px}
+    .btn-primary{padding:10px 20px;background:var(--indigo);color:#fff;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:.2s}
+    .btn-primary:hover{background:var(--indigo-dark)}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+    .stat-card{background:var(--card);border-radius:12px;padding:18px 20px;border:1px solid var(--border);display:flex;align-items:center;gap:14px}
+    .stat-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .g{background:rgba(16,185,129,.1)}.i{background:rgba(99,102,241,.1)}.a{background:rgba(245,158,11,.1)}.r{background:rgba(244,63,94,.1)}
+    .stat-val{font-family:'Outfit',sans-serif;font-size:24px;font-weight:800;color:var(--text)}
+    .stat-lbl{font-size:11px;color:var(--muted)}
+    .setup-banner{background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:14px;padding:22px 26px;display:flex;align-items:center;gap:18px;margin-bottom:22px}
+    .setup-banner h3{font-family:'Outfit',sans-serif;font-size:17px;font-weight:700;color:#fff}
+    .setup-banner p{font-size:13px;color:rgba(255,255,255,.7);margin-top:3px}
+    .btn-setup{padding:9px 18px;background:var(--emerald);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-top:10px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}
+    .card{background:var(--card);border-radius:14px;padding:22px;border:1px solid var(--border);margin-bottom:18px}
+    .card-title{font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;justify-content:space-between;align-items:center}
+    .req-card{display:flex;align-items:center;gap:12px;padding:14px;background:#f8fafc;border-radius:10px;margin-bottom:8px;border:1px solid var(--border);transition:.3s}
+    .req-card.fade{opacity:0;transform:scale(.95)}
+    .req-av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),#818cf8);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden}
+    .req-av img{width:100%;height:100%;object-fit:cover}
+    .req-info{flex:1}
+    .req-name{font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:var(--text)}
+    .req-sub{font-size:12px;color:var(--muted);margin-top:1px}
+    .req-actions{display:flex;gap:6px}
+    .btn-acc{padding:7px 14px;background:var(--emerald);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+    .btn-rej{padding:7px 14px;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2);border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+    .btn-app{padding:7px 14px;background:var(--emerald);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+    .btn-deny{padding:7px 14px;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.2);border-radius:8px;font-family:'Outfit',sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+    .s-item{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid #f1f5f9}
+    .s-item:last-child{border-bottom:none}
+    .s-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),#818cf8);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
+    .s-av img{width:100%;height:100%;object-fit:cover}
+    .s-info{flex:1}
+    .s-name{font-size:14px;font-weight:700;color:var(--text)}
+    .s-sub{font-size:12px;color:var(--muted);margin-top:1px}
+    .s-tag{padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(16,185,129,.1);color:var(--emerald)}
+    /* Payment badge */
+    .pay-tag.pending{background:rgba(245,158,11,.1);color:var(--amber)}
+    .pay-tag.approved{background:rgba(16,185,129,.1);color:var(--emerald)}
+    .pay-tag.rejected{background:rgba(239,68,68,.1);color:#ef4444}
+    .pay-tag{padding:3px 8px;border-radius:20px;font-size:11px;font-weight:700}
+    /* FORMS */
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+    .form-group{margin-bottom:12px}
+    label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:5px}
+    input,select,textarea{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-family:'Nunito',sans-serif;font-size:13px;outline:none;transition:.2s;background:#fafafa;color:var(--text)}
+    input:focus,select:focus,textarea:focus{border-color:var(--indigo);background:#fff}
+    textarea{min-height:80px;resize:vertical}
+    .btn-submit{padding:11px 24px;background:var(--indigo);color:#fff;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-top:6px}
+    /* CONTENT ITEMS */
+    .content-item{display:flex;align-items:center;gap:12px;padding:12px;background:#f8fafc;border-radius:10px;margin-bottom:8px;border:1px solid var(--border)}
+    .ci-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+    .ci-icon.note{background:rgba(99,102,241,.1)}
+    .ci-icon.video{background:rgba(239,68,68,.1)}
+    .ci-icon.pdf{background:rgba(245,158,11,.1)}
+    .ci-icon.link{background:rgba(16,185,129,.1)}
+    .ci-info{flex:1}
+    .ci-title{font-size:14px;font-weight:700;color:var(--text)}
+    .ci-type{font-size:11px;color:var(--muted);margin-top:1px}
+    .btn-del-item{padding:5px 10px;background:rgba(239,68,68,.1);color:#ef4444;border:none;border-radius:6px;font-size:12px;cursor:pointer}
+    /* MODAL */
+    .modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;justify-content:center;align-items:flex-start;overflow-y:auto;padding:40px 20px;backdrop-filter:blur(3px)}
+    .modal-ov.open{display:flex}
+    .modal{background:#fff;border-radius:18px;padding:28px;width:520px;margin:auto;animation:pop .3s ease}
+    @keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+    .modal-title{font-family:'Outfit',sans-serif;font-size:18px;font-weight:700;margin-bottom:18px;color:var(--text)}
+    .btn-cancel{width:100%;padding:10px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;margin-top:6px}
+    .empty{text-align:center;padding:32px;color:var(--muted);font-size:13px}
+    .empty div{font-size:36px;margin-bottom:8px}
+    .chat-msg-wrap{display:flex;flex-direction:column;max-width:72%;position:relative}
+    .chat-msg-del{
+      position:absolute;top:2px;right:calc(100% + 8px);
+      display:flex;align-items:center;gap:5px;
+      background:#fff;border:1px solid #fca5a5;
+      color:#ef4444;font-size:12px;font-weight:700;
+      padding:5px 10px;border-radius:20px;
+      cursor:pointer;z-index:10;white-space:nowrap;
+      box-shadow:0 4px 14px rgba(239,68,68,.2);
+      opacity:0;transform:scale(.8) translateX(6px);
+      pointer-events:none;
+      transition:opacity .2s ease, transform .2s ease;
+    }
+    .chat-msg-del.visible{
+      opacity:1;transform:scale(1) translateX(0);
+      pointer-events:all;
+    }
+    .chat-msg-del:hover{background:#fee2e2;}
+    @keyframes msgPop{from{transform:scale(.95);opacity:.6}to{transform:scale(1);opacity:1}}
+    .chat-msg-wrap.selected .chat-bubble{box-shadow:0 0 0 2px rgba(239,68,68,.35);}
+    .toast{position:fixed;bottom:24px;right:24px;color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;transform:translateY(60px);opacity:0;transition:all .3s;z-index:9999}
+    .toast.show{transform:translateY(0);opacity:1}
+  </style>
+  <link rel="stylesheet" href="mobile.css">
+</head>
+<body>
+<div class="sidebar">
+  <div class="sidebar-logo">Uni<span>Buddy</span></div>
+  <div class="mbadge">🧑‍🏫 MENTOR MODE</div>
+  <div class="nav-sec">Mentor</div>
+  <div class="nav-item active" id="navOverview" onclick="showSec('overview')"><span class="icon">🏠</span> Overview</div>
+  <div class="nav-item" id="navRequests" onclick="showSec('requests')"><span class="icon">📬</span> Student Requests<span class="badge-pill" id="reqPill">0</span></div>
+  <div class="nav-item" id="navPayments" onclick="showSec('payments')"><span class="icon">💰</span> Payments<span class="badge-pill" id="payPill">0</span></div>
+  <div class="nav-item" id="navStudents" onclick="showSec('students')"><span class="icon">👥</span> My Students</div>
+  <div class="nav-sec">Course</div>
+  <div class="nav-item" id="navContent" onclick="showSec('content')"><span class="icon">📚</span> Course Content</div>
+  <div class="nav-item" id="navSchedule" onclick="showSec('schedule')"><span class="icon">📅</span> Live Classes</div>
+  <div class="nav-item" id="navAnn" onclick="showSec('ann')"><span class="icon">📢</span> Announcements</div>
+  <div class="nav-item" id="navChats" onclick="showSec('chats')"><span class="icon">💬</span> Student Chats<span class="badge-pill" id="chatPill">0</span></div>
+  <div class="nav-item" id="navQuizzes" onclick="showSec('quizzes')"><span class="icon">📝</span> My Quizzes</div>
+  <div class="nav-sec">Account</div>
+  <a href="profile.html" class="nav-item"><span class="icon">👤</span> My Profile</a>
+  <div class="sb-bottom">
+    <div class="user-mini">
+      <div class="av-sm" id="sideAv">M</div>
+      <div><div class="u-name" id="sideName">Mentor</div><div class="u-role">🧑‍🏫 Mentor</div></div>
+      <button class="btn-lo" onclick="logout()">⏻</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- OVERVIEW -->
+  <div class="sec active" id="secOverview">
+    <div class="topbar"><div><div class="page-title">Dashboard 🧑‍🏫 <span id="greetName"></span></div></div><button class="btn-primary" onclick="showSec('content')">+ Add Content</button></div>
+    <div class="setup-banner" id="setupBanner" style="display:none">
+      <div style="font-size:36px">⚙️</div>
+      <div><h3>Setup Your Mentor Profile</h3><p>Students can't find you yet! Add your subjects, bio, session price and UPI ID.</p>
+      <button class="btn-setup" onclick="openModal('setupModal')">Setup Profile →</button></div>
+    </div>
+    <div class="stats">
+      <div class="stat-card"><div class="stat-icon g">👥</div><div><div class="stat-val" id="stStudents">0</div><div class="stat-lbl">Students</div></div></div>
+      <div class="stat-card"><div class="stat-icon i">📝</div><div><div class="stat-val" id="stQuizzes">0</div><div class="stat-lbl">Quizzes</div></div></div>
+      <div class="stat-card"><div class="stat-icon a">💰</div><div><div class="stat-val" id="stEarnings">₹0</div><div class="stat-lbl">Earnings</div></div></div>
+      <div class="stat-card"><div class="stat-icon r">⭐</div><div><div class="stat-val" id="stRating">—</div><div class="stat-lbl">Rating</div></div></div>
+    </div>
+    <div class="grid2">
+      <div class="card"><div class="card-title">📬 Pending Requests <span style="font-size:13px;color:var(--indigo);cursor:pointer" onclick="showSec('requests')">View all</span></div><div id="ovReqs"><div class="empty"><div>⏳</div>Loading...</div></div></div>
+      <div class="card"><div class="card-title">💰 Pending Payments <span style="font-size:13px;color:var(--indigo);cursor:pointer" onclick="showSec('payments')">View all</span></div><div id="ovPays"><div class="empty"><div>⏳</div>Loading...</div></div></div>
+    </div>
+  </div>
+
+  <!-- REQUESTS -->
+  <div class="sec" id="secRequests">
+    <div class="topbar"><div><div class="page-title">📬 Student Requests</div><div class="page-sub">Accept ya reject karo</div></div></div>
+    <div class="card"><div id="allReqs"><div class="empty"><div>⏳</div>Loading...</div></div></div>
+  </div>
+
+  <!-- PAYMENTS -->
+  <div class="sec" id="secPayments">
+    <div class="topbar"><div><div class="page-title">💰 Payment Requests</div><div class="page-sub">Verify karke course access do</div></div></div>
+    <div class="card"><div id="allPays"><div class="empty"><div>⏳</div>Loading...</div></div></div>
+  </div>
+
+  <!-- STUDENTS -->
+  <div class="sec" id="secStudents">
+    <div class="topbar"><div><div class="page-title">👥 My Students</div></div></div>
+    <div class="card"><div id="allStudents"><div class="empty"><div>⏳</div>Loading...</div></div></div>
+  </div>
+
+  <!-- COURSE CONTENT -->
+  <div class="sec" id="secContent">
+    <div class="topbar"><div><div class="page-title">📚 Course Content</div></div><button class="btn-primary" onclick="openModal('contentModal')">+ Add Content</button></div>
+    <div class="card"><div id="allContent"><div class="empty"><div>⏳</div>Loading...</div></div></div>
+  </div>
+
+  <!-- LIVE CLASSES -->
+  <div class="sec" id="secSchedule">
+    <div class="topbar"><div><div class="page-title">📅 Live Classes</div></div><button class="btn-primary" onclick="openModal('classModal')">+ Schedule Class</button></div>
+    <div class="card"><div id="allClasses"><div class="empty"><div>⏳</div>Loading...</div></div></div>
+  </div>
+
+  <!-- ANNOUNCEMENTS -->
+  <div class="sec" id="secAnn">
+    <div class="topbar"><div><div class="page-title">📢 Announcements</div></div><button class="btn-primary" onclick="openModal('annModal')">+ Post Notice</button></div>
+    <div class="card"><div id="allAnns"><div class="empty"><div>⏳</div>Loading...</div></div></div>
+  </div>
+
+  <!-- CHATS -->
+  <div class="sec" id="secChats">
+    <div class="topbar"><div><div class="page-title">💬 Student Chats</div><div class="page-sub">Connected students ke saath chat karo</div></div></div>
+    <div style="display:grid;grid-template-columns:280px 1fr;gap:0;background:var(--card);border-radius:14px;border:1px solid var(--border);overflow:hidden;height:calc(100vh - 180px)">
+      <!-- Students List -->
+      <div style="border-right:1px solid var(--border);display:flex;flex-direction:column">
+        <div style="padding:16px;border-bottom:1px solid var(--border);font-family:Outfit,sans-serif;font-size:14px;font-weight:700;color:var(--text)">Conversations</div>
+        <div id="chatStudentList" style="flex:1;overflow-y:auto"></div>
+      </div>
+      <!-- Chat Window -->
+      <div style="display:flex;flex-direction:column" id="chatWindow">
+        <div id="chatWindowEmpty" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);gap:10px">
+          <div style="font-size:48px">💬</div>
+          <div style="font-size:14px;font-weight:600">Kisi student ko select karo</div>
+        </div>
+        <div id="chatWindowActive" style="display:none;flex-direction:column;height:100%">
+          <div id="chatHeader" style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:#f8fafc">
+            <div id="chatHeaderAv" style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),#818cf8);display:flex;align-items:center;justify-content:center;font-family:Outfit,sans-serif;font-size:15px;font-weight:700;color:#fff;flex-shrink:0"></div>
+            <div><div id="chatHeaderName" style="font-family:Outfit,sans-serif;font-size:15px;font-weight:700;color:var(--text)"></div>
+            <div id="chatHeaderSub" style="font-size:12px;color:var(--muted)"></div></div>
+          </div>
+          <div id="chatMsgsBox" style="flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:#f8fafc"></div>
+          <div id="emojiPicker" style="display:none;flex-direction:column;padding:8px 14px;background:#fff;border-top:1px solid var(--border)"></div>
+          <div style="padding:10px 16px;background:#fff;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;position:relative">
+            <button onclick="toggleEmojiPicker()" title="Emoji" style="width:36px;height:36px;border-radius:50%;background:#f1f5f9;border:1px solid var(--border);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s" onmouseover="this.style.background='#e2e8f0'" onmouseout="this.style.background='#f1f5f9'">😊</button>
+            <button id="voiceBtn" onclick="toggleVoice()" title="Voice message" style="width:36px;height:36px;border-radius:50%;background:#f1f5f9;border:1px solid var(--border);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s">🎤</button>
+            <input id="chatReplyInput" style="flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:24px;font-family:Nunito,sans-serif;font-size:14px;outline:none;transition:.2s" placeholder="Reply karo..." onkeydown="if(event.key==='Enter')sendReply()" onfocus="this.style.borderColor='var(--indigo)'" onblur="this.style.borderColor='var(--border)'">
+            <button onclick="sendReply()" style="width:36px;height:36px;border-radius:50%;background:var(--indigo);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZZES -->
+  <div class="sec" id="secQuizzes">
+    <div class="topbar"><div><div class="page-title">📝 My Quizzes</div></div><button class="btn-primary" onclick="openModal('quizModal')">+ Create Quiz</button></div>
+    <div class="card"><div id="allQuizzes"><div class="empty"><div>⏳</div>Loading...</div></div></div>
+  </div>
+
+</div>
+
+<!-- SETUP MODAL -->
+<div class="modal-ov" id="setupModal">
+  <div class="modal">
+    <div class="modal-title">⚙️ Setup Mentor Profile</div>
+    <div class="form-group"><label>Subjects (comma separated)</label><input id="sS" placeholder="DSA, Python, DBMS"></div>
+    <div class="form-group"><label>Experience</label><input id="sE" placeholder="e.g. 2 years, Final year student"></div>
+    <div class="form-group"><label>Bio</label><textarea id="sB" placeholder="Tell students about yourself..."></textarea></div>
+    <div class="form-row">
+      <div class="form-group"><label>Session Price (₹)</label><input type="number" id="sPr" placeholder="0 for free"></div>
+      <div class="form-group"><label>UPI ID</label><input id="sUpi" placeholder="yourname@upi"></div>
+    </div>
+    <button class="btn-submit" onclick="setupProfile()">Save Profile ✅</button>
+    <button class="btn-cancel" onclick="closeModal('setupModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- CONTENT MODAL -->
+<div class="modal-ov" id="contentModal">
+  <div class="modal">
+    <div class="modal-title">📚 Add Course Content</div>
+    <div class="form-group"><label>Title</label><input id="cTitle" placeholder="e.g. Chapter 1 - Introduction to DSA"></div>
+    <div class="form-group"><label>Description</label><input id="cDesc" placeholder="Brief description..."></div>
+    <div class="form-row">
+      <div class="form-group"><label>Type</label>
+        <select id="cType" onchange="toggleContentFields()">
+          <option value="note">📝 Note / Text</option>
+          <option value="video">🎥 Video Link</option>
+          <option value="pdf">📄 PDF Link</option>
+          <option value="link">🔗 External Link</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Order Number</label><input type="number" id="cOrder" placeholder="1" value="1"></div>
+    </div>
+    <div class="form-group" id="cNoteField"><label>Note Content</label><textarea id="cContent" placeholder="Write your note here..." style="min-height:140px"></textarea></div>
+    <div class="form-group" id="cUrlField" style="display:none"><label>URL / Link</label><input id="cUrl" placeholder="https://..."></div>
+    <button class="btn-submit" onclick="addContent()">Add Content ✅</button>
+    <button class="btn-cancel" onclick="closeModal('contentModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- LIVE CLASS MODAL -->
+<div class="modal-ov" id="classModal">
+  <div class="modal">
+    <div class="modal-title">📅 Schedule Live Class</div>
+    <div class="form-group"><label>Class Title</label><input id="clTitle" placeholder="e.g. DSA - Sorting Algorithms"></div>
+    <div class="form-row">
+      <div class="form-group"><label>Subject</label><input id="clSubject" placeholder="e.g. Data Structures"></div>
+      <div class="form-group"><label>Duration (mins)</label><input type="number" id="clDuration" value="60"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Date & Time</label><input type="datetime-local" id="clDateTime"></div>
+      <div class="form-group"><label>Meet Link</label><input id="clMeet" placeholder="https://meet.jit.si/..."></div>
+    </div>
+    <button class="btn-submit" onclick="scheduleClass()">Schedule ✅</button>
+    <button class="btn-cancel" onclick="closeModal('classModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- ANNOUNCEMENT MODAL -->
+<div class="modal-ov" id="annModal">
+  <div class="modal">
+    <div class="modal-title">📢 Post Announcement</div>
+    <div class="form-group"><label>Title</label><input id="aTitle" placeholder="e.g. Aaj class 8 baje hogi"></div>
+    <div class="form-group"><label>Details (optional)</label><textarea id="aContent" placeholder="Additional details..."></textarea></div>
+    <button class="btn-submit" onclick="postAnn()">Post ✅</button>
+    <button class="btn-cancel" onclick="closeModal('annModal')">Cancel</button>
+  </div>
+</div>
+
+<!-- QUIZ MODAL -->
+<div class="modal-ov" id="quizModal">
+  <div class="modal">
+    <div class="modal-title">📝 Create Quiz</div>
+    <div class="form-row"><div class="form-group"><label>Title</label><input id="qT" placeholder="Quiz title"></div><div class="form-group"><label>Subject</label><input id="qS" placeholder="Subject"></div></div>
+    <div class="form-row"><div class="form-group"><label>Duration (mins)</label><input type="number" id="qD" value="15"></div><div class="form-group"><label>Type</label><select id="qP"><option value="false">✅ Free</option><option value="true">⭐ Premium</option></select></div></div>
+    <div style="font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin:14px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--border)">Questions</div>
+    <div id="qContainer"></div>
+    <button style="width:100%;padding:9px;background:var(--indigo-light);color:var(--indigo);border:1px dashed var(--indigo);border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:14px" onclick="addQ()">+ Add Question</button>
+    <button class="btn-submit" onclick="createQuiz()">Create ✅</button>
+    <button class="btn-cancel" onclick="closeModal('quizModal')">Cancel</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+const SUPABASE_URL = "https://ognlrlguombhjbyocpss.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9nbmxybGd1b21iaGpieW9jcHNzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2NTczMDgsImV4cCI6MjA5MDIzMzMwOH0.x6Mbo8d_-3osljcCPgo868dGKpaIa0E9LtxQ260ocQA";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const API="https://unibuddy-1.onrender.com/api",token=localStorage.getItem("token"),user=JSON.parse(localStorage.getItem("user")||"{}");
+if(!token)window.location.href="login.html";
+if(user.role!=="mentor")window.location.href="dashboard.html";
+
+document.getElementById("sideName").textContent=user.name||"Mentor";
+document.getElementById("greetName").textContent=(user.name||"Mentor").split(" ")[0];
+if(user.avatar)document.getElementById("sideAv").innerHTML='<img src="'+user.avatar+'">';
+else document.getElementById("sideAv").textContent=(user.name||"M")[0].toUpperCase();
+
+function logout(){localStorage.clear();window.location.href="login.html";}
+function toast(m,c){const t=document.getElementById("toast");t.textContent=m;t.style.background=c||"#0f172a";t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3000);}
+function openModal(id){document.getElementById(id).classList.add("open");}
+function closeModal(id){document.getElementById(id).classList.remove("open");}
+
+function showSec(n){
+  document.querySelectorAll(".sec").forEach(s=>s.classList.remove("active"));
+  document.querySelectorAll(".nav-item[id^='nav']").forEach(x=>x.classList.remove("active"));
+  document.getElementById("sec"+n[0].toUpperCase()+n.slice(1)).classList.add("active");
+  document.getElementById("nav"+n[0].toUpperCase()+n.slice(1)).classList.add("active");
+  if(n==="chats")loadChats();
+  if(n==="requests")loadReqs("allReqs");
+  if(n==="payments")loadPayments("allPays");
+  if(n==="students")loadStudents();
+  if(n==="content")loadContent();
+  if(n==="schedule")loadClasses();
+  if(n==="ann")loadAnns();
+  if(n==="quizzes")loadQuizzes();
+}
+
+let myMentorId=null;
+
+async function init(){
+  try{const r=await fetch(API+"/mentors");const a=await r.json();
+  const me=a.find(m=>m.user_id===user.id);
+  if(!me){document.getElementById("setupBanner").style.display="flex";}
+  else{myMentorId=me.id;document.getElementById("stRating").textContent=me.rating>0?me.rating+"⭐":"—";}
+  }catch(e){}
+  loadOvReqs();loadOvPays();loadStudentCount();loadQuizCount();
+}
+
+// ── REQUESTS ──────────────────────────────────────────────────────────────
+async function loadOvReqs(){
+  try{const r=await fetch(API+"/mentors/requests/incoming",{headers:{"Authorization":"Bearer "+token}});const reqs=await r.json();
+  const pill=document.getElementById("reqPill");
+  if(reqs.length){pill.textContent=reqs.length;pill.classList.add("show");}else pill.classList.remove("show");
+  const el=document.getElementById("ovReqs");
+  if(!reqs.length){el.innerHTML='<div class="empty"><div>📭</div>Koi pending request nahi</div>';return;}
+  el.innerHTML=reqs.slice(0,3).map(r=>reqCard(r)).join("");}catch(e){}
+}
+
+async function loadReqs(elId){
+  const el=document.getElementById(elId);el.innerHTML='<div class="empty"><div>⏳</div>Loading...</div>';
+  try{const r=await fetch(API+"/mentors/requests/incoming",{headers:{"Authorization":"Bearer "+token}});const reqs=await r.json();
+  if(!reqs.length){el.innerHTML='<div class="empty"><div>📭</div>Koi pending request nahi</div>';return;}
+  el.innerHTML=reqs.map(r=>reqCard(r)).join("");}catch(e){el.innerHTML='<div class="empty"><div>❌</div>Load nahi hua</div>';}
+}
+
+function reqCard(r){const s=r.student||{};return'<div class="req-card" id="rc-'+r.requestId+'">'+
+  '<div class="req-av">'+(s.avatar?'<img src="'+s.avatar+'">':(s.name||"?")[0].toUpperCase())+'</div>'+
+  '<div class="req-info"><div class="req-name">'+(s.name||"Unknown")+'</div><div class="req-sub">'+(s.course||"—")+' • '+(s.year||"—")+'</div></div>'+
+  '<div class="req-actions"><button class="btn-acc" onclick="respond(\''+r.requestId+'\',\'accepted\')">✅ Accept</button><button class="btn-rej" onclick="respond(\''+r.requestId+'\',\'rejected\')">❌ Reject</button></div></div>';}
+
+async function respond(id,status){
+  try{const r=await fetch(API+"/mentors/requests/"+id,{method:"PUT",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({status})});
+  const d=await r.json();if(r.ok){toast(d.message,status==="accepted"?"#059669":"#0f172a");
+    const c=document.getElementById("rc-"+id);if(c){c.classList.add("fade");setTimeout(()=>{c.remove();loadOvReqs();},300);}
+    if(status==="accepted")loadStudentCount();}else toast(d.message||"Error","#dc2626");
+  }catch(e){toast("Server error","#dc2626");}
+}
+
+// ── PAYMENTS ──────────────────────────────────────────────────────────────
+async function loadOvPays(){
+  try{const r=await fetch(API+"/mentors/payments/pending",{headers:{"Authorization":"Bearer "+token}});const pays=await r.json();
+  const pill=document.getElementById("payPill");
+  if(pays.length){pill.textContent=pays.length;pill.classList.add("show");}else pill.classList.remove("show");
+  const el=document.getElementById("ovPays");
+  if(!pays.length){el.innerHTML='<div class="empty"><div>💰</div>Koi pending payment nahi</div>';return;}
+  el.innerHTML=pays.slice(0,3).map(p=>payCard(p)).join("");}catch(e){}
+}
+
+async function loadPayments(elId){
+  const el=document.getElementById(elId);el.innerHTML='<div class="empty"><div>⏳</div>Loading...</div>';
+  try{const r=await fetch(API+"/mentors/payments/pending",{headers:{"Authorization":"Bearer "+token}});const pays=await r.json();
+  if(!pays.length){el.innerHTML='<div class="empty"><div>💰</div>Koi pending payment nahi</div>';return;}
+  el.innerHTML=pays.map(p=>payCard(p)).join("");}catch(e){el.innerHTML='<div class="empty"><div>❌</div>Load nahi hua</div>';}
+}
+
+function payCard(p){const s=p.student||{};return'<div class="req-card" id="pc-'+p.id+'">'+
+  '<div class="req-av">'+(s.avatar?'<img src="'+s.avatar+'">':(s.name||"?")[0].toUpperCase())+'</div>'+
+  '<div class="req-info"><div class="req-name">'+(s.name||"Unknown")+'</div>'+
+  '<div class="req-sub">₹'+p.amount+' • Txn: '+p.txn_id+'</div></div>'+
+  '<div class="req-actions"><button class="btn-app" onclick="approvePayment(\''+p.id+'\',\'approved\')">✅ Approve</button><button class="btn-deny" onclick="approvePayment(\''+p.id+'\',\'rejected\')">❌ Reject</button></div></div>';}
+
+async function approvePayment(id,status){
+  try{const r=await fetch(API+"/mentors/payments/"+id,{method:"PUT",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},body:JSON.stringify({status})});
+  const d=await r.json();if(r.ok){toast(d.message,"#059669");
+    const c=document.getElementById("pc-"+id);if(c){c.classList.add("fade");setTimeout(()=>{c.remove();loadOvPays();},300);}
+    if(status==="approved"){document.getElementById("stEarnings").textContent="₹"+((parseInt(document.getElementById("stEarnings").textContent.replace("₹","")||0))+(parseInt(document.getElementById("stStudents").textContent)*0));}}
+  else toast(d.message||"Error","#dc2626");}catch(e){toast("Server error","#dc2626");}
+}
+
+// ── STUDENTS ──────────────────────────────────────────────────────────────
+async function loadStudentCount(){
+  try{const r=await fetch(API+"/mentors/requests/students",{headers:{"Authorization":"Bearer "+token}});const ss=await r.json();document.getElementById("stStudents").textContent=ss.length;}catch(e){}
+}
+async function loadStudents(){
+  const el=document.getElementById("allStudents");el.innerHTML='<div class="empty"><div>⏳</div>Loading...</div>';
+  try{const r=await fetch(API+"/mentors/requests/students",{headers:{"Authorization":"Bearer "+token}});const ss=await r.json();
+  if(!ss.length){el.innerHTML='<div class="empty"><div>👥</div>Koi connected student nahi abhi</div>';return;}
+  el.innerHTML=ss.map(s=>'<div class="s-item"><div class="s-av">'+(s.avatar?'<img src="'+s.avatar+'">':(s.name||"?")[0].toUpperCase())+'</div>'+
+    '<div class="s-info"><div class="s-name">'+s.name+'</div><div class="s-sub">'+s.email+' • '+(s.course||"—")+' '+( s.year||"")+'</div></div>'+
+    '<span class="s-tag">✅ Connected</span></div>').join("");}
+  catch(e){el.innerHTML='<div class="empty"><div>❌</div>Load nahi hua</div>';}
+}
+
+// ── COURSE CONTENT ────────────────────────────────────────────────────────
+async function loadContent(){
+  if(!myMentorId){el.innerHTML='<div class="empty"><div>⚙️</div>Setup your mentor profile first</div>';return;}
+  const el=document.getElementById("allContent");el.innerHTML='<div class="empty"><div>⏳</div>Loading...</div>';
+  try{const r=await fetch(API+"/mentors/"+myMentorId+"/content",{headers:{"Authorization":"Bearer "+token}});const items=await r.json();
+  if(!items.length){el.innerHTML='<div class="empty"><div>📚</div>Koi content nahi abhi. "+ Add Content" dabao!</div>';return;}
+  const icons={note:"📝",video:"🎥",pdf:"📄",link:"🔗"};
+  el.innerHTML=items.map(item=>'<div class="content-item">'+
+    '<div class="ci-icon '+item.content_type+'">'+(icons[item.content_type]||"📄")+'</div>'+
+    '<div class="ci-info"><div class="ci-title">'+item.title+'</div><div class="ci-type">'+item.content_type+(item.description?' • '+item.description:'')+'</div></div>'+
+    '<button class="btn-del-item" onclick="delContent(\''+item.id+'\')">🗑️ Delete</button></div>').join("");}
+  catch(e){el.innerHTML='<div class="empty"><div>❌</div>Load nahi hua</div>';}
+}
+
+function toggleContentFields(){
+  const t=document.getElementById("cType").value;
+  document.getElementById("cNoteField").style.display=t==="note"?"block":"none";
+  document.getElementById("cUrlField").style.display=t!=="note"?"block":"none";
+}
+
+async function addContent(){
+  if(!myMentorId){toast("Setup your mentor profile first!","#dc2626");return;}
+  const title=document.getElementById("cTitle").value.trim();
+  if(!title){toast("Title required!","#dc2626");return;}
+  const type=document.getElementById("cType").value;
+  try{const r=await fetch(API+"/mentors/"+myMentorId+"/content",{method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+    body:JSON.stringify({title,description:document.getElementById("cDesc").value,content_type:type,
+    content:document.getElementById("cContent").value,file_url:document.getElementById("cUrl").value,
+    order_num:parseInt(document.getElementById("cOrder").value)||1})});
+  const d=await r.json();if(r.ok){toast("Content added ✅","#059669");closeModal("contentModal");loadContent();}
+  else toast(d.message||"Error","#dc2626");}catch(e){toast("Server error","#dc2626");}
+}
+
+async function delContent(id){
+  if(!confirm("Delete this content?"))return;
+  try{await fetch(API+"/mentors/content/"+id,{method:"DELETE",headers:{"Authorization":"Bearer "+token}});
+  toast("Deleted ✅","#059669");loadContent();}catch(e){toast("Error","#dc2626");}
+}
+
+// ── LIVE CLASSES ──────────────────────────────────────────────────────────
+async function loadClasses(){
+  if(!myMentorId)return;
+  const el=document.getElementById("allClasses");el.innerHTML='<div class="empty"><div>⏳</div>Loading...</div>';
+  try{const r=await fetch(API+"/mentors/"+myMentorId+"/live-classes",{headers:{"Authorization":"Bearer "+token}});const cls=await r.json();
+  if(!cls.length){el.innerHTML='<div class="empty"><div>📅</div>Koi class scheduled nahi. "+ Schedule Class" dabao!</div>';return;}
+  el.innerHTML=cls.map(c=>{const dt=new Date(c.scheduled_at);
+    const dtStr=dt.toLocaleDateString("en-IN",{day:"numeric",month:"short"})+" "+dt.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit"});
+    return'<div class="content-item"><div class="ci-icon note">📅</div>'+
+    '<div class="ci-info"><div class="ci-title">'+c.title+'</div>'+
+    '<div class="ci-type">'+dtStr+' • '+c.duration_mins+' mins'+(c.meet_link?' • <a href="'+c.meet_link+'" target="_blank" style="color:var(--indigo)">Meeting Link</a>':'')+'</div></div>'+
+    '<button class="btn-del-item" onclick="delClass(\''+c.id+'\')">🗑️</button></div>';}).join("");}
+  catch(e){el.innerHTML='<div class="empty"><div>❌</div>Load nahi hua</div>';}
+}
+
+async function scheduleClass(){
+  if(!myMentorId){toast("Setup mentor profile first!","#dc2626");return;}
+  const title=document.getElementById("clTitle").value.trim();const dt=document.getElementById("clDateTime").value;
+  if(!title||!dt){toast("Title and time required!","#dc2626");return;}
+  try{const r=await fetch(API+"/mentors/"+myMentorId+"/live-classes",{method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+    body:JSON.stringify({title,subject:document.getElementById("clSubject").value,scheduled_at:dt,
+    duration_mins:parseInt(document.getElementById("clDuration").value)||60,meet_link:document.getElementById("clMeet").value})});
+  const d=await r.json();if(r.ok){toast("Class scheduled ✅","#059669");closeModal("classModal");loadClasses();}
+  else toast(d.message||"Error","#dc2626");}catch(e){toast("Server error","#dc2626");}
+}
+
+async function delClass(id){
+  try{await fetch(API+"/mentors/live-classes/"+id,{method:"DELETE",headers:{"Authorization":"Bearer "+token}});toast("Deleted ✅","#059669");loadClasses();}catch(e){}
+}
+
+// ── ANNOUNCEMENTS ─────────────────────────────────────────────────────────
+async function loadAnns(){
+  if(!myMentorId)return;
+  const el=document.getElementById("allAnns");el.innerHTML='<div class="empty"><div>⏳</div>Loading...</div>';
+  try{const r=await fetch(API+"/mentors/"+myMentorId+"/announcements",{headers:{"Authorization":"Bearer "+token}});const anns=await r.json();
+  if(!anns.length){el.innerHTML='<div class="empty"><div>📢</div>Koi announcement nahi. "+ Post Notice" dabao!</div>';return;}
+  el.innerHTML=anns.map(a=>'<div class="content-item"><div class="ci-icon link">📢</div>'+
+    '<div class="ci-info"><div class="ci-title">'+a.title+'</div>'+
+    (a.content?'<div class="ci-type">'+a.content+'</div>':'')+'</div>'+
+    '<button class="btn-del-item" onclick="delAnn(\''+a.id+'\')">🗑️</button></div>').join("");}
+  catch(e){el.innerHTML='<div class="empty"><div>❌</div>Load nahi hua</div>';}
+}
+
+async function postAnn(){
+  if(!myMentorId){toast("Setup mentor profile first!","#dc2626");return;}
+  const title=document.getElementById("aTitle").value.trim();
+  if(!title){toast("Title required!","#dc2626");return;}
+  try{const r=await fetch(API+"/mentors/"+myMentorId+"/announcements",{method:"POST",
+    headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+    body:JSON.stringify({title,content:document.getElementById("aContent").value})});
+  const d=await r.json();if(r.ok){toast("Announcement posted ✅","#059669");closeModal("annModal");loadAnns();}
+  else toast(d.message||"Error","#dc2626");}catch(e){toast("Server error","#dc2626");}
+}
+
+async function delAnn(id){
+  try{await fetch(API+"/mentors/announcements/"+id,{method:"DELETE",headers:{"Authorization":"Bearer "+token}});toast("Deleted ✅","#059669");loadAnns();}catch(e){}
+}
+
+// ── QUIZZES ───────────────────────────────────────────────────────────────
+async function loadQuizCount(){
+  try{const r=await fetch(API+"/quiz",{headers:{"Authorization":"Bearer "+token}});const a=await r.json();document.getElementById("stQuizzes").textContent=a.filter(q=>q.mentor_id===user.id).length;}catch(e){}
+}
+async function loadQuizzes(){
+  const el=document.getElementById("allQuizzes");el.innerHTML='<div class="empty"><div>⏳</div>Loading...</div>';
+  try{const r=await fetch(API+"/quiz",{headers:{"Authorization":"Bearer "+token}});const a=await r.json();
+  const mine=a.filter(q=>q.mentor_id===user.id);
+  if(!mine.length){el.innerHTML='<div class="empty"><div>📝</div>Koi quiz nahi. "+ Create Quiz" dabao!</div>';return;}
+  el.innerHTML=mine.map(q=>'<div class="content-item">'+
+    '<div class="ci-icon note">📝</div>'+
+    '<div class="ci-info"><div class="ci-title">'+q.title+'</div>'+
+    '<div class="ci-type">📘 '+q.subject+' • ⏱ '+q.duration+' mins • '+(q.questions||[]).length+' questions • '+(q.is_premium?'⭐ Premium':'✅ Free')+'</div></div></div>').join("");}
+  catch(e){el.innerHTML='<div class="empty"><div>❌</div>Load nahi hua</div>';}
+}
+
+let qN=0;
+function addQ(){qN++;const n=qN,d=document.createElement("div");
+  d.style.cssText="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid var(--border)";d.id="qb-"+n;
+  d.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-family:Outfit,sans-serif;font-size:13px;font-weight:700;color:var(--text)"><span>Q'+n+'</span>'+(n>1?'<button style="background:none;border:none;color:var(--rose);cursor:pointer;font-size:16px" onclick="document.getElementById(\'qb-'+n+'\').remove()">🗑️</button>':'')+
+  '</div><input id="qt-'+n+'" placeholder="Question..." style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-family:Nunito,sans-serif;font-size:13px;outline:none;margin-bottom:8px">'+
+  '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">'+
+  '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;font-weight:700;color:var(--muted);width:14px">A</span><input id="qo-'+n+'-0" placeholder="Option A" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:Nunito,sans-serif;font-size:12px;outline:none"></div>'+
+  '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;font-weight:700;color:var(--muted);width:14px">B</span><input id="qo-'+n+'-1" placeholder="Option B" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:Nunito,sans-serif;font-size:12px;outline:none"></div>'+
+  '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;font-weight:700;color:var(--muted);width:14px">C</span><input id="qo-'+n+'-2" placeholder="Option C" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:Nunito,sans-serif;font-size:12px;outline:none"></div>'+
+  '<div style="display:flex;align-items:center;gap:6px"><span style="font-size:12px;font-weight:700;color:var(--muted);width:14px">D</span><input id="qo-'+n+'-3" placeholder="Option D" style="flex:1;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:Nunito,sans-serif;font-size:12px;outline:none"></div>'+
+  '</div><select id="qc-'+n+'" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:Nunito,sans-serif;font-size:12px;outline:none;margin-bottom:6px"><option value="0">Correct: A</option><option value="1">Correct: B</option><option value="2">Correct: C</option><option value="3">Correct: D</option></select>'+
+  '<input id="qe-'+n+'" placeholder="Explanation (optional)..." style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-family:Nunito,sans-serif;font-size:12px;outline:none">';
+  document.getElementById("qContainer").appendChild(d);}
+
+async function createQuiz(){
+  const title=document.getElementById("qT").value.trim(),subject=document.getElementById("qS").value.trim();
+  if(!title||!subject){toast("Title aur Subject required!","#dc2626");return;}
+  const qs=[];
+  document.querySelectorAll("[id^='qb-']").forEach(b=>{const n=b.id.split("-")[1];const t=document.getElementById("qt-"+n)?.value.trim();if(!t)return;
+    qs.push({question:t,options:[0,1,2,3].map(i=>document.getElementById("qo-"+n+"-"+i)?.value.trim()||"Option "+(i+1)),correct:parseInt(document.getElementById("qc-"+n)?.value||0),explanation:document.getElementById("qe-"+n)?.value.trim()||""});});
+  if(!qs.length){toast("Kam se kam 1 question!","#dc2626");return;}
+  try{const r=await fetch(API+"/quiz/create",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+    body:JSON.stringify({title,subject,duration:parseInt(document.getElementById("qD").value)||15,total_marks:qs.length,is_premium:document.getElementById("qP").value==="true",questions:qs})});
+  const d=await r.json();if(r.ok){toast("Quiz created ✅","#059669");closeModal("quizModal");qN=0;document.getElementById("qContainer").innerHTML="";loadQuizzes();loadQuizCount();}
+  else toast(d.message||"Error","#dc2626");}catch(e){toast("Server error","#dc2626");}
+}
+
+// ── SETUP PROFILE ─────────────────────────────────────────────────────────
+async function setupProfile(){
+  const subs=document.getElementById("sS").value.split(",").map(s=>s.trim()).filter(Boolean);
+  if(!subs.length){toast("Subjects required!","#dc2626");return;}
+  try{const r=await fetch(API+"/mentors/register",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+    body:JSON.stringify({subjects:subs,experience:document.getElementById("sE").value,bio:document.getElementById("sB").value,price:parseFloat(document.getElementById("sPr").value)||0,upi_id:document.getElementById("sUpi").value.trim()})});
+  const d=await r.json();
+  if(r.ok){toast("Profile setup ho gaya! ✅","#059669");closeModal("setupModal");document.getElementById("setupBanner").style.display="none";init();}
+  else toast(d.message||"Error","#dc2626");}catch(e){toast("Server error","#dc2626");}
+}
+
+// ── CHATS ─────────────────────────────────────────────────────────────────
+let currentChatStudent = null;
+let chatChannel = null;
+let mediaRecorder = null;
+let audioChunks = [];
+let isRecording = false;
+
+function getRoomId(id1, id2) { return [id1, id2].sort().join("_"); }
+
+// IST time helper
+function toIST(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Kolkata" });
+}
+function toISTDate(dateStr) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", timeZone: "Asia/Kolkata" });
+}
+
+async function loadChats() {
+  const el = document.getElementById("chatStudentList");
+  el.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:13px">⏳ Loading...</div>';
+  try {
+    const r = await fetch(API + "/mentors/requests/students", { headers: { "Authorization": "Bearer " + token } });
+    const students = await r.json();
+    if (!students.length) { el.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:13px;text-align:center">👥 Koi connected student nahi</div>'; return; }
+
+    const previews = await Promise.all(students.map(async s => {
+      const roomId = getRoomId(user.id, s.id);
+      const { data } = await sb.from("messages").select("content, created_at, sender_id, type").eq("room_id", roomId).order("created_at", { ascending: false }).limit(1);
+      return { student: s, last: data?.[0] || null };
+    }));
+
+    let totalUnread = 0;
+    el.innerHTML = previews.map(({ student: s, last }) => {
+      const isUnread = last && last.sender_id === s.id;
+      if (isUnread) totalUnread++;
+      const lastMsg = !last ? "No messages yet" : last.type === "voice" ? "🎤 Voice message" : last.content.substring(0, 28) + (last.content.length > 28 ? "..." : "");
+      const lastTime = last ? toIST(last.created_at) : "";
+      return '<div onclick="openChat(\'' + s.id + '\',\'' + s.name + '\',\'' + (s.course||"") + '\',\'' + (s.year||"") + '\')" ' +
+        'style="display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;border-bottom:1px solid var(--border);transition:.2s;background:' + (currentChatStudent===s.id?'var(--indigo-light)':'white') + '"' +
+        ' onmouseover="this.style.background=\'#f8fafc\'" onmouseout="this.style.background=\'' + (currentChatStudent===s.id?'var(--indigo-light)':'white') + '\'">' +
+        '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--indigo),#818cf8);display:flex;align-items:center;justify-content:center;font-family:Outfit,sans-serif;font-size:16px;font-weight:700;color:#fff;flex-shrink:0;position:relative">' +
+        (s.avatar ? '<img src="' + s.avatar + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">' : s.name[0].toUpperCase()) +
+        (isUnread ? '<div style="position:absolute;top:-2px;right:-2px;width:10px;height:10px;background:#ef4444;border-radius:50%;border:2px solid white"></div>' : '') + '</div>' +
+        '<div style="flex:1;min-width:0">' +
+        '<div style="font-family:Outfit,sans-serif;font-size:14px;font-weight:' + (isUnread?'700':'600') + ';color:var(--text)">' + s.name + '</div>' +
+        '<div style="font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + lastMsg + '</div></div>' +
+        (lastTime ? '<div style="font-size:10px;color:var(--muted);flex-shrink:0">' + lastTime + '</div>' : '') + '</div>';
+    }).join("");
+
+    const pill = document.getElementById("chatPill");
+    if (totalUnread > 0) { pill.textContent = totalUnread; pill.classList.add("show"); }
+    else pill.classList.remove("show");
+  } catch(e) { el.innerHTML = '<div style="padding:20px;color:var(--muted);font-size:13px">❌ Load nahi hua</div>'; }
+}
+
+async function openChat(studentId, name, course, year) {
+  currentChatStudent = studentId;
+  document.getElementById("chatWindowEmpty").style.display = "none";
+  const win = document.getElementById("chatWindowActive");
+  win.style.display = "flex";
+  document.getElementById("chatHeaderName").textContent = name;
+  document.getElementById("chatHeaderSub").textContent = (course || "Course not set") + (year ? " • " + year : "");
+  document.getElementById("chatHeaderAv").textContent = name[0].toUpperCase();
+
+  const roomId = getRoomId(user.id, studentId);
+  const { data: msgs } = await sb.from("messages").select("*").eq("room_id", roomId).order("created_at", { ascending: true }).limit(100);
+  renderMsgs(msgs || []);
+
+  // Unsubscribe old channel, subscribe new
+  if (chatChannel) { sb.removeChannel(chatChannel); chatChannel = null; }
+  chatChannel = sb.channel("chat-mentor-" + roomId)
+    .on("postgres_changes", {
+      event: "INSERT", schema: "public", table: "messages",
+      filter: "room_id=eq." + roomId
+    }, payload => {
+      const m = payload.new;
+      // Don't duplicate messages we sent ourselves
+      if (m.sender_id !== user.id) {
+        appendMsg(m);
+        loadChats(); // refresh list preview
+      }
+    })
+    .subscribe((status) => {
+      console.log("Chat subscribed:", status);
+    });
+
+  document.getElementById("chatReplyInput").focus();
+  loadChats();
+}
+
+function renderMsgs(msgs) {
+  const box = document.getElementById("chatMsgsBox");
+  if (!msgs.length) {
+    box.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">💬 Conversation start karo!</div>';
+    return;
+  }
+  box.innerHTML = "";
+  let lastDate = "";
+  msgs.forEach(m => {
+    const dateStr = toISTDate(m.created_at);
+    if (dateStr !== lastDate) {
+      const sep = document.createElement("div");
+      sep.style.cssText = "text-align:center;font-size:11px;color:var(--muted);margin:8px 0;position:relative";
+      sep.innerHTML = '<span style="background:#f8fafc;padding:0 10px;position:relative;z-index:1">' + (dateStr === toISTDate(new Date()) ? "Today" : dateStr) + '</span>';
+      box.appendChild(sep);
+      lastDate = dateStr;
+    }
+    appendMsg(m);
+  });
+}
+
+function appendMsg(m) {
+  const box = document.getElementById("chatMsgsBox");
+  const isMe = m.sender_id === user.id;
+  const time = toIST(m.created_at);
+  const divId = "msg-" + (m.id || "tmp-" + Date.now());
+  const div = document.createElement("div");
+  div.id = divId;
+  div.className = "chat-msg-wrap";
+  div.style.cssText = isMe ? "align-self:flex-end;align-items:flex-end" : "align-self:flex-start;align-items:flex-start";
+
+  let bubbleContent = "";
+  if (m.type === "voice" && m.content && m.content.startsWith("data:audio")) {
+    bubbleContent = '<audio controls style="max-width:220px;height:36px" src="' + m.content + '"></audio>';
+  } else {
+    bubbleContent = (m.content||"").replace(/</g,"&lt;").replace(/\n/g,"<br>");
+  }
+
+  const delBtn = (isMe && m.id)
+    ? '<button class="chat-msg-del" id="del-' + divId + '" onclick="deleteMsg(\'' + m.id + '\',\'' + divId + '\',event)">🗑️ Delete</button>'
+    : '';
+
+  const bubbleStyle = 'padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;word-break:break-word;cursor:' + (isMe && m.id ? 'pointer' : 'default') + ';transition:box-shadow .15s;' +
+    (isMe ? "background:var(--indigo);color:#fff;border-bottom-right-radius:4px" : "background:#fff;color:var(--text);border:1px solid var(--border);border-bottom-left-radius:4px");
+
+  const clickAttr = (isMe && m.id) ? 'onclick="toggleMsgDelete(\'' + divId + '\',event)"' : '';
+
+  div.innerHTML = delBtn +
+    '<div class="chat-bubble" style="' + bubbleStyle + '" ' + clickAttr + '>' +
+    bubbleContent + '</div>' +
+    '<div style="font-size:10px;color:var(--muted);margin-top:3px;padding:0 4px">' + time + (isMe ? ' ✓' : '') + '</div>';
+
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function toggleMsgDelete(divId, e) {
+  e.stopPropagation();
+  // hide all other open delete buttons first
+  document.querySelectorAll('.chat-msg-del.visible').forEach(btn => {
+    if (btn.id !== 'del-' + divId) {
+      btn.classList.remove('visible');
+      btn.closest('.chat-msg-wrap').classList.remove('selected');
+    }
+  });
+  const wrap = document.getElementById(divId);
+  const delBtn = document.getElementById('del-' + divId);
+  if (!delBtn) return;
+  const isVisible = delBtn.classList.contains('visible');
+  delBtn.classList.toggle('visible', !isVisible);
+  wrap.classList.toggle('selected', !isVisible);
+}
+
+// Click anywhere outside to close delete buttons
+document.addEventListener('click', function() {
+  document.querySelectorAll('.chat-msg-del.visible').forEach(btn => {
+    btn.classList.remove('visible');
+    btn.closest('.chat-msg-wrap')?.classList.remove('selected');
+  });
+});
+
+async function deleteMsg(msgId, divId, e) {
+  if (e) e.stopPropagation();
+  const el = document.getElementById(divId);
+  if (!el) return;
+  // Animate out with a shrink + fade
+  el.style.transition = "all .3s cubic-bezier(.4,0,.2,1)";
+  el.style.transform = "scale(.8) translateX(20px)";
+  el.style.opacity = "0";
+  el.style.maxHeight = el.offsetHeight + "px";
+  setTimeout(() => {
+    el.style.maxHeight = "0";
+    el.style.margin = "0";
+    el.style.padding = "0";
+    el.style.overflow = "hidden";
+  }, 200);
+  setTimeout(async () => {
+    el.remove();
+    try { await sb.from("messages").delete().eq("id", msgId); } catch(e) {}
+    toast("Message delete ho gaya 🗑️", "#059669");
+  }, 400);
+}
+
+// Emoji picker
+const EMOJIS = ["😊","😂","🤣","👍","❤️","🔥","😍","🙏","💯","👏","😭","😅","🥳","🤔","👌","💪","🎉","📚","✅","⭐","🚀","😎","🤝","👋","😴","🤯","🥺","😤","🎯","📝","💡","🏆","⚡","🌟","😇","🤗","😌","🥰","😘","🤩","😜","🤫","🫡","💬","📢","🔔","✍️","🧠","💻"];
+
+function toggleEmojiPicker() {
+  const picker = document.getElementById("emojiPicker");
+  if (!picker.dataset.built) {
+    picker.innerHTML = '<div style="display:flex;flex-wrap:wrap;gap:3px;max-height:110px;overflow-y:auto;padding:4px">' +
+      EMOJIS.map(e => '<span onclick="insertEmoji(\'' + e + '\')" style="font-size:22px;cursor:pointer;padding:3px;border-radius:6px" onmouseover="this.style.background=\'#f1f5f9\'" onmouseout="this.style.background=\'transparent\'">' + e + '</span>').join("") +
+      '</div>';
+    picker.dataset.built = "1";
+  }
+  picker.style.display = picker.style.display === "none" ? "flex" : "none";
+}
+
+function insertEmoji(e) {
+  const inp = document.getElementById("chatReplyInput");
+  const p = inp.selectionStart, v = inp.value;
+  inp.value = v.slice(0,p) + e + v.slice(p);
+  inp.focus(); inp.setSelectionRange(p+e.length, p+e.length);
+}
+
+async function sendReply() {
+  const input = document.getElementById("chatReplyInput");
+  const text = input.value.trim();
+  if (!text || !currentChatStudent) return;
+  input.value = "";
+  const roomId = getRoomId(user.id, currentChatStudent);
+  const msg = { room_id: roomId, sender_id: user.id, sender_name: user.name, content: text, type: "text", created_at: new Date().toISOString() };
+  appendMsg(msg);
+  try { await sb.from("messages").insert([msg]); loadChats(); } catch(e) {}
+}
+
+// ── VOICE MESSAGE ─────────────────────────────────────────────────────────
+async function toggleVoice() {
+  const btn = document.getElementById("voiceBtn");
+  if (!isRecording) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaRecorder = new MediaRecorder(stream);
+      audioChunks = [];
+      mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+      mediaRecorder.onstop = async () => {
+        const blob = new Blob(audioChunks, { type: "audio/webm" });
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64 = reader.result;
+          const roomId = getRoomId(user.id, currentChatStudent);
+          const msg = { room_id: roomId, sender_id: user.id, sender_name: user.name, content: base64, type: "voice", created_at: new Date().toISOString() };
+          appendMsg(msg);
+          try { await sb.from("messages").insert([msg]); loadChats(); } catch(e) {}
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(t => t.stop());
+      };
+      mediaRecorder.start();
+      isRecording = true;
+      btn.textContent = "⏹️";
+      btn.style.background = "#fee2e2";
+      btn.style.border = "1px solid #ef4444";
+      toast("Recording... ⏺️ Stop karne ke liye button click karo", "#ef4444");
+    } catch(e) { toast("Microphone access denied!", "#dc2626"); }
+  } else {
+    mediaRecorder.stop();
+    isRecording = false;
+    btn.textContent = "🎤";
+    btn.style.background = "#f1f5f9";
+    btn.style.border = "1px solid var(--border)";
+    toast("Voice message sending...", "#059669");
+  }
+}
+
+// Notification polling every 20 seconds
+setInterval(async () => {
+  if (document.getElementById("secChats").classList.contains("active")) return;
+  try {
+    const r = await fetch(API + "/mentors/requests/students", { headers: { "Authorization": "Bearer " + token } });
+    const students = await r.json();
+    let unread = 0;
+    for (const s of students) {
+      const roomId = getRoomId(user.id, s.id);
+      const { data } = await sb.from("messages").select("id").eq("room_id", roomId).eq("sender_id", s.id).order("created_at", { ascending: false }).limit(1);
+      if (data?.length) unread++;
+    }
+    const pill = document.getElementById("chatPill");
+    if (unread > 0) { pill.textContent = unread; pill.classList.add("show"); }
+    else pill.classList.remove("show");
+  } catch(e) {}
+}, 20000);
+
+init();
+</script>
+<script src="theme.js"></script>
+<script src="mobile.js"></script>
+</body>
+</html>
