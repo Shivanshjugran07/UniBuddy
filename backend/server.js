@@ -9,13 +9,13 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(cors());
 
-// Root redirect — STATIC SE PEHLE
-app.get("/", (req, res) => {
-  res.sendfile(path.join(__dirname, "frontend", "login.html"));
-});
-
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, "frontend")));
+
+// Root route — seedha file send karo
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "frontend", "login.html"));
+});
 
 // API Routes
 app.use("/api/auth", require("./routes/auth"));
