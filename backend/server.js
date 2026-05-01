@@ -11,7 +11,7 @@ app.use(cors());
 
 // Root redirect — STATIC SE PEHLE
 app.get("/", (req, res) => {
-  res.redirect("/login.html");
+  res.sendfile(path.join(__dirname, "frontend", "login.html"));
 });
 
 // Serve frontend static files
