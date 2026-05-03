@@ -312,7 +312,7 @@
         </div>
       </div>
       <div class="chat-header-actions">
-        <button class="btn-icon-header" onclick="startVideoCall()" title="Start Google Meet">📹</button>
+        <button class="btn-icon-header" onclick="startVideoCall()" title="Start Video Call">📹</button>
         <button class="btn-icon-header" onclick="closeChat()" title="Close">✕</button>
       </div>
     </div>
@@ -320,9 +320,9 @@
     <div class="call-bar">
       <div>
         <div class="call-bar-text">📹 Video Study Room</div>
-        <div class="call-bar-text"><span>Like Google Meet — start a room, share the link!</span></div>
+        <div class="call-bar-text"><span>Free video call — start a room, share the link!</span></div>
       </div>
-      <button class="btn-start-call" onclick="startVideoCall()">📹 Start Google Meet</button>
+      <button class="btn-start-call" onclick="startVideoCall()">📹 Start Video Call</button>
     </div>
 
     <div class="chat-messages" id="chatMessages">
@@ -825,11 +825,9 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   async function startVideoCall() {
     if (!currentPeer) return;
-    // Generate a Google Meet-compatible unique room code (10 char alphanumeric)
-    const chars = "abcdefghijklmnopqrstuvwxyz";
-    const seg = (n) => Array.from({length:n}, () => chars[Math.floor(Math.random()*chars.length)]).join("");
-    const meetCode = seg(3) + "-" + seg(4) + "-" + seg(3);
-    const meetUrl = `https://meet.google.com/${meetCode}`;
+    // Use Jitsi Meet — free, no account needed, actually works!
+    const roomId = getRoomId(user.id, currentPeer.id);
+    const meetUrl = `https://meet.jit.si/unibuddy-${roomId.substring(0, 12)}`;
 
     // Send invite in chat so partner can also click
     const msg = {
@@ -843,7 +841,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     appendMessage(msg);
     try { await sb.from("messages").insert([msg]); } catch {}
 
-    openCallWindow(meetUrl, meetCode);
+    openCallWindow(meetUrl, `unibuddy-${roomId.substring(0, 12)}`);
   }
 
   function joinCallFromLink(url) {
