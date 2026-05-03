@@ -86,6 +86,41 @@
     .empty div { font-size: 44px; margin-bottom: 12px; }
 
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    /* ── FILTER TABS (Wishlist) ── */
+    .tab-row { display:flex; gap:4px; background:#f1f5f9; border-radius:10px; padding:4px; width:fit-content; margin-bottom:18px; }
+    .tab-btn { padding:8px 18px; border:none; border-radius:7px; background:transparent; font-family:"Outfit",sans-serif; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer; transition:0.2s; position:relative; }
+    .tab-btn.active { background:linear-gradient(135deg,#2563eb,#f97316); color:#fff; }
+    .wish-count { position:absolute; top:2px; right:4px; background:#ef4444; color:#fff; border-radius:50%; width:16px; height:16px; font-size:9px; display:flex; align-items:center; justify-content:center; font-weight:700; }
+
+    /* ── WISHLIST HEART BUTTON ── */
+    .btn-wish { position:absolute; top:10px; right:10px; background:rgba(255,255,255,0.9); border:none; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:18px; transition:0.2s; box-shadow:0 2px 8px rgba(0,0,0,0.15); z-index:2; }
+    .btn-wish:hover { transform:scale(1.15); }
+    .btn-wish.wished { background:rgba(239,68,68,0.1); }
+    .book-img-wrap { position:relative; }
+
+    /* ── OFFER / NEGOTIATE BUTTON ── */
+    .btn-offer { flex:1; margin-top:6px; padding:8px; background:rgba(249,115,22,0.1); color:#f97316; border:1px solid rgba(249,115,22,0.3); border-radius:8px; font-family:"Outfit",sans-serif; font-size:12px; font-weight:700; cursor:pointer; transition:0.2s; }
+    .btn-offer:hover { background:#f97316; color:#fff; }
+
+    /* ── OFFER MODAL ── */
+    .offer-modal-ov { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; justify-content:center; align-items:center; backdrop-filter:blur(4px); }
+    .offer-modal-ov.open { display:flex; }
+    .offer-modal { background:var(--card); border-radius:20px; padding:28px; width:380px; border:1px solid var(--border); animation:fadeUp 0.3s ease; }
+    .offer-modal h3 { font-family:"Outfit",sans-serif; font-size:18px; font-weight:700; color:var(--text); margin-bottom:6px; }
+    .offer-modal p { font-size:13px; color:var(--muted); margin-bottom:18px; line-height:1.5; }
+    .offer-price-row { display:flex; gap:10px; margin-bottom:16px; align-items:flex-end; }
+    .offer-price-row input { flex:1; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; font-family:"Nunito",sans-serif; font-size:16px; font-weight:700; color:var(--text); outline:none; }
+    .offer-price-row input:focus { border-color:#2563eb; }
+    .offer-msg { width:100%; padding:10px 14px; border:1.5px solid var(--border); border-radius:10px; font-family:"Nunito",sans-serif; font-size:13px; color:var(--text); outline:none; min-height:70px; resize:vertical; margin-bottom:16px; }
+    .offer-msg:focus { border-color:#2563eb; }
+    .offer-btns { display:flex; gap:10px; }
+    .btn-send-offer { flex:2; padding:12px; background:linear-gradient(135deg,#2563eb,#f97316); color:#fff; border:none; border-radius:10px; font-family:"Outfit",sans-serif; font-size:14px; font-weight:700; cursor:pointer; }
+    .btn-cancel-offer { flex:1; padding:12px; background:#f1f5f9; color:var(--muted); border:none; border-radius:10px; font-family:"Outfit",sans-serif; font-weight:600; cursor:pointer; }
+
+    /* ── TOAST ── */
+    .ub-toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%) translateY(20px); background:#0f172a; color:#fff; padding:12px 24px; border-radius:24px; font-size:13px; font-weight:600; opacity:0; transition:all 0.3s; z-index:9999; white-space:nowrap; }
+    .ub-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
   </style>
   <link rel="stylesheet" href="mobile.css">
 </head>
@@ -146,6 +181,12 @@ window.addEventListener("load",function(){setTimeout(window._ubHide,600);});
     <button class="btn-add" onclick="openModal()">+ List a Book</button>
   </div>
 
+  <!-- Filter Tabs -->
+  <div class="tab-row">
+    <button class="tab-btn active" id="tabAll" onclick="setTab('all')">All Books</button>
+    <button class="tab-btn" id="tabWishlist" onclick="setTab('wishlist')">❤️ Wishlist <span class="wish-count" id="wishCount" style="display:none">0</span></button>
+  </div>
+
   <div class="filters">
     <input class="filter-input search" id="search" placeholder="🔍 Search books..." oninput="applyFilters()">
     <select class="filter-input" id="filterCourse" onchange="applyFilters()">
@@ -201,6 +242,27 @@ window.addEventListener("load",function(){setTimeout(window._ubHide,600);});
   </div>
 </div>
 
+
+<!-- OFFER MODAL -->
+<div class="offer-modal-ov" id="offerModal">
+  <div class="offer-modal">
+    <h3>💰 Make an Offer</h3>
+    <p id="offerBook">Send a price offer to the seller. They can accept or reject it.</p>
+    <div class="offer-price-row">
+      <div>
+        <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;margin-bottom:6px;">Your Offer (₹)</div>
+        <input type="number" id="offerAmount" placeholder="e.g. 180">
+      </div>
+    </div>
+    <textarea class="offer-msg" id="offerMsg" placeholder="Optional message to seller... e.g. I can pickup today!"></textarea>
+    <div class="offer-btns">
+      <button class="btn-cancel-offer" onclick="closeOffer()">Cancel</button>
+      <button class="btn-send-offer" onclick="sendOffer()">Send Offer 🚀</button>
+    </div>
+  </div>
+</div>
+<div class="ub-toast" id="ubToast"></div>
+
 <script>
   const API = "https://unibuddy-1.onrender.com/api";
   const token = localStorage.getItem("token");
@@ -223,44 +285,63 @@ window.addEventListener("load",function(){setTimeout(window._ubHide,600);});
       const res = await fetch(`${API}/books`);
       allBooks = await res.json();
       renderBooks(allBooks);
+      updateWishCount();
     } catch {
       document.getElementById("booksGrid").innerHTML = '<div class="empty"><div>❌</div>Could not load books</div>';
     }
   }
 
+
   function renderBooks(books) {
     const grid = document.getElementById("booksGrid");
-    if (books.length === 0) { grid.innerHTML = '<div class="empty"><div>📭</div>No books found</div>'; return; }
-    grid.innerHTML = books.map((b, i) => `
-      <div class="book-card" style="animation-delay:${i * 0.05}s">
-        <div class="book-img">
-          ${b.image ? `<img src="${b.image}" alt="${b.title}" onerror="this.parentElement.innerHTML='📖'">` : "📖"}
-        </div>
-        <div class="book-body">
-          <span class="book-condition ${conditionClass[b.condition] || 'condition-good'}">${b.condition}</span>
-          <div class="book-title" title="${b.title}">${b.title}</div>
-          <div class="book-author">${b.author || "Unknown Author"}</div>
-          <div>
-            <span class="book-price">₹${b.price}</span>
-            ${b.originalPrice ? `<span class="book-og-price">₹${b.originalPrice}</span>` : ""}
+    if (!books || books.length === 0) {
+      grid.innerHTML = currentTab === "wishlist"
+        ? '<div class="empty"><div>❤️</div>No books in wishlist yet<br><small>Click 🤍 on any book to save it</small></div>'
+        : '<div class="empty"><div>📭</div>No books found</div>';
+      return;
+    }
+    const wish = getWishlist();
+    grid.innerHTML = books.map((b, i) => {
+      const bookId = b.id || b._id || i;
+      const isWished = wish.includes(bookId);
+      return `
+        <div class="book-card" style="animation-delay:${i * 0.05}s">
+          <div class="book-img-wrap">
+            <div class="book-img">
+              ${b.image ? `<img src="${b.image}" alt="${b.title}" onerror="this.parentElement.innerHTML='📖'">` : "📖"}
+            </div>
+            <button class="btn-wish ${isWished ? "wished" : ""}" onclick="toggleWish('${bookId}', this)">${isWished ? "❤️" : "🤍"}</button>
           </div>
-          <div class="book-seller">👤 ${b.seller || "Student"} • ${b.course || "General"}</div>
-          <button class="btn-contact" onclick="contactSeller('${b.sellerPhone || ''}', '${b.seller || ''}', '${b.title}')">📞 Contact Seller</button>
-        </div>
-      </div>
-    `).join("");
+          <div class="book-body">
+            <span class="book-condition ${conditionClass[b.condition] || 'condition-good'}">${b.condition}</span>
+            <div class="book-title" title="${b.title}">${b.title}</div>
+            <div class="book-author">${b.author || "Unknown Author"}</div>
+            <div>
+              <span class="book-price">₹${b.price}</span>
+              ${b.originalPrice ? `<span class="book-og-price">₹${b.originalPrice}</span>` : ""}
+            </div>
+            <div class="book-seller">👤 ${b.seller || "Student"} • ${b.course || "General"}</div>
+            <button class="btn-contact" onclick="contactSeller('${b.sellerPhone || b.seller_phone || ""}', '${b.seller || ""}', '${b.title}')">📞 Contact</button>
+            <button class="btn-offer" onclick='openOffer(${JSON.stringify(b).replace(/'/g, "&#39;")})'>💰 Make Offer</button>
+          </div>
+        </div>`;
+    }).join("");
   }
 
-  function applyFilters() {
+
+  function applyFilterLogic(books) {
     const search = document.getElementById("search").value.toLowerCase();
     const course = document.getElementById("filterCourse").value;
     const condition = document.getElementById("filterCondition").value;
-    let filtered = allBooks.filter(b =>
+    return books.filter(b =>
       (!search || b.title.toLowerCase().includes(search) || (b.author || "").toLowerCase().includes(search)) &&
       (!course || b.course === course) &&
       (!condition || b.condition === condition)
     );
-    renderBooks(filtered);
+  }
+  function applyFilters() {
+    if (currentTab === "wishlist") setTab("wishlist");
+    else renderBooks(applyFilterLogic(allBooks));
   }
 
   function contactSeller(phone, seller, title) {
@@ -298,14 +379,95 @@ window.addEventListener("load",function(){setTimeout(window._ubHide,600);});
         })
       });
       const data = await res.json();
-      if (res.ok) { closeModal(); loadBooks(); alert("Book listed ✅"); }
+      if (res.ok) { closeModal(); loadBooks(); showToast('Book listed! 📚', '#059669'); if(window.UBNotif)UBNotif.push('book','Book Listed!','Your book "'+title+'" is now live on the marketplace.','my_books.html'); }
       else alert(data.message || "Failed");
     } catch { alert("Server error"); }
+  }
+
+
+  // ── TOAST ──────────────────────────────
+  function showToast(msg, color) {
+    const t = document.getElementById("ubToast");
+    t.textContent = msg;
+    t.style.background = color || "#0f172a";
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 2500);
+  }
+
+  // ── WISHLIST ────────────────────────────
+  function getWishlist() {
+    try { return JSON.parse(localStorage.getItem("ub_wishlist") || "[]"); } catch { return []; }
+  }
+  function toggleWish(bookId, btn) {
+    let wish = getWishlist();
+    if (wish.includes(bookId)) {
+      wish = wish.filter(id => id !== bookId);
+      btn.textContent = "🤍";
+      btn.classList.remove("wished");
+      showToast("Removed from wishlist");
+    } else {
+      wish.push(bookId);
+      btn.textContent = "❤️";
+      btn.classList.add("wished");
+      showToast("Added to wishlist ❤️", "#ef4444");
+    }
+    localStorage.setItem("ub_wishlist", JSON.stringify(wish));
+    updateWishCount();
+    if (currentTab === "wishlist") renderBooks(allBooks.filter(b => getWishlist().includes(b.id || b._id)));
+  }
+  function updateWishCount() {
+    const n = getWishlist().length;
+    const el = document.getElementById("wishCount");
+    el.textContent = n;
+    el.style.display = n > 0 ? "flex" : "none";
+  }
+
+  // ── TABS ────────────────────────────────
+  let currentTab = "all";
+  function setTab(tab) {
+    currentTab = tab;
+    document.getElementById("tabAll").classList.toggle("active", tab === "all");
+    document.getElementById("tabWishlist").classList.toggle("active", tab === "wishlist");
+    if (tab === "all") renderBooks(applyFilterLogic(allBooks));
+    else renderBooks(allBooks.filter(b => getWishlist().includes(b.id || b._id)));
+  }
+
+  // ── OFFER MODAL ─────────────────────────
+  let offerTarget = null;
+  function openOffer(book) {
+    offerTarget = book;
+    document.getElementById("offerBook").textContent =
+      `"${book.title}" — Listed at ₹${book.price} by ${book.seller || "Seller"}`;
+    document.getElementById("offerAmount").value = "";
+    document.getElementById("offerMsg").value = "";
+    document.getElementById("offerModal").classList.add("open");
+  }
+  function closeOffer() { document.getElementById("offerModal").classList.remove("open"); }
+  function sendOffer() {
+    const amt = document.getElementById("offerAmount").value;
+    const msg = document.getElementById("offerMsg").value.trim();
+    if (!amt || isNaN(amt) || Number(amt) <= 0) { showToast("Enter a valid offer amount", "#dc2626"); return; }
+    if (!offerTarget) return;
+    const phone = offerTarget.sellerPhone || offerTarget.seller_phone;
+    const waMsg = `Hi ${offerTarget.seller || "Seller"}, I saw your book "${offerTarget.title}" on UniBuddy (listed ₹${offerTarget.price}). I'd like to offer ₹${amt}.${msg ? " " + msg : ""} — sent via UniBuddy`;
+    if (phone) {
+      window.open(`https://wa.me/91${phone}?text=${encodeURIComponent(waMsg)}`);
+    } else {
+      navigator.clipboard.writeText(waMsg).catch(() => {});
+      showToast("Offer message copied! Send it to seller 📋", "#059669");
+    }
+    // Save offer locally
+    const offers = JSON.parse(localStorage.getItem("ub_offers") || "[]");
+    offers.push({ bookId: offerTarget.id || offerTarget._id, title: offerTarget.title, offer: Number(amt), msg, timestamp: Date.now() });
+    localStorage.setItem("ub_offers", JSON.stringify(offers));
+    closeOffer();
+    showToast("Offer sent! ✅", "#059669");
   }
 
   loadBooks();
 </script>
 <script src="theme.js"></script>
 <script src="mobile.js"></script>
+<script src="notifications.js"></script>
 </body>
 </html>
