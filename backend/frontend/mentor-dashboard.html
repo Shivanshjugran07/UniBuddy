@@ -575,8 +575,8 @@ async function postAnn(){
 
 async function startLiveClassNow(){
   if(!myMentorId){toast("Mentor ID nahi mila","#ef4444");return;}
-  const roomId = "unibuddy-live-" + myMentorId.toString().substring(0,10) + "-" + Date.now().toString(36);
-  const jitsiUrl = "https://meet.jit.si/" + roomId + "#config.lobby.enabled=false&config.startWithAudioMuted=false";
+  const roomId = "unibuddy-live-" + myMentorId.toString().substring(0,10);
+  const jitsiUrl = "https://meet.jit.si/" + roomId;
   // Open Jitsi in new tab
   window.open(jitsiUrl, "_blank");
   // Post announcement with the link
