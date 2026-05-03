@@ -225,7 +225,7 @@
 
     /* ===== VIDEO CALL MODAL ===== */
     .call-overlay { display: none; position: fixed; inset: 0; background: #0c0e1a; z-index: 2000; flex-direction: column; align-items: center; justify-content: center; }
-    .call-overlay.open { display: flex; }
+    .call-overlay.open { display: flex !important; }
     .call-room-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 700; color: white; margin-bottom: 6px; }
     .call-room-sub { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 28px; text-align: center; }
     .call-iframe-wrap { width: 820px; height: 500px; border-radius: 16px; overflow: hidden; border: 2px solid #1e2240; }
@@ -312,7 +312,7 @@
         </div>
       </div>
       <div class="chat-header-actions">
-        <button class="btn-icon-header" onclick="startVideoCall()" title="Start video call">📹</button>
+        <button class="btn-icon-header" onclick="startVideoCall()" title="Start Google Meet">📹</button>
         <button class="btn-icon-header" onclick="closeChat()" title="Close">✕</button>
       </div>
     </div>
@@ -322,7 +322,7 @@
         <div class="call-bar-text">📹 Video Study Room</div>
         <div class="call-bar-text"><span>Like Google Meet — start a room, share the link!</span></div>
       </div>
-      <button class="btn-start-call" onclick="startVideoCall()">🚀 Start Room</button>
+      <button class="btn-start-call" onclick="startVideoCall()">📹 Start Google Meet</button>
     </div>
 
     <div class="chat-messages" id="chatMessages">
@@ -825,22 +825,25 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   async function startVideoCall() {
     if (!currentPeer) return;
-    const roomName = generateRoomName();
-    const roomUrl  = `https://meet.jit.si/${roomName}`;
+    // Generate a Google Meet-compatible unique room code (10 char alphanumeric)
+    const chars = "abcdefghijklmnopqrstuvwxyz";
+    const seg = (n) => Array.from({length:n}, () => chars[Math.floor(Math.random()*chars.length)]).join("");
+    const meetCode = seg(3) + "-" + seg(4) + "-" + seg(3);
+    const meetUrl = `https://meet.google.com/${meetCode}`;
 
-    // Send call invite as a message so partner sees it in chat
+    // Send invite in chat so partner can also click
     const msg = {
       room_id: getRoomId(user.id, currentPeer.id),
       sender_id: user.id,
       sender_name: user.name,
-      content: roomUrl,
+      content: meetUrl,
       type: "call_invite",
       created_at: new Date().toISOString()
     };
     appendMessage(msg);
     try { await sb.from("messages").insert([msg]); } catch {}
 
-    openCallWindow(roomUrl, roomName);
+    openCallWindow(meetUrl, meetCode);
   }
 
   function joinCallFromLink(url) {
@@ -848,18 +851,32 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     openCallWindow(url, roomName);
   }
 
+  let currentMeetUrl = "";
   function openCallWindow(url, roomName) {
-    document.getElementById("callRoomTitle").textContent = `📹 ${currentPeer?.name || "Study"} Room`;
-    document.getElementById("callRoomSub").textContent = `Room: ${roomName}  •  Share link: ${url}`;
-    document.getElementById("callIframe").src = url;
+    currentMeetUrl = url;
+    document.getElementById("callRoomTitle").textContent = `📹 ${currentPeer?.name || "Study"} Room Ready!`;
+    document.getElementById("callRoomSub").textContent = `Share this link with ${currentPeer?.name || "your partner"} to join`;
+    document.getElementById("meetLinkUrl").textContent = url;
     document.getElementById("callOverlay").classList.add("open");
-    // Close chat modal while on call
-    document.getElementById("chatOverlay").classList.remove("open");
+    document.getElementById("callOverlay").style.display = "flex";
+  }
+  function openMeetLink() {
+    if (currentMeetUrl) window.open(currentMeetUrl, "_blank");
+  }
+  function copyMeetLink() {
+    navigator.clipboard.writeText(currentMeetUrl).then(() => {
+      const btn = document.querySelector(".btn-copy-link");
+      btn.textContent = "✅ Copied!";
+      setTimeout(() => btn.textContent = "📋 Copy", 2000);
+    }).catch(() => {
+      prompt("Copy this link:", currentMeetUrl);
+    });
   }
 
   function endCall() {
     document.getElementById("callOverlay").classList.remove("open");
-    document.getElementById("callIframe").src = "";
+    document.getElementById("callOverlay").style.display = "none";
+    currentMeetUrl = "";
     // Re-open chat
     if (currentPeer) document.getElementById("chatOverlay").classList.add("open");
   }
