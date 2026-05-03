@@ -217,7 +217,12 @@
 
   <!-- LIVE CLASSES -->
   <div class="sec" id="secSchedule">
-    <div class="topbar"><div><div class="page-title">📅 Live Classes</div></div><button class="btn-primary" onclick="openModal('classModal')">+ Schedule Class</button></div>
+    <div class="topbar"><div><div class="page-title">📅 Live Classes</div></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn-primary" onclick="startLiveClassNow()" style="background:#059669;">🔴 Start Live Class Now</button>
+        <button class="btn-primary" onclick="openModal('classModal')">+ Schedule Class</button>
+      </div>
+    </div>
     <div class="card"><div id="allClasses"><div class="empty"><div>⏳</div>Loading...</div></div></div>
   </div>
 
@@ -566,6 +571,27 @@ async function postAnn(){
     body:JSON.stringify({title,content:document.getElementById("aContent").value})});
   const d=await r.json();if(r.ok){toast("Announcement posted ✅","#059669");closeModal("annModal");loadAnns();}
   else toast(d.message||"Error","#dc2626");}catch(e){toast("Server error","#dc2626");}
+}
+
+async function startLiveClassNow(){
+  if(!myMentorId){toast("Mentor ID nahi mila","#ef4444");return;}
+  const roomId = "unibuddy-live-" + myMentorId.toString().substring(0,10) + "-" + Date.now().toString(36);
+  const jitsiUrl = "https://meet.jit.si/" + roomId + "#config.lobby.enabled=false&config.startWithAudioMuted=false";
+  // Open Jitsi in new tab
+  window.open(jitsiUrl, "_blank");
+  // Post announcement with the link
+  const msg = "🔴 LIVE CLASS ABHI SHURU HO GAYI! Join karo: " + jitsiUrl;
+  try{
+    const r = await fetch(API+"/mentors/"+myMentorId+"/announcements",{
+      method:"POST",
+      headers:{"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+      body:JSON.stringify({message: msg})
+    });
+    if(r.ok){
+      toast("Live class shuru! Link announcement mein post ho gaya ✅","#059669");
+      if(document.getElementById("secAnn").classList.contains("active")) loadAnns();
+    }
+  }catch(e){toast("Jitsi open ho gaya par announcement post nahi hua","#f97316");}
 }
 
 async function delAnn(id){
