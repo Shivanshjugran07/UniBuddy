@@ -827,7 +827,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     if (!currentPeer) return;
     // Use Jitsi Meet — free, no account needed, actually works!
     const roomId = getRoomId(user.id, currentPeer.id);
-    const meetUrl = `https://meet.jit.si/unibuddy-${roomId.substring(0, 12)}`;
+    const meetUrl = `https://meet.jit.si/unibuddy-${roomId.substring(0, 12)}#config.lobby.enabled=false&config.startWithAudioMuted=false&config.startWithVideoMuted=false`;
 
     // Send invite in chat so partner can also click
     const msg = {
