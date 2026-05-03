@@ -661,12 +661,12 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       if (m.type === "call_invite") {
         html += `
           <div class="msg ${isMe ? "mine" : "theirs"}">
-            <div class="bubble call-invite" onclick="joinCallFromLink('${m.content}')">
+            <div class="bubble call-invite">
               <div class="call-invite-icon">📹</div>
               <div>
                 <div class="call-invite-text">${isMe ? "You started" : currentPeer?.name + " started"} a Study Room</div>
                 <div class="call-invite-sub">${m.content}</div>
-                <button class="btn-join-call">Join Room →</button>
+                <button class="btn-join-call" onclick="window.open('${m.content}', '_blank')">Join Room →</button>
               </div>
             </div>
             <div class="msg-time">${timeStr}</div>
@@ -701,12 +701,12 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     if (m.type === "call_invite") {
       div.innerHTML = `
-        <div class="bubble call-invite" onclick="joinCallFromLink('${m.content}')">
+        
           <div class="call-invite-icon">📹</div>
           <div>
             <div class="call-invite-text">${isMe ? "You started" : (currentPeer?.name || "Partner") + " started"} a Study Room</div>
             <div class="call-invite-sub">${m.content}</div>
-            <button class="btn-join-call">Join Room →</button>
+            <button class="btn-join-call" onclick="window.open('${m.content}', '_blank')">Join Room →</button>
           </div>
         </div>
         <div class="msg-time">${timeStr}</div>`;
@@ -847,8 +847,7 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   }
 
   function joinCallFromLink(url) {
-    const roomName = url.split("/").pop();
-    openCallWindow(url, roomName);
+    window.open(url, "_blank");
   }
 
   let currentMeetUrl = "";
