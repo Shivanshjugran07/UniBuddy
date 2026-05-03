@@ -165,6 +165,13 @@
   .ph-name { font-size: 16px !important; }
   .chat-wrap { height: calc(100vh - 320px) !important; }
 
+  /* ── RATE MENTOR BUTTON MOBILE FIX ── */
+  .rate-fab,
+  .rated-badge {
+    bottom: 70px !important;
+    right: 16px !important;
+  }
+
   /* ── LIGHT MODE MOBILE OVERRIDES ── */
   body.light-mode .mob-topbar,
   body.light-mode .mob-bottom-nav,
