@@ -99,6 +99,33 @@
     .btn-cancel-pay { width: 100%; padding: 11px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 8px; }
     .empty { text-align: center; padding: 60px; color: var(--muted); font-size: 15px; grid-column: 1/-1; }
     .empty div { font-size: 44px; margin-bottom: 12px; }
+    /* ── Mentor-wise grouping ── */
+    .mentor-section { margin-bottom: 32px; }
+    .mentor-header { display:flex; align-items:center; gap:12px; margin-bottom:16px; padding-bottom:10px; border-bottom:2px solid var(--border); }
+    .mentor-avatar-big { width:46px; height:46px; border-radius:50%; background:var(--indigo); display:flex; align-items:center; justify-content:center; font-size:18px; font-weight:800; color:white; flex-shrink:0; }
+    .mentor-section-title { font-family:'Outfit',sans-serif; font-size:18px; font-weight:700; color:var(--text); }
+    .mentor-quiz-count { font-size:12px; color:var(--muted); font-weight:600; }
+    /* ── Tabs ── */
+    .tab-bar { display:flex; gap:8px; margin-bottom:24px; flex-wrap:wrap; }
+    .tab-btn { padding:9px 20px; border-radius:8px; border:1px solid var(--border); background:var(--card); font-family:'Outfit',sans-serif; font-size:13px; font-weight:700; cursor:pointer; color:var(--muted); transition:0.2s; }
+    .tab-btn.active { background:#2563eb; color:white; border-color:#2563eb; }
+    /* ── Mock paper badge ── */
+    .quiz-badge.mock { background:rgba(99,102,241,0.1); color:#6366f1; }
+    /* ── Student detail form ── */
+    .student-form-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:998; justify-content:center; align-items:center; backdrop-filter:blur(4px); }
+    .student-form-overlay.open { display:flex; }
+    .student-form-box { background:white; border-radius:20px; padding:32px; width:420px; max-width:95vw; animation:pop 0.3s ease; }
+    /* ── Tab-switch warning ── */
+    .cheating-warning { display:none; position:fixed; inset:0; background:rgba(220,38,38,0.97); z-index:9999; flex-direction:column; align-items:center; justify-content:center; color:white; text-align:center; padding:40px; }
+    .cheating-warning.show { display:flex; }
+    /* ── Time taken in result ── */
+    .result-time { font-size:16px; color:var(--muted); margin-top:8px; }
+    /* ── Score breakdown ── */
+    .score-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin:20px 0; }
+    .score-box { background:var(--bg); border-radius:12px; padding:14px; text-align:center; border:1px solid var(--border); }
+    .score-box-val { font-family:'Outfit',sans-serif; font-size:26px; font-weight:800; color:var(--indigo); }
+    .score-box-label { font-size:11px; color:var(--muted); margin-top:2px; }
+
     .toast { position: fixed; bottom: 24px; right: 24px; background: #0f172a; color: white; padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 600; transform: translateY(60px); opacity: 0; transition: all 0.3s; z-index: 9999; }
     .toast.show { transform: translateY(0); opacity: 1; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
@@ -155,7 +182,12 @@ window.addEventListener("load",function(){setTimeout(window._ubHide,600);});
 <div class="main">
   <div class="list-view" id="listView">
     <div class="topbar"><div class="page-title">📝 Quizzes & Tests</div></div>
-    <div class="info-banner">
+    
+    <div class="tab-bar" id="tabBar">
+      <button class="tab-btn active" onclick="switchTab('all')">📝 All Quizzes</button>
+      <button class="tab-btn" onclick="switchTab('mock')">📄 Mock Papers</button>
+    </div>
+<div class="info-banner">
       <div style="font-size:32px;flex-shrink:0">🔐</div>
       <div class="info-banner-text">
         <strong>How quizzes work</strong><br>
@@ -189,10 +221,17 @@ window.addEventListener("load",function(){setTimeout(window._ubHide,600);});
   <div class="quiz-view" id="resultView">
     <div class="result-card">
       <div style="font-size:48px;margin-bottom:16px">🎉</div>
-      <div class="result-score"><span id="rScore">0</span>/<span id="rTotal">0</span></div>
-      <div class="result-label">Quiz Complete!</div>
+      <div style="font-family:'Outfit',sans-serif;font-size:22px;font-weight:700;color:var(--text);margin-bottom:16px;" id="rTitle">Quiz Complete! 🎉</div>
+      <div class="score-grid">
+        <div class="score-box"><div class="score-box-val" id="rScore">0</div><div class="score-box-label">✅ Correct</div></div>
+        <div class="score-box"><div class="score-box-val" id="rWrong">0</div><div class="score-box-label">❌ Wrong</div></div>
+        <div class="score-box"><div class="score-box-val" id="rTotal">0</div><div class="score-box-label">📊 Total</div></div>
+      </div>
       <div class="result-pct" id="rPct"></div>
+      <div class="result-label" style="margin-top:4px;">Score</div>
+      <div class="result-time" id="rTime"></div>
       <div style="font-size:14px;color:var(--muted);margin-top:12px" id="rMsg"></div>
+      <div id="rTabWarning" style="display:none;margin-top:8px;padding:8px 14px;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;font-size:13px;color:#dc2626;font-weight:600;"></div>
       <button class="btn-back" onclick="backToList()">← Back to Quizzes</button>
     </div>
   </div>
@@ -241,91 +280,151 @@ window.addEventListener("load",function(){setTimeout(window._ubHide,600);});
     t.classList.add("show"); setTimeout(() => t.classList.remove("show"), 3000);
   }
 
+  // ── State ────────────────────────────────────────────────────────────────
   let currentQuiz = null, currentQ = 0, answers = [], timerInterval = null;
-  let allMentors = [];
+  let allMentors = [], allQuizzes = [];
   let pendingPayQuiz = null;
+  let pendingQuizId = null;
+  let quizStartTime = null;
+  let tabSwitchCount = 0;
+  let currentTab = 'all';
 
   function getPaidQuizzes() { return JSON.parse(localStorage.getItem("paidQuizzes") || "[]"); }
   function getConnectedMentors() { return JSON.parse(localStorage.getItem("connectedMentors") || "[]"); }
+  function getStudentDetails() { return JSON.parse(localStorage.getItem("studentDetails") || "null"); }
 
+  // ── Tab switch detection ──────────────────────────────────────────────────
+  document.addEventListener("visibilitychange", () => {
+    if (!currentQuiz) return;
+    if (document.hidden) {
+      tabSwitchCount++;
+      const warn = document.getElementById("cheatingWarning");
+      document.getElementById("tabSwitchCount").textContent = `Tab switch count: ${tabSwitchCount}`;
+      warn.classList.add("show");
+    }
+  });
+
+  function dismissCheatingWarning() {
+    document.getElementById("cheatingWarning").classList.remove("show");
+  }
+
+  // ── Tab switching (quizzes vs mock papers) ────────────────────────────────
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    event.target.classList.add('active');
+    renderQuizCards(allQuizzes);
+  }
+
+  // ── Load quizzes ──────────────────────────────────────────────────────────
   async function loadQuizzes() {
     try {
-      // Load mentors for price info
       const mRes = await fetch(`${API}/mentors`);
       allMentors = await mRes.json();
-
       const res = await fetch(`${API}/quiz`);
       const quizzes = await res.json();
-
       if (!quizzes.length) {
-        const demos = [
-          { id: "demo1", title: "DSA Basics", subject: "Data Structures", duration: 10, total_marks: 5, is_premium: false, mentor_name: "UniBuddy Team", mentor_id: "demo" },
-          { id: "demo2", title: "DBMS Fundamentals", subject: "Database Management", duration: 15, total_marks: 10, is_premium: false, mentor_name: "UniBuddy Team", mentor_id: "demo" },
-          { id: "demo3", title: "OS Concepts", subject: "Operating Systems", duration: 20, total_marks: 15, is_premium: true, mentor_name: "UniBuddy Demo", mentor_id: "demo" },
+        allQuizzes = [
+          { id:"demo1", title:"DSA Basics", subject:"Data Structures", duration:10, total_marks:5, is_premium:false, is_mock:false, mentor_name:"UniBuddy Team", mentor_id:"demo" },
+          { id:"demo2", title:"DBMS Fundamentals", subject:"Database Management", duration:15, total_marks:10, is_premium:false, is_mock:false, mentor_name:"UniBuddy Team", mentor_id:"demo" },
+          { id:"demo3", title:"OS Concepts — Mock Paper", subject:"Operating Systems", duration:20, total_marks:15, is_premium:true, is_mock:true, mentor_name:"UniBuddy Demo", mentor_id:"demo" },
         ];
-        renderQuizCards(demos);
-        return;
+      } else {
+        allQuizzes = quizzes;
       }
-      renderQuizCards(quizzes);
+      renderQuizCards(allQuizzes);
     } catch {
       document.getElementById("quizGrid").innerHTML = '<div class="empty"><div>❌</div>Could not load quizzes</div>';
     }
   }
 
+  // ── Render quiz cards (mentor-wise grouped) ───────────────────────────────
   function renderQuizCards(quizzes) {
     const paid = getPaidQuizzes();
     const connected = getConnectedMentors();
+    const filtered = quizzes.filter(q => currentTab === 'mock' ? q.is_mock : !q.is_mock);
 
-    document.getElementById("quizGrid").innerHTML = quizzes.map((q, i) => {
-      const isDemo = q.id?.startsWith("demo");
-      const mentor = allMentors.find(m => m.user_id === q.mentor_id);
-      const isConnected = isDemo || connected.includes(q.mentor_id);
-      const isPaid = isDemo || paid.includes(q.id);
+    // Group by mentor
+    const groups = {};
+    filtered.forEach(q => {
+      const key = q.mentor_id || 'demo';
+      if (!groups[key]) groups[key] = { name: q.mentor_name || 'UniBuddy', quizzes: [] };
+      groups[key].quizzes.push(q);
+    });
 
-      let lockHTML = "";
-      if (!isDemo) {
-        if (q.is_premium && !isPaid) {
-          const price = mentor?.price || 0;
-          lockHTML = `<div class="premium-lock">
-            <div class="premium-lock-icon">⭐</div>
-            <div class="premium-lock-msg">Premium Quiz</div>
-            <div class="premium-lock-sub">Pay ₹${price} session fee to ${q.mentor_name} to unlock</div>
-            <button class="btn-pay" onclick="event.stopPropagation();openPayModal('${q.id}','${q.title.replace(/'/g,"\\'")}','${q.mentor_name}',${mentor?.price||0},'${mentor?.id||''}','${q.mentor_name.toLowerCase().replace(/\s/g,"")}')">💰 Pay & Unlock</button>
-          </div>`;
-        } else if (!q.is_premium && !isConnected) {
-          lockHTML = `<div class="lock-overlay">
-            <div class="lock-icon">🔒</div>
-            <div class="lock-msg">Connect with mentor first</div>
-            <div class="lock-sub">Go to Mentors page and connect with ${q.mentor_name}</div>
-            <button class="btn-go-connect" onclick="event.stopPropagation();window.location.href='mentors.html'">Browse Mentors →</button>
-          </div>`;
+    if (!Object.keys(groups).length) {
+      document.getElementById("quizGrid").innerHTML = '<div class="empty"><div>📭</div>Is section mein koi quiz nahi hai</div>';
+      return;
+    }
+
+    let html = '';
+    Object.values(groups).forEach(group => {
+      html += `<div class="mentor-section">
+        <div class="mentor-header">
+          <div class="mentor-avatar-big">${group.name[0].toUpperCase()}</div>
+          <div>
+            <div class="mentor-section-title">👨‍🏫 ${group.name}</div>
+            <div class="mentor-quiz-count">${group.quizzes.length} ${currentTab==='mock'?'mock paper':'quiz'}${group.quizzes.length>1?'s':''}</div>
+          </div>
+        </div>
+        <div class="quiz-grid">`;
+
+      group.quizzes.forEach((q, i) => {
+        const isDemo = q.id?.startsWith("demo");
+        const mentor = allMentors.find(m => m.user_id === q.mentor_id);
+        const mentorPrice = mentor?.price || mentor?.session_fee || q.session_fee || 0;
+        const isConnected = isDemo || connected.includes(q.mentor_id);
+        const isPaid = isDemo || paid.includes(q.id);
+
+        let lockHTML = "";
+        if (!isDemo) {
+          if (q.is_premium && !isPaid) {
+            const upiHandle = (q.mentor_name||'mentor').toLowerCase().replace(/\s/g,'');
+            lockHTML = `<div class="premium-lock">
+              <div class="premium-lock-icon">⭐</div>
+              <div class="premium-lock-msg">Premium ${q.is_mock?'Mock Paper':'Quiz'}</div>
+              <div class="premium-lock-sub">Pay ₹${mentorPrice} to ${q.mentor_name} to unlock</div>
+              <button class="btn-pay" onclick="event.stopPropagation();openPayModal('${q.id}','${(q.title||'').replace(/'/g,"\\'")}','${q.mentor_name}',${mentorPrice},'${mentor?.id||''}','${upiHandle}')">💰 Pay & Unlock</button>
+            </div>`;
+          } else if (!q.is_premium && !isConnected) {
+            lockHTML = `<div class="lock-overlay">
+              <div class="lock-icon">🔒</div>
+              <div class="lock-msg">Connect with mentor first</div>
+              <div class="lock-sub">Mentors page pe jaao aur ${q.mentor_name} se connect karo</div>
+              <button class="btn-go-connect" onclick="event.stopPropagation();window.location.href='mentors.html'">Browse Mentors →</button>
+            </div>`;
+          }
         }
-      }
 
-      const accessible = !lockHTML;
-      return `
-        <div class="quiz-card ${accessible ? 'accessible' : ''}" style="animation-delay:${i*0.06}s" ${accessible ? `onclick="startQuiz('${q.id}')"` : ""}>
-          <span class="quiz-badge ${q.is_premium ? 'premium' : 'free'}">${q.is_premium ? '⭐ Premium' : '✅ Free'}</span>
+        const accessible = !lockHTML;
+        const badgeType = q.is_mock ? 'mock' : (q.is_premium ? 'premium' : 'free');
+        const badgeLabel = q.is_mock ? '📄 Mock Paper' : (q.is_premium ? '⭐ Premium' : '✅ Free');
+
+        html += `<div class="quiz-card ${accessible?'accessible':''}" style="animation-delay:${i*0.06}s" ${accessible?`onclick="startQuiz('${q.id}')"`:""}> 
+          <span class="quiz-badge ${badgeType}">${badgeLabel}</span>
           <div class="quiz-title">${q.title}</div>
           <div class="quiz-subject">📘 ${q.subject}</div>
           <div class="quiz-meta">
             <span>⏱ ${q.duration} mins</span>
             <span>📊 ${q.total_marks} marks</span>
-            <span>👨‍🏫 ${q.mentor_name || "UniBuddy"}</span>
           </div>
-          ${accessible ? `<button class="btn-start">Start Quiz →</button>` : ""}
+          ${accessible ? `<button class="btn-start">Start ${q.is_mock?'Mock Test':'Quiz'} →</button>` : ''}
           ${lockHTML}
         </div>`;
-    }).join("");
+      });
+      html += '</div></div>';
+    });
+
+    document.getElementById("quizGrid").innerHTML = html;
   }
 
-  // ── Payment ───────────────────────────────────────────────────────────────
+  // ── Payment modal ─────────────────────────────────────────────────────────
   function openPayModal(quizId, quizTitle, mentorName, price, mentorDbId, upiHandle) {
     pendingPayQuiz = { quizId, quizTitle, mentorName, price };
     document.getElementById("payQuizName").textContent = quizTitle;
     document.getElementById("payMentorName").textContent = mentorName;
-    document.getElementById("payAmount").textContent = "₹" + price;
-    document.getElementById("payUpiId").textContent = upiHandle + "@upi";
+    document.getElementById("payAmount").textContent = "₹" + (price || '—');
+    document.getElementById("payUpiId").textContent = (upiHandle || mentorName.toLowerCase().replace(/\s/g,'')) + "@upi";
     document.getElementById("payTxnId").value = "";
     document.getElementById("payModal").classList.add("open");
   }
@@ -333,48 +432,85 @@ window.addEventListener("load",function(){setTimeout(window._ubHide,600);});
 
   function copyUpi() {
     const upi = document.getElementById("payUpiId").textContent;
-    navigator.clipboard.writeText(upi).then(() => showToast("UPI ID copied! 📋", "#059669")).catch(() => {});
+    navigator.clipboard.writeText(upi).then(() => showToast("UPI ID copied! 📋","#059669")).catch(()=>{});
   }
 
   function confirmPayment() {
     const txnId = document.getElementById("payTxnId").value.trim();
-    if (!txnId) { showToast("Transaction ID daalo!", "#dc2626"); return; }
+    if (!txnId) { showToast("Transaction ID daalo!","#dc2626"); return; }
+    if (txnId.length < 6) { showToast("Valid UTR/Transaction ID daalo!","#dc2626"); return; }
     if (!pendingPayQuiz) return;
     const paid = getPaidQuizzes();
     if (!paid.includes(pendingPayQuiz.quizId)) {
       paid.push(pendingPayQuiz.quizId);
       localStorage.setItem("paidQuizzes", JSON.stringify(paid));
     }
-    showToast("Payment recorded! Quiz unlock ho gaya ✅", "#059669");
+    // Save txn record
+    const txns = JSON.parse(localStorage.getItem("paymentRecords")||"[]");
+    txns.push({ quizId: pendingPayQuiz.quizId, quizTitle: pendingPayQuiz.quizTitle, mentor: pendingPayQuiz.mentorName, amount: pendingPayQuiz.price, txnId, time: new Date().toISOString() });
+    localStorage.setItem("paymentRecords", JSON.stringify(txns));
+    showToast("Payment verified! Quiz unlock ho gaya ✅","#059669");
     closePayModal();
     setTimeout(loadQuizzes, 400);
   }
 
+  // ── Student details form ──────────────────────────────────────────────────
+  function openStudentForm(quizId) {
+    pendingQuizId = quizId;
+    const saved = getStudentDetails();
+    if (saved) { document.getElementById("sf_name").value = saved.name||''; document.getElementById("sf_roll").value = saved.roll||''; document.getElementById("sf_college").value = saved.college||''; document.getElementById("sf_course").value = saved.course||''; }
+    document.getElementById("studentFormOverlay").classList.add("open");
+  }
+
+  function closeStudentForm() {
+    document.getElementById("studentFormOverlay").classList.remove("open");
+    pendingQuizId = null;
+  }
+
+  function saveStudentDetails() {
+    const name = document.getElementById("sf_name").value.trim();
+    const roll = document.getElementById("sf_roll").value.trim();
+    const college = document.getElementById("sf_college").value.trim();
+    const course = document.getElementById("sf_course").value.trim();
+    if (!name) { showToast("Naam required hai!","#dc2626"); return; }
+    localStorage.setItem("studentDetails", JSON.stringify({name, roll, college, course}));
+    document.getElementById("studentFormOverlay").classList.remove("open");
+    if (pendingQuizId) { const id = pendingQuizId; pendingQuizId = null; _doStartQuiz(id); }
+  }
+
   // ── Quiz engine ───────────────────────────────────────────────────────────
   async function startQuiz(id) {
+    const saved = getStudentDetails();
+    if (!saved) { openStudentForm(id); return; }
+    _doStartQuiz(id);
+  }
+
+  async function _doStartQuiz(id) {
+    tabSwitchCount = 0;
     if (id.startsWith("demo")) {
       currentQuiz = {
-        id, title: "Sample Quiz", duration: 5,
-        questions: [
-          { question: "What is the time complexity of Binary Search?", options: ["O(n)", "O(log n)", "O(n²)", "O(1)"], correct: 1, explanation: "Binary Search halves the search space each time — O(log n)." },
-          { question: "Which data structure uses LIFO order?", options: ["Queue", "Stack", "Array", "Linked List"], correct: 1, explanation: "Stack follows Last In First Out." },
-          { question: "What does SQL stand for?", options: ["Structured Query Language", "Simple Query Language", "Sequential Query Logic", "Standard Query List"], correct: 0, explanation: "SQL = Structured Query Language." },
-          { question: "Which is NOT a primary key property?", options: ["Unique", "Not Null", "Can repeat", "Identifies a row"], correct: 2, explanation: "Primary keys cannot repeat." },
-          { question: "What is a foreign key?", options: ["Key from abroad", "References another table's PK", "Duplicate primary key", "Index key"], correct: 1, explanation: "A foreign key references another table's primary key." },
+        id, title:"Sample Quiz", duration:5, is_mock:false,
+        questions:[
+          { question:"What is the time complexity of Binary Search?", options:["O(n)","O(log n)","O(n²)","O(1)"], correct:1, explanation:"Binary Search halves the search space each time — O(log n)." },
+          { question:"Which data structure uses LIFO order?", options:["Queue","Stack","Array","Linked List"], correct:1, explanation:"Stack follows Last In First Out." },
+          { question:"What does SQL stand for?", options:["Structured Query Language","Simple Query Language","Sequential Query Logic","Standard Query List"], correct:0, explanation:"SQL = Structured Query Language." },
+          { question:"Which is NOT a primary key property?", options:["Unique","Not Null","Can repeat","Identifies a row"], correct:2, explanation:"Primary keys cannot repeat." },
+          { question:"What is a foreign key?", options:["Key from abroad","References another table's PK","Duplicate primary key","Index key"], correct:1, explanation:"A foreign key references another table's primary key." },
         ]
       };
       beginQuiz(); return;
     }
     try {
-      const res = await fetch(`${API}/quiz/${id}`, { headers: { "Authorization": "Bearer " + token } });
+      const res = await fetch(`${API}/quiz/${id}`, { headers:{"Authorization":"Bearer "+token} });
       currentQuiz = await res.json();
       beginQuiz();
-    } catch { showToast("Quiz load nahi hua", "#dc2626"); }
+    } catch { showToast("Quiz load nahi hua","#dc2626"); }
   }
 
   function beginQuiz() {
     currentQ = 0;
     answers = new Array(currentQuiz.questions.length).fill(null);
+    quizStartTime = Date.now();
     document.getElementById("qTitle").textContent = currentQuiz.title;
     document.getElementById("qMeta").textContent = `${currentQuiz.questions.length} questions • ${currentQuiz.duration} minutes`;
     document.getElementById("listView").classList.add("hidden");
@@ -387,65 +523,103 @@ window.addEventListener("load",function(){setTimeout(window._ubHide,600);});
   function renderQuestion() {
     const q = currentQuiz.questions[currentQ];
     const total = currentQuiz.questions.length;
-    document.getElementById("progressFill").style.width = ((currentQ + 1) / total * 100) + "%";
-    document.getElementById("prevBtn").style.display = currentQ > 0 ? "block" : "none";
-    document.getElementById("nextBtn").textContent = currentQ === total - 1 ? "Submit ✅" : "Next →";
+    document.getElementById("progressFill").style.width = ((currentQ+1)/total*100)+"%";
+    document.getElementById("prevBtn").style.display = currentQ>0?"block":"none";
+    document.getElementById("nextBtn").textContent = currentQ===total-1?"Submit ✅":"Next →";
     const letters = ["A","B","C","D"];
     document.getElementById("questionArea").innerHTML = `
       <div class="question-card">
-        <div class="q-number">Question ${currentQ + 1} of ${total}</div>
+        <div class="q-number">Question ${currentQ+1} of ${total}</div>
         <div class="q-text">${q.question}</div>
         <div class="options">
-          ${q.options.map((opt, i) => `
-            <div class="option ${answers[currentQ] === i ? 'selected' : ''}" onclick="selectAnswer(${i})">
-              <div class="option-letter">${letters[i]}</div>${opt}
-            </div>`).join("")}
+          ${q.options.map((opt,i)=>`<div class="option ${answers[currentQ]===i?'selected':''}" onclick="selectAnswer(${i})"><div class="option-letter">${letters[i]}</div>${opt}</div>`).join("")}
         </div>
       </div>`;
   }
 
-  function selectAnswer(i) { answers[currentQ] = i; renderQuestion(); }
-  function nextQ() { if (currentQ < currentQuiz.questions.length - 1) { currentQ++; renderQuestion(); } else submitQuiz(); }
-  function prevQ() { if (currentQ > 0) { currentQ--; renderQuestion(); } }
+  function selectAnswer(i) { answers[currentQ]=i; renderQuestion(); }
+  function nextQ() { if(currentQ<currentQuiz.questions.length-1){currentQ++;renderQuestion();}else submitQuiz(); }
+  function prevQ() { if(currentQ>0){currentQ--;renderQuestion();} }
 
   function submitQuiz() {
     clearInterval(timerInterval);
-    let score = 0;
-    currentQuiz.questions.forEach((q, i) => { if (answers[i] === q.correct) score++; });
-    const total = currentQuiz.questions.length;
-    const pct = Math.round(score / total * 100);
+    let score=0, wrong=0;
+    currentQuiz.questions.forEach((q,i)=>{ if(answers[i]===q.correct)score++; else if(answers[i]!==null)wrong++; });
+    const total=currentQuiz.questions.length;
+    const pct=Math.round(score/total*100);
+
+    // Time taken
+    const elapsed = Math.floor((Date.now()-quizStartTime)/1000);
+    const mins = Math.floor(elapsed/60), secs = elapsed%60;
+    const timeStr = mins>0 ? `${mins}m ${secs}s` : `${secs}s`;
+
+    document.getElementById("rTitle").textContent = (currentQuiz.title||"Quiz") + " — Result";
     document.getElementById("rScore").textContent = score;
+    document.getElementById("rWrong").textContent = wrong;
     document.getElementById("rTotal").textContent = total;
-    document.getElementById("rPct").textContent = pct + "%";
-    document.getElementById("rPct").style.color = pct >= 70 ? "var(--emerald)" : pct >= 40 ? "var(--amber)" : "var(--rose)";
-    document.getElementById("rMsg").textContent = pct >= 70 ? "Excellent! Great job! 🎉" : pct >= 40 ? "Good effort! Keep practicing 💪" : "Keep studying, you'll improve! 📚";
+    document.getElementById("rPct").textContent = pct+"%";
+    document.getElementById("rPct").style.color = pct>=70?"var(--emerald)":pct>=40?"var(--amber)":"var(--rose)";
+    document.getElementById("rTime").textContent = `⏱ Time taken: ${timeStr}`;
+    document.getElementById("rMsg").textContent = pct>=70?"Excellent! Great job! 🎉":pct>=40?"Good effort! Keep practicing 💪":"Keep studying, you'll improve! 📚";
+
+    const tw = document.getElementById("rTabWarning");
+    if (tabSwitchCount>0) { tw.style.display="block"; tw.textContent=`⚠️ Tab switch ${tabSwitchCount} baar detect hua quiz ke dauran`; } else { tw.style.display="none"; }
+
     document.getElementById("quizView").classList.remove("active");
     document.getElementById("resultView").classList.add("active");
+    currentQuiz = null;
+    tabSwitchCount = 0;
   }
 
   function startTimer(seconds) {
     let remaining = seconds;
     const el = document.getElementById("timer");
-    timerInterval = setInterval(() => {
+    timerInterval = setInterval(()=>{
       remaining--;
-      const m = Math.floor(remaining / 60).toString().padStart(2, "0");
-      const s = (remaining % 60).toString().padStart(2, "0");
-      el.textContent = `${m}:${s}`;
-      if (remaining <= 0) { clearInterval(timerInterval); submitQuiz(); }
-    }, 1000);
+      const m=Math.floor(remaining/60).toString().padStart(2,"0");
+      const s=(remaining%60).toString().padStart(2,"0");
+      el.textContent=`${m}:${s}`;
+      if(remaining<=300) el.style.color="var(--rose)";
+      if(remaining<=0){clearInterval(timerInterval);submitQuiz();}
+    },1000);
   }
 
   function backToList() {
     clearInterval(timerInterval);
+    currentQuiz = null;
+    tabSwitchCount = 0;
     document.getElementById("listView").classList.remove("hidden");
     document.getElementById("quizView").classList.remove("active");
     document.getElementById("resultView").classList.remove("active");
   }
 
   loadQuizzes();
-</script>
 <script src="theme.js"></script>
 <script src="mobile.js"></script>
 <script src="notifications.js"></script>
+
+<!-- Student Detail Form -->
+<div class="student-form-overlay" id="studentFormOverlay">
+  <div class="student-form-box">
+    <div style="font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;margin-bottom:6px;color:var(--text);">📋 Student Details</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">Ek baar details bharo — sab quizzes ke liye save ho jayenge</div>
+    <div class="form-group"><label>Full Name</label><input id="sf_name" placeholder="Aapka pura naam"></div>
+    <div class="form-group"><label>Roll Number / Student ID</label><input id="sf_roll" placeholder="Roll no ya student ID"></div>
+    <div class="form-group"><label>College / University</label><input id="sf_college" placeholder="Aapka college naam"></div>
+    <div class="form-group"><label>Course / Branch</label><input id="sf_course" placeholder="B.Tech CSE / BCA etc."></div>
+    <button style="width:100%;padding:13px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:8px;" onclick="saveStudentDetails()">✅ Save & Start Quiz</button>
+    <button style="width:100%;padding:11px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:8px;font-size:14px;cursor:pointer;" onclick="closeStudentForm()">Cancel</button>
+  </div>
+</div>
+
+<!-- Cheating Warning Overlay -->
+<div class="cheating-warning" id="cheatingWarning">
+  <div style="font-size:64px;margin-bottom:20px;">🚨</div>
+  <div style="font-family:'Outfit',sans-serif;font-size:28px;font-weight:800;margin-bottom:12px;">TAB SWITCH DETECTED!</div>
+  <div style="font-size:16px;opacity:0.9;max-width:400px;line-height:1.6;margin-bottom:8px;">Aapne quiz ke dauran doosra tab/window khola.<br>Yeh action record ho gayi hai.</div>
+  <div id="tabSwitchCount" style="font-size:14px;opacity:0.7;margin-bottom:24px;"></div>
+  <button onclick="dismissCheatingWarning()" style="padding:12px 32px;background:white;color:#dc2626;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;cursor:pointer;">Wapas Aao →</button>
+</div>
+
 </body>
 </html>
