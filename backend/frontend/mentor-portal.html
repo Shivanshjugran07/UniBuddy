@@ -188,6 +188,55 @@
     .btn-submit-rate{width:100%;padding:13px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:.2s;margin-bottom:10px}
     .btn-submit-rate:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(245,158,11,.4)}
     .btn-close-rate{width:100%;padding:11px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;cursor:pointer}
+
+    /* ── QUIZ SECTION ── */
+    .quiz-mgmt-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+    .btn-create-quiz{padding:10px 20px;background:linear-gradient(135deg,#2563eb,#f97316);color:#fff;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
+    .btn-create-quiz:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(37,99,235,.35)}
+    .quiz-list{display:flex;flex-direction:column;gap:12px}
+    .quiz-item{background:var(--card);border-radius:14px;padding:18px 20px;border:1px solid var(--border);display:flex;align-items:center;gap:14px;transition:.2s}
+    .quiz-item:hover{box-shadow:0 4px 16px rgba(0,0,0,.06)}
+    .qi-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+    .qi-icon.free{background:rgba(16,185,129,.1)}
+    .qi-icon.premium{background:rgba(245,158,11,.1)}
+    .qi-icon.mock{background:rgba(99,102,241,.1)}
+    .qi-info{flex:1}
+    .qi-title{font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:var(--text)}
+    .qi-meta{font-size:12px;color:var(--muted);margin-top:3px}
+    .qi-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+    .qi-badge.free{background:rgba(16,185,129,.1);color:#10b981}
+    .qi-badge.premium{background:rgba(245,158,11,.1);color:#f59e0b}
+    .qi-badge.mock{background:rgba(99,102,241,.1);color:#6366f1}
+    .btn-delete-quiz{padding:6px 12px;background:#fee2e2;color:#ef4444;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s}
+    .btn-delete-quiz:hover{background:#fecaca}
+    /* Pending Payments */
+    .pay-req-card{background:var(--card);border-radius:14px;padding:16px 20px;border:1px solid var(--border);display:flex;align-items:center;gap:14px;margin-bottom:10px}
+    .pay-req-info{flex:1}
+    .pay-req-name{font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:var(--text)}
+    .pay-req-meta{font-size:12px;color:var(--muted);margin-top:2px}
+    .pay-req-txn{font-size:12px;color:#2563eb;margin-top:4px;font-weight:600}
+    .btn-approve{padding:7px 14px;background:rgba(16,185,129,.1);color:#059669;border:1px solid rgba(16,185,129,.3);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s;margin-right:6px}
+    .btn-approve:hover{background:#059669;color:#fff}
+    .btn-reject{padding:7px 14px;background:rgba(239,68,68,.1);color:#ef4444;border:1px solid rgba(239,68,68,.3);border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;transition:.2s}
+    .btn-reject:hover{background:#ef4444;color:#fff}
+    /* Create Quiz Modal */
+    .quiz-modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:999;justify-content:center;align-items:flex-start;overflow-y:auto;padding:32px 16px;backdrop-filter:blur(4px)}
+    .quiz-modal-ov.open{display:flex}
+    .quiz-modal-box{background:var(--card);border-radius:20px;padding:32px;width:100%;max-width:680px;margin:auto;animation:slideUp .3s ease}
+    .quiz-modal-title{font-family:'Outfit',sans-serif;font-size:20px;font-weight:700;color:var(--text);margin-bottom:20px}
+    .q-builder{background:#f8faff;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid var(--border)}
+    .q-builder-header{font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:var(--muted);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+    .q-option-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+    .q-option-row input[type=radio]{flex-shrink:0;accent-color:#2563eb;width:16px;height:16px;cursor:pointer}
+    .q-option-row input[type=text]{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:13px;outline:none}
+    .q-option-row input[type=text]:focus{border-color:#2563eb}
+    .btn-add-q{padding:9px 18px;background:rgba(37,99,235,.08);color:#2563eb;border:1px dashed rgba(37,99,235,.3);border-radius:10px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;cursor:pointer;width:100%;margin-bottom:16px;transition:.2s}
+    .btn-add-q:hover{background:rgba(37,99,235,.15)}
+    .btn-submit-quiz{width:100%;padding:13px;background:linear-gradient(135deg,#2563eb,#f97316);color:#fff;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:.2s}
+    .btn-submit-quiz:disabled{opacity:.6;cursor:not-allowed}
+    .btn-cancel-quiz{width:100%;padding:11px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;cursor:pointer;margin-top:8px}
+    .section-divider{font-family:'Outfit',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin:24px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--border)}
+
     .rated-badge{display:none;align-items:center;gap:6px;padding:7px 16px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:20px;font-size:13px;font-weight:700;color:#d97706;position:fixed;bottom:30px;right:30px;z-index:200}
   </style>
   <link rel="stylesheet" href="mobile.css">
@@ -283,6 +332,7 @@
         <div class="ps-item" id="psSchedule" onclick="showPortalSec('schedule')"><span class="icon">📅</span> Schedule</div>
         <div class="ps-item" id="psContent" onclick="showPortalSec('content')"><span class="icon">📚</span> Course Content</div>
         <div class="ps-item" id="psChat" onclick="showPortalSec('chat')"><span class="icon">💬</span> Live Chat</div>
+        <div class="ps-item" id="psQuiz" onclick="showPortalSec('quiz')"><span class="icon">📝</span> Quizzes</div>
       </div>
 
       <!-- PORTAL CONTENT -->
@@ -306,6 +356,23 @@
           <div class="content-grid" id="contentList"><div class="empty" style="grid-column:1/-1"><div>⏳</div>Loading...</div></div>
         </div>
 
+
+        <!-- QUIZ & MOCK TEST MANAGEMENT -->
+        <div class="sec" id="secQuiz">
+          <div class="quiz-mgmt-header">
+            <div class="sec-title" style="margin-bottom:0">📝 Quiz & Mock Test</div>
+            <button class="btn-create-quiz" onclick="openCreateQuiz()">➕ Create Quiz / Mock</button>
+          </div>
+
+          <!-- Pending Payments -->
+          <div class="section-divider">⏳ Pending Payment Approvals</div>
+          <div id="pendingPayList"><div class="empty"><div>⏳</div>Loading...</div></div>
+
+          <!-- My Quizzes -->
+          <div class="section-divider">📋 My Quizzes & Mock Papers</div>
+          <div class="quiz-list" id="mentorQuizList"><div class="empty"><div>⏳</div>Loading...</div></div>
+        </div>
+
         <!-- CHAT -->
         <div class="sec" id="secChat">
           <div class="sec-title">💬 Live Chat with Mentor</div>
@@ -325,6 +392,36 @@
     </div>
   </div>
 
+</div>
+
+<!-- CREATE QUIZ MODAL -->
+<div class="quiz-modal-ov" id="createQuizModal">
+  <div class="quiz-modal-box">
+    <div class="quiz-modal-title">📝 Create New Quiz / Mock Paper</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div class="form-group" style="margin:0"><label>Quiz Title *</label><input id="cq_title" placeholder="e.g. DSA Basics"></div>
+      <div class="form-group" style="margin:0"><label>Subject *</label><input id="cq_subject" placeholder="e.g. Data Structures"></div>
+      <div class="form-group" style="margin:0"><label>Duration (mins)</label><input id="cq_duration" type="number" value="15" min="5" max="180"></div>
+      <div class="form-group" style="margin:0"><label>Total Marks</label><input id="cq_marks" type="number" value="10" min="1"></div>
+    </div>
+
+    <div style="display:flex;gap:20px;margin-bottom:16px;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px;font-weight:600;color:var(--text)">
+        <input type="checkbox" id="cq_premium" style="width:16px;height:16px;accent-color:#f59e0b"> ⭐ Premium (paid)
+      </label>
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;text-transform:none;letter-spacing:0;font-size:13px;font-weight:600;color:var(--text)">
+        <input type="checkbox" id="cq_mock" style="width:16px;height:16px;accent-color:#6366f1"> 📄 Mock Paper
+      </label>
+    </div>
+
+    <div style="font-family:'Outfit',sans-serif;font-size:14px;font-weight:700;color:var(--text);margin-bottom:12px">Questions *</div>
+    <div id="questionsContainer"></div>
+    <button class="btn-add-q" onclick="addQuestion()">➕ Add Question</button>
+
+    <button class="btn-submit-quiz" id="btnSubmitQuiz" onclick="submitCreateQuiz()">✅ Create Quiz</button>
+    <button class="btn-cancel-quiz" onclick="closeCreateQuiz()">Cancel</button>
+  </div>
 </div>
 
 <!-- NOTE MODAL -->
@@ -488,6 +585,7 @@ function showPortalSec(name) {
   if (name === "ann") loadAnnouncements();
   if (name === "schedule") loadSchedule();
   if (name === "content") loadContent();
+  if (name === "quiz") loadMentorQuizSection();
 }
 
 // ── ANNOUNCEMENTS ─────────────────────────────────────────────────────────
@@ -732,6 +830,217 @@ async function sendChat() {
   appendChatMsg(msg);
   try { await sb.from("messages").insert([msg]); } catch(e) {}
 }
+
+
+// ── QUIZ & MOCK TEST MANAGEMENT ───────────────────────────────────────────
+
+var myMentorData = null; // will be set after init
+
+async function loadMentorQuizSection() {
+  // Only mentors see this
+  if (user.role !== "mentor") {
+    document.getElementById("mentorQuizList").innerHTML = '<div class="empty"><div>🔒</div>Sirf mentors quiz manage kar sakte hain</div>';
+    document.getElementById("pendingPayList").innerHTML = '';
+    return;
+  }
+  loadMentorQuizzes();
+  loadPendingPayments();
+}
+
+async function loadMentorQuizzes() {
+  const el = document.getElementById("mentorQuizList");
+  try {
+    const res = await fetch(API + "/quiz", { headers: { "Authorization": "Bearer " + token } });
+    const all = await res.json();
+    // Filter quizzes created by this mentor
+    const mine = (all || []).filter(q => q.mentor_id === user.id);
+    if (!mine.length) {
+      el.innerHTML = '<div class="empty"><div>📝</div>Abhi koi quiz nahi banaya. Oopar "+ Create Quiz" pe click karo!</div>';
+      return;
+    }
+    el.innerHTML = mine.map(q => {
+      var type = q.is_mock ? 'mock' : (q.is_premium ? 'premium' : 'free');
+      var icon = q.is_mock ? '📄' : (q.is_premium ? '⭐' : '✅');
+      var label = q.is_mock ? 'Mock Paper' : (q.is_premium ? 'Premium' : 'Free');
+      return '<div class="quiz-item">' +
+        '<div class="qi-icon ' + type + '">' + icon + '</div>' +
+        '<div class="qi-info">' +
+          '<div class="qi-title">' + q.title + '</div>' +
+          '<div class="qi-meta">📘 ' + q.subject + ' &nbsp;•&nbsp; ⏱ ' + q.duration + ' mins &nbsp;•&nbsp; 📊 ' + q.total_marks + ' marks</div>' +
+        '</div>' +
+        '<span class="qi-badge ' + type + '">' + label + '</span>' +
+        '<button class="btn-delete-quiz" onclick="deleteQuiz('' + q.id + '')">🗑 Delete</button>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="empty"><div>❌</div>Load nahi hua</div>';
+  }
+}
+
+async function loadPendingPayments() {
+  const el = document.getElementById("pendingPayList");
+  try {
+    const res = await fetch(API + "/quiz/payments/pending", { headers: { "Authorization": "Bearer " + token } });
+    if (!res.ok) { el.innerHTML = '<div class="empty"><div>📭</div>Koi pending payment nahi</div>'; return; }
+    const payments = await res.json();
+    if (!payments.length) {
+      el.innerHTML = '<div class="empty"><div>✅</div>Koi pending payment nahi</div>';
+      return;
+    }
+    el.innerHTML = payments.map(p => {
+      return '<div class="pay-req-card">' +
+        '<div class="pay-req-info">' +
+          '<div class="pay-req-name">👤 ' + (p.student_name || 'Student') + '</div>' +
+          '<div class="pay-req-meta">📝 ' + (p.quiz_title || 'Quiz') + '</div>' +
+          '<div class="pay-req-txn">🔖 Transaction ID: ' + p.txn_id + '</div>' +
+        '</div>' +
+        '<button class="btn-approve" onclick="handlePayment('' + p.id + '','approved')">✅ Approve</button>' +
+        '<button class="btn-reject" onclick="handlePayment('' + p.id + '','rejected')">❌ Reject</button>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<div class="empty"><div>📭</div>Koi pending payment nahi</div>';
+  }
+}
+
+async function handlePayment(paymentId, action) {
+  try {
+    const res = await fetch(API + "/quiz/payment/" + paymentId + "/approve", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ action })
+    });
+    const d = await res.json();
+    toast(d.message || (action === "approved" ? "Payment approved ✅" : "Payment rejected ❌"), action === "approved" ? "#059669" : "#dc2626");
+    loadPendingPayments();
+  } catch(e) { toast("Error ho gaya", "#dc2626"); }
+}
+
+async function deleteQuiz(quizId) {
+  if (!confirm("Is quiz ko delete karna chahte ho?")) return;
+  try {
+    const res = await fetch(API + "/quiz/" + quizId, {
+      method: "DELETE",
+      headers: { "Authorization": "Bearer " + token }
+    });
+    const d = await res.json();
+    toast(d.message || "Quiz delete ho gayi ✅", "#059669");
+    loadMentorQuizzes();
+  } catch(e) { toast("Delete nahi hua", "#dc2626"); }
+}
+
+// ── CREATE QUIZ MODAL ─────────────────────────────────────────────────────
+var questionCount = 0;
+
+function openCreateQuiz() {
+  if (user.role !== "mentor") { toast("Sirf mentors quiz bana sakte hain!", "#dc2626"); return; }
+  questionCount = 0;
+  document.getElementById("cq_title").value = "";
+  document.getElementById("cq_subject").value = "";
+  document.getElementById("cq_duration").value = "15";
+  document.getElementById("cq_marks").value = "10";
+  document.getElementById("cq_premium").checked = false;
+  document.getElementById("cq_mock").checked = false;
+  document.getElementById("questionsContainer").innerHTML = "";
+  document.getElementById("btnSubmitQuiz").disabled = false;
+  document.getElementById("btnSubmitQuiz").textContent = "✅ Create Quiz";
+  addQuestion(); // start with 1 question
+  document.getElementById("createQuizModal").classList.add("open");
+}
+
+function closeCreateQuiz() {
+  document.getElementById("createQuizModal").classList.remove("open");
+}
+
+function addQuestion() {
+  questionCount++;
+  var n = questionCount;
+  var html = '<div class="q-builder" id="qb_' + n + '">' +
+    '<div class="q-builder-header">' +
+      '<span>Question ' + n + '</span>' +
+      (n > 1 ? '<button onclick="removeQuestion(' + n + ')" style="background:none;border:none;color:#ef4444;font-size:18px;cursor:pointer;line-height:1">✕</button>' : '') +
+    '</div>' +
+    '<div class="form-group" style="margin-bottom:10px">' +
+      '<input id="q' + n + '_text" placeholder="Question likhein..." style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none">' +
+    '</div>' +
+    '<div style="font-size:11px;color:var(--muted);font-weight:700;margin-bottom:8px;letter-spacing:.5px">OPTIONS — Sahi answer ke radio button pe click karo</div>' +
+    ['A','B','C','D'].map((l, i) =>
+      '<div class="q-option-row">' +
+        '<input type="radio" name="qcorrect_' + n + '" value="' + i + '" id="qr' + n + '_' + i + '">' +
+        '<input type="text" id="q' + n + '_opt' + i + '" placeholder="Option ' + l + '">' +
+      '</div>'
+    ).join('') +
+    '<div style="font-size:11px;color:var(--muted);margin-top:8px">' +
+      '<input id="q' + n + '_exp" placeholder="Explanation (optional)" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:7px;font-size:12px;outline:none;color:var(--muted)">' +
+    '</div>' +
+  '</div>';
+  document.getElementById("questionsContainer").insertAdjacentHTML("beforeend", html);
+}
+
+function removeQuestion(n) {
+  var el = document.getElementById("qb_" + n);
+  if (el) el.remove();
+}
+
+async function submitCreateQuiz() {
+  var title = document.getElementById("cq_title").value.trim();
+  var subject = document.getElementById("cq_subject").value.trim();
+  var duration = parseInt(document.getElementById("cq_duration").value) || 15;
+  var total_marks = parseInt(document.getElementById("cq_marks").value) || 10;
+  var is_premium = document.getElementById("cq_premium").checked;
+  var is_mock = document.getElementById("cq_mock").checked;
+
+  if (!title) { toast("Title daalo!", "#dc2626"); return; }
+  if (!subject) { toast("Subject daalo!", "#dc2626"); return; }
+
+  // Build questions array
+  var questions = [];
+  var qBlocks = document.querySelectorAll(".q-builder");
+  for (var i = 0; i < qBlocks.length; i++) {
+    var id = qBlocks[i].id.replace("qb_", "");
+    var qText = document.getElementById("q" + id + "_text").value.trim();
+    if (!qText) { toast("Question " + (i+1) + " ka text daalo!", "#dc2626"); return; }
+    var opts = [];
+    for (var j = 0; j < 4; j++) {
+      var opt = document.getElementById("q" + id + "_opt" + j).value.trim();
+      if (!opt) { toast("Question " + (i+1) + " ke saare options bharo!", "#dc2626"); return; }
+      opts.push(opt);
+    }
+    var correctRadio = document.querySelector('input[name="qcorrect_' + id + '"]:checked');
+    if (!correctRadio) { toast("Question " + (i+1) + " ka sahi answer select karo!", "#dc2626"); return; }
+    var exp = document.getElementById("q" + id + "_exp").value.trim();
+    questions.push({ question: qText, options: opts, correct: parseInt(correctRadio.value), explanation: exp });
+  }
+
+  if (!questions.length) { toast("Kam se kam ek question add karo!", "#dc2626"); return; }
+
+  var btn = document.getElementById("btnSubmitQuiz");
+  btn.disabled = true;
+  btn.textContent = "⏳ Creating...";
+
+  try {
+    var res = await fetch(API + "/quiz/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ title, subject, is_premium, is_mock, questions, duration, total_marks })
+    });
+    var d = await res.json();
+    if (res.ok) {
+      toast("Quiz create ho gaya! ✅", "#059669");
+      closeCreateQuiz();
+      loadMentorQuizzes();
+    } else {
+      toast(d.message || "Error ho gaya", "#dc2626");
+      btn.disabled = false;
+      btn.textContent = "✅ Create Quiz";
+    }
+  } catch(e) {
+    toast("Network error!", "#dc2626");
+    btn.disabled = false;
+    btn.textContent = "✅ Create Quiz";
+  }
+}
+
 
 init();
 </script>

@@ -46,6 +46,11 @@
     .premium-lock-sub { font-size: 12px; color: rgba(255,255,255,0.85); max-width: 190px; line-height: 1.4; }
     .btn-pay { padding: 9px 20px; background: white; color: #d97706; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 800; cursor: pointer; margin-top: 6px; transition: 0.2s; }
     .btn-pay:hover { transform: scale(1.03); }
+    /* PENDING STATE — payment submit hua, mentor ne abhi approve nahi kiya */
+    .pending-lock { position: absolute; inset: 0; background: linear-gradient(135deg, rgba(99,102,241,0.93), rgba(67,56,202,0.96)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; border-radius: 16px; padding: 20px; text-align: center; }
+    .pending-lock-icon { font-size: 36px; }
+    .pending-lock-msg { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 800; color: white; }
+    .pending-lock-sub { font-size: 12px; color: rgba(255,255,255,0.85); max-width: 200px; line-height: 1.4; }
     .quiz-badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 10px; }
     .quiz-badge.free { background: rgba(16,185,129,0.1); color: var(--emerald); }
     .quiz-badge.premium { background: rgba(245,158,11,0.1); color: var(--amber); }
@@ -97,6 +102,7 @@
     input { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Nunito', sans-serif; font-size: 14px; outline: none; transition: 0.2s; }
     input:focus { border-color: #2563eb; }
     .btn-confirm-pay { width: 100%; padding: 13px; background: linear-gradient(135deg, #059669, #0ea572); color: white; border: none; border-radius: 8px; font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+    .btn-confirm-pay:disabled { opacity: 0.6; cursor: not-allowed; }
     .btn-cancel-pay { width: 100%; padding: 11px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; cursor: pointer; margin-top: 8px; }
     .empty { text-align: center; padding: 60px; color: var(--muted); font-size: 15px; grid-column: 1/-1; }
     .empty div { font-size: 44px; margin-bottom: 12px; }
@@ -254,7 +260,8 @@ window.addEventListener("load", function() { setTimeout(window._ubHide, 600); })
       <label>UPI Transaction ID</label>
       <input id="payTxnId" placeholder="Enter transaction ID after paying">
     </div>
-    <button class="btn-confirm-pay" onclick="confirmPayment()">✅ I've Paid — Unlock Quiz</button>
+    <!-- FIX: Button disabled during API call, text changes to show loading -->
+    <button class="btn-confirm-pay" id="btnConfirmPay" onclick="confirmPayment()">✅ I've Paid — Unlock Quiz</button>
     <button class="btn-cancel-pay" onclick="closePayModal()">Cancel</button>
   </div>
 </div>
@@ -306,7 +313,7 @@ window.addEventListener("load", function() { setTimeout(window._ubHide, 600); })
     t.textContent = msg;
     t.style.background = color;
     t.classList.add("show");
-    setTimeout(function() { t.classList.remove("show"); }, 3000);
+    setTimeout(function() { t.classList.remove("show"); }, 3500);
   }
 
   // ── State ────────────────────────────────────────────────────────────────
@@ -322,7 +329,10 @@ window.addEventListener("load", function() { setTimeout(window._ubHide, 600); })
   var tabSwitchCount = 0;
   var currentTab = 'all';
 
+  // FIX: getPaidQuizzes now checks server-approved list too (stored after server confirm)
   function getPaidQuizzes() { return JSON.parse(localStorage.getItem("paidQuizzes") || "[]"); }
+  // Pending payments submitted but not yet approved by mentor
+  function getPendingPayments() { return JSON.parse(localStorage.getItem("pendingPayments") || "[]"); }
   function getConnectedMentors() { return JSON.parse(localStorage.getItem("connectedMentors") || "[]"); }
   function getStudentDetails() { return JSON.parse(localStorage.getItem("studentDetails") || "null"); }
 
@@ -340,7 +350,6 @@ window.addEventListener("load", function() { setTimeout(window._ubHide, 600); })
     document.getElementById("cheatingWarning").classList.remove("show");
   }
 
-  // ── FIX: Tab switching — btn passed as parameter ──────────────────────────
   function switchTab(tab, btn) {
     currentTab = tab;
     document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
@@ -348,42 +357,74 @@ window.addEventListener("load", function() { setTimeout(window._ubHide, 600); })
     renderQuizCards(allQuizzes);
   }
 
-  // ── Load quizzes ──────────────────────────────────────────────────────────
+  // ── Load quizzes + check server-approved payments ─────────────────────────
   async function loadQuizzes() {
     try {
       var mRes = await fetch(API + "/mentors");
       allMentors = await mRes.json();
-    } catch(e) {
-      allMentors = [];
-    }
+    } catch(e) { allMentors = []; }
+
     try {
       var res = await fetch(API + "/quiz");
       var quizzes = await res.json();
-      if (!quizzes || !quizzes.length) {
-        allQuizzes = getDemoQuizzes();
-      } else {
-        allQuizzes = quizzes;
-      }
+      // FIX: is_mock now comes from backend (was missing before)
+      allQuizzes = (!quizzes || !quizzes.length) ? getDemoQuizzes() : quizzes;
     } catch(e) {
       allQuizzes = getDemoQuizzes();
     }
+
+    // FIX: Check server for any newly approved payments (in case mentor approved while offline)
+    await syncApprovedPayments();
+
     renderQuizCards(allQuizzes);
+  }
+
+  // Sync server-approved payments into localStorage so card shows unlocked
+  async function syncApprovedPayments() {
+    var pending = getPendingPayments();
+    if (!pending.length) return;
+    var nowApproved = [];
+    for (var i = 0; i < pending.length; i++) {
+      try {
+        var r = await fetch(API + "/quiz/" + pending[i] + "/payment-status", {
+          headers: { "Authorization": "Bearer " + token }
+        });
+        var data = await r.json();
+        if (data.status === "approved") nowApproved.push(pending[i]);
+      } catch(e) {}
+    }
+    if (nowApproved.length) {
+      var paid = getPaidQuizzes();
+      nowApproved.forEach(function(id) {
+        if (paid.indexOf(id) === -1) paid.push(id);
+        // Remove from pending list
+        pending = pending.filter(function(p) { return p !== id; });
+      });
+      localStorage.setItem("paidQuizzes", JSON.stringify(paid));
+      localStorage.setItem("pendingPayments", JSON.stringify(pending));
+      showToast("🎉 " + nowApproved.length + " quiz(zes) mentor ne approve kar di!", "#059669");
+    }
   }
 
   function getDemoQuizzes() {
     return [
       { id:"demo1", title:"DSA Basics", subject:"Data Structures", duration:10, total_marks:5, is_premium:false, is_mock:false, mentor_name:"UniBuddy Team", mentor_id:"demo" },
       { id:"demo2", title:"DBMS Fundamentals", subject:"Database Management", duration:15, total_marks:10, is_premium:false, is_mock:false, mentor_name:"UniBuddy Team", mentor_id:"demo" },
-      { id:"demo3", title:"OS Concepts — Mock Paper", subject:"Operating Systems", duration:20, total_marks:15, is_premium:true, is_mock:true, mentor_name:"UniBuddy Demo", mentor_id:"demo" }
+      // FIX: Demo mock paper — is_mock:true so it shows in Mock Papers tab
+      { id:"demo3", title:"OS Concepts — Mock Paper", subject:"Operating Systems", duration:20, total_marks:15, is_premium:false, is_mock:true, mentor_name:"UniBuddy Team", mentor_id:"demo" }
     ];
   }
 
-  // ── Render quiz cards (mentor-wise grouped) ───────────────────────────────
+  // ── Render quiz cards ─────────────────────────────────────────────────────
   function renderQuizCards(quizzes) {
     var paid = getPaidQuizzes();
+    var pending = getPendingPayments();
     var connected = getConnectedMentors();
+
+    // FIX: is_mock filter now works because backend sends is_mock field
     var filtered = quizzes.filter(function(q) {
-      return currentTab === 'mock' ? q.is_mock : !q.is_mock;
+      if (currentTab === 'mock') return q.is_mock === true;
+      return !q.is_mock;
     });
 
     var groups = {};
@@ -418,10 +459,19 @@ window.addEventListener("load", function() { setTimeout(window._ubHide, 600); })
         var mentorPrice = (mentor && (mentor.price || mentor.session_fee)) || q.session_fee || 0;
         var isConnected = isDemo || connected.indexOf(q.mentor_id) !== -1;
         var isPaid = isDemo || paid.indexOf(q.id) !== -1;
+        // FIX: Check if payment is pending mentor approval
+        var isPending = !isDemo && !isPaid && pending.indexOf(q.id) !== -1;
 
         var lockHTML = "";
         if (!isDemo) {
-          if (q.is_premium && !isPaid) {
+          if (q.is_premium && isPending) {
+            // FIX: Pending state — payment submitted, waiting for mentor
+            lockHTML = '<div class="pending-lock">' +
+              '<div class="pending-lock-icon">⏳</div>' +
+              '<div class="pending-lock-msg">Payment Verification Pending</div>' +
+              '<div class="pending-lock-sub">Mentor ne abhi approve nahi kiya. Thoda wait karo!</div>' +
+            '</div>';
+          } else if (q.is_premium && !isPaid) {
             var upiHandle = (q.mentor_name || 'mentor').toLowerCase().replace(/\s/g, '');
             var safeTitle = (q.title || '').replace(/'/g, "\\'");
             var safeMentor = (q.mentor_name || '').replace(/'/g, "\\'");
@@ -474,6 +524,9 @@ window.addEventListener("load", function() { setTimeout(window._ubHide, 600); })
     document.getElementById("payAmount").textContent = "₹" + (price || '—');
     document.getElementById("payUpiId").textContent = (upiHandle || mentorName.toLowerCase().replace(/\s/g, '')) + "@upi";
     document.getElementById("payTxnId").value = "";
+    var btn = document.getElementById("btnConfirmPay");
+    btn.disabled = false;
+    btn.textContent = "✅ I've Paid — Unlock Quiz";
     document.getElementById("payModal").classList.add("open");
   }
 
@@ -489,22 +542,60 @@ window.addEventListener("load", function() { setTimeout(window._ubHide, 600); })
     }).catch(function() {});
   }
 
-  function confirmPayment() {
+  // FIX: confirmPayment now calls backend — no auto-unlock from frontend
+  async function confirmPayment() {
     var txnId = document.getElementById("payTxnId").value.trim();
     if (!txnId) { showToast("Transaction ID daalo!", "#dc2626"); return; }
-    if (txnId.length < 6) { showToast("Valid UTR/Transaction ID daalo!", "#dc2626"); return; }
+    if (txnId.length < 6) { showToast("Valid UTR/Transaction ID daalo (min 6 chars)!", "#dc2626"); return; }
     if (!pendingPayQuiz) return;
-    var paid = getPaidQuizzes();
-    if (paid.indexOf(pendingPayQuiz.quizId) === -1) {
-      paid.push(pendingPayQuiz.quizId);
-      localStorage.setItem("paidQuizzes", JSON.stringify(paid));
+
+    var btn = document.getElementById("btnConfirmPay");
+    btn.disabled = true;
+    btn.textContent = "⏳ Submitting...";
+
+    try {
+      var res = await fetch(API + "/quiz/" + pendingPayQuiz.quizId + "/payment-request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({ txnId: txnId })
+      });
+      var result = await res.json();
+
+      if (result.approved) {
+        // Server ne bola already approved tha — unlock kar do
+        var paid = getPaidQuizzes();
+        if (paid.indexOf(pendingPayQuiz.quizId) === -1) {
+          paid.push(pendingPayQuiz.quizId);
+          localStorage.setItem("paidQuizzes", JSON.stringify(paid));
+        }
+        showToast("Quiz unlock ho gayi! ✅", "#059669");
+        closePayModal();
+        setTimeout(loadQuizzes, 400);
+
+      } else if (result.pending) {
+        // FIX: Save as pending, NOT as paid — mentor approval required
+        var pendingList = getPendingPayments();
+        if (pendingList.indexOf(pendingPayQuiz.quizId) === -1) {
+          pendingList.push(pendingPayQuiz.quizId);
+          localStorage.setItem("pendingPayments", JSON.stringify(pendingList));
+        }
+        showToast("Payment request bhej di! ⏳ Mentor approve kare tab unlock hoga.", "#6366f1");
+        closePayModal();
+        setTimeout(loadQuizzes, 400);
+
+      } else {
+        showToast(result.message || "Kuch error hua, dobara try karo", "#dc2626");
+        btn.disabled = false;
+        btn.textContent = "✅ I've Paid — Unlock Quiz";
+      }
+    } catch(e) {
+      showToast("Network error! Dobara try karo 🔄", "#dc2626");
+      btn.disabled = false;
+      btn.textContent = "✅ I've Paid — Unlock Quiz";
     }
-    var txns = JSON.parse(localStorage.getItem("paymentRecords") || "[]");
-    txns.push({ quizId: pendingPayQuiz.quizId, quizTitle: pendingPayQuiz.quizTitle, mentor: pendingPayQuiz.mentorName, amount: pendingPayQuiz.price, txnId: txnId, time: new Date().toISOString() });
-    localStorage.setItem("paymentRecords", JSON.stringify(txns));
-    showToast("Payment verified! Quiz unlock ho gaya ✅", "#059669");
-    closePayModal();
-    setTimeout(loadQuizzes, 400);
   }
 
   // ── Student details form ──────────────────────────────────────────────────
@@ -552,9 +643,9 @@ window.addEventListener("load", function() { setTimeout(window._ubHide, 600); })
     if (id.startsWith("demo")) {
       currentQuiz = {
         id: id,
-        title: "Sample Quiz",
+        title: id === "demo3" ? "OS Concepts — Mock Paper" : "Sample Quiz",
         duration: 5,
-        is_mock: false,
+        is_mock: id === "demo3",
         questions: [
           { question: "What is the time complexity of Binary Search?", options: ["O(n)", "O(log n)", "O(n²)", "O(1)"], correct: 1, explanation: "Binary Search halves the search space each time — O(log n)." },
           { question: "Which data structure uses LIFO order?", options: ["Queue", "Stack", "Array", "Linked List"], correct: 1, explanation: "Stack follows Last In First Out." },
@@ -611,12 +702,8 @@ window.addEventListener("load", function() { setTimeout(window._ubHide, 600); })
   function selectAnswer(i) { answers[currentQ] = i; renderQuestion(); }
 
   function nextQ() {
-    if (currentQ < currentQuiz.questions.length - 1) {
-      currentQ++;
-      renderQuestion();
-    } else {
-      submitQuiz();
-    }
+    if (currentQ < currentQuiz.questions.length - 1) { currentQ++; renderQuestion(); }
+    else { submitQuiz(); }
   }
 
   function prevQ() {
@@ -632,7 +719,6 @@ window.addEventListener("load", function() { setTimeout(window._ubHide, 600); })
     });
     var total = currentQuiz.questions.length;
     var pct = Math.round(score / total * 100);
-
     var elapsed = Math.floor((Date.now() - quizStartTime) / 1000);
     var mins = Math.floor(elapsed / 60);
     var secs = elapsed % 60;
@@ -651,9 +737,7 @@ window.addEventListener("load", function() { setTimeout(window._ubHide, 600); })
     if (tabSwitchCount > 0) {
       tw.style.display = "block";
       tw.textContent = "⚠️ Tab switch " + tabSwitchCount + " baar detect hua quiz ke dauran";
-    } else {
-      tw.style.display = "none";
-    }
+    } else { tw.style.display = "none"; }
 
     document.getElementById("quizView").classList.remove("active");
     document.getElementById("resultView").classList.add("active");
